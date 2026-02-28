@@ -68,7 +68,6 @@ export const AppLayout: React.FC = () => {
     { to: '/comandos', label: 'Comandos Rápidos', icon: Zap, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
     { to: '/chat', label: 'Chat', icon: MessageSquare, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
     { to: '/notificacoes', label: 'Notificações', icon: Bell, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
-    { to: '/usuarios', label: 'Usuários', icon: Users, roles: ['administrador'] },
   ].filter(item => {
     // When viewing as another profile, show that profile's menu items + admin-only items
     if (isAdmin && isViewingAs) {

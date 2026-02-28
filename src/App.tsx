@@ -39,26 +39,26 @@ const App = () => (
     <TooltipProvider>
       <AuthProvider>
         <DataProvider>
-          <ViewAsProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<LoginGuard />} />
-              <Route path="/" element={<Navigate to="/login" replace />} />
-              <Route element={<ProtectedRoutes />}>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/fila" element={<FilaAtendimento />} />
-                <Route path="/atendimento/:id" element={<AtendimentoDetalhe />} />
-                <Route path="/novo-atendimento" element={<NovoAtendimento />} />
-                <Route path="/comandos" element={<Comandos />} />
-                <Route path="/chat" element={<Chat />} />
-                <Route path="/notificacoes" element={<Notificacoes />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <ViewAsProvider>
+              <Routes>
+                <Route path="/login" element={<LoginGuard />} />
+                <Route path="/" element={<Navigate to="/login" replace />} />
+                <Route element={<ProtectedRoutes />}>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/fila" element={<FilaAtendimento />} />
+                  <Route path="/atendimento/:id" element={<AtendimentoDetalhe />} />
+                  <Route path="/novo-atendimento" element={<NovoAtendimento />} />
+                  <Route path="/comandos" element={<Comandos />} />
+                  <Route path="/chat" element={<Chat />} />
+                  <Route path="/notificacoes" element={<Notificacoes />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </ViewAsProvider>
           </BrowserRouter>
-          </ViewAsProvider>
         </DataProvider>
       </AuthProvider>
     </TooltipProvider>
