@@ -46,13 +46,25 @@ const LoginPage: React.FC = () => {
       </div>
 
       <div className="relative z-10 flex flex-col lg:flex-row items-center w-full max-w-5xl mx-auto px-4 gap-12 lg:gap-16">
-        {/* Left: Branding */}
-        <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left py-8 lg:py-0">
-          <img
-            src={logoVerticeFull}
-            alt="VÉRTICE"
-            className="w-44 lg:w-56 object-contain mb-6"
-          />
+        {/* Left: Branding with glow + animation */}
+        <div
+          className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left py-8 lg:py-0"
+          style={{ animation: 'login-brand-in 0.6s ease-out both' }}
+        >
+          <div className="relative">
+            {/* Radial glow behind logo */}
+            <div
+              className="absolute inset-0 -m-12 pointer-events-none"
+              style={{
+                background: 'radial-gradient(circle, rgba(60,92,122,0.25) 0%, rgba(60,92,122,0.1) 40%, transparent 70%)',
+              }}
+            />
+            <img
+              src={logoVerticeFull}
+              alt="VÉRTICE"
+              className="relative w-44 lg:w-56 object-contain mb-6"
+            />
+          </div>
           <p
             className="text-sm lg:text-base tracking-[0.25em] uppercase font-medium mb-4"
             style={{ color: '#A9B7C9' }}
@@ -67,12 +79,17 @@ const LoginPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Right: Login Card */}
-        <div className="w-full max-w-md">
+        {/* Right: Login Card with glass + animation */}
+        <div
+          className="w-full max-w-md"
+          style={{ animation: 'login-card-in 0.4s ease-out both 0.15s' }}
+        >
           <div
-            className="rounded-2xl p-8 backdrop-blur-sm"
+            className="rounded-2xl p-8"
             style={{
               background: 'rgba(13, 30, 58, 0.85)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
               border: '1px solid #1F3455',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
             }}
@@ -86,11 +103,7 @@ const LoginPage: React.FC = () => {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label
-                  htmlFor="email"
-                  className="block text-xs font-medium mb-1.5 uppercase tracking-wider"
-                  style={{ color: '#A9B7C9' }}
-                >
+                <label htmlFor="email" className="block text-xs font-medium mb-1.5 uppercase tracking-wider" style={{ color: '#A9B7C9' }}>
                   E-mail
                 </label>
                 <input
@@ -101,22 +114,14 @@ const LoginPage: React.FC = () => {
                   placeholder="seu@email.gov.br"
                   required
                   className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors duration-200 placeholder:text-[#5A6F8A]"
-                  style={{
-                    background: '#122544',
-                    border: '1px solid #324A71',
-                    color: '#E6EDF5',
-                  }}
+                  style={{ background: '#122544', border: '1px solid #324A71', color: '#E6EDF5' }}
                   onFocus={e => (e.target.style.borderColor = '#5A7FAA')}
                   onBlur={e => (e.target.style.borderColor = '#324A71')}
                 />
               </div>
 
               <div>
-                <label
-                  htmlFor="senha"
-                  className="block text-xs font-medium mb-1.5 uppercase tracking-wider"
-                  style={{ color: '#A9B7C9' }}
-                >
+                <label htmlFor="senha" className="block text-xs font-medium mb-1.5 uppercase tracking-wider" style={{ color: '#A9B7C9' }}>
                   Senha
                 </label>
                 <input
@@ -127,29 +132,18 @@ const LoginPage: React.FC = () => {
                   placeholder="••••••••"
                   required
                   className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors duration-200 placeholder:text-[#5A6F8A]"
-                  style={{
-                    background: '#122544',
-                    border: '1px solid #324A71',
-                    color: '#E6EDF5',
-                  }}
+                  style={{ background: '#122544', border: '1px solid #324A71', color: '#E6EDF5' }}
                   onFocus={e => (e.target.style.borderColor = '#5A7FAA')}
                   onBlur={e => (e.target.style.borderColor = '#324A71')}
                 />
               </div>
 
-              {erro && (
-                <p className="text-sm" style={{ color: '#E5737F' }}>
-                  {erro}
-                </p>
-              )}
+              {erro && <p className="text-sm" style={{ color: '#E5737F' }}>{erro}</p>}
 
               <button
                 type="submit"
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200"
-                style={{
-                  background: '#3C5C7A',
-                  color: '#E6EDF5',
-                }}
+                style={{ background: '#3C5C7A', color: '#E6EDF5' }}
                 onMouseEnter={e => (e.currentTarget.style.background = '#486891')}
                 onMouseLeave={e => (e.currentTarget.style.background = '#3C5C7A')}
               >
@@ -162,15 +156,9 @@ const LoginPage: React.FC = () => {
           {/* Demo accounts */}
           <div
             className="mt-5 rounded-xl p-4"
-            style={{
-              background: 'rgba(13, 30, 58, 0.6)',
-              border: '1px solid #1F3455',
-            }}
+            style={{ background: 'rgba(13, 30, 58, 0.6)', border: '1px solid #1F3455' }}
           >
-            <p
-              className="text-xs font-medium uppercase tracking-widest mb-3"
-              style={{ color: '#6B7F99' }}
-            >
+            <p className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: '#6B7F99' }}>
               Acesso Demonstração
             </p>
             <div className="grid grid-cols-2 gap-2">
@@ -179,23 +167,11 @@ const LoginPage: React.FC = () => {
                   key={acc.email}
                   onClick={() => { setEmail(acc.email); setSenha('demo'); }}
                   className="text-left px-3 py-2 rounded-lg text-xs transition-colors duration-200"
-                  style={{
-                    background: 'transparent',
-                    border: '1px solid transparent',
-                    color: '#A9B7C9',
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.background = '#122544';
-                    e.currentTarget.style.borderColor = '#324A71';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.borderColor = 'transparent';
-                  }}
+                  style={{ background: 'transparent', border: '1px solid transparent', color: '#A9B7C9' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#122544'; e.currentTarget.style.borderColor = '#324A71'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; }}
                 >
-                  <span className="font-medium block" style={{ color: '#E6EDF5' }}>
-                    {acc.label}
-                  </span>
+                  <span className="font-medium block" style={{ color: '#E6EDF5' }}>{acc.label}</span>
                   <span style={{ color: '#6B7F99' }}>{acc.email}</span>
                 </button>
               ))}
@@ -203,6 +179,18 @@ const LoginPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Scoped keyframes */}
+      <style>{`
+        @keyframes login-brand-in {
+          from { opacity: 0; transform: translateY(18px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes login-card-in {
+          from { opacity: 0; transform: scale(0.95); }
+          to   { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
     </div>
   );
 };
