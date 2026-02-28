@@ -9,10 +9,10 @@ import { cn } from '@/lib/utils';
 
 const prioridadeOrder: Record<Prioridade, number> = { Alta: 0, Média: 1, Baixa: 2 };
 
-const prioridadeStyles: Record<Prioridade, string> = {
-  Alta: 'priority-high',
-  Média: 'priority-medium',
-  Baixa: 'priority-low',
+const prioridadeBadge: Record<Prioridade, string> = {
+  Alta: 'bg-red-100 text-red-800 border-red-300',
+  Média: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+  Baixa: 'bg-green-100 text-green-800 border-green-300',
 };
 
 const statusBadge: Record<StatusAtendimento, string> = {
@@ -59,11 +59,14 @@ const FilaAtendimento: React.FC = () => {
           const tempoAlerta = tempo > 60 ? 'border-l-red-500' : tempo > 30 ? 'border-l-yellow-500' : 'border-l-transparent';
 
           return (
-            <div key={a.id} className={cn("bg-card rounded-lg border p-4 border-l-4 transition-all", tempoAlerta, prioridadeStyles[a.prioridade])}>
+            <div key={a.id} className={cn("bg-card rounded-lg border p-4 border-l-4 transition-all", tempoAlerta)}>
               <div className="flex flex-col md:flex-row md:items-center gap-3">
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-semibold text-foreground">{a.nome_cidadao}</span>
+                    <span className={cn("px-2 py-0.5 rounded text-xs font-bold border", prioridadeBadge[a.prioridade])}>
+                      {a.prioridade}
+                    </span>
                     <Badge variant="outline" className="text-xs">{a.tipo}</Badge>
                     <Badge variant="outline" className="text-xs">{a.tipo_registro}</Badge>
                     <span className={cn("px-2 py-0.5 rounded text-xs font-bold border", statusBadge[a.status])}>
