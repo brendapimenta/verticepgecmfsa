@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Atendimento, Comando, MensagemChat, Notificacao, Perfil, Solicitacao } from '@/types';
+import { Atendimento, Comando, MensagemChat, Notificacao, Perfil, Solicitacao, DemandaAtendimento } from '@/types';
 import { mockAtendimentos, mockComandos, mockMensagens } from '@/data/mockData';
 
 interface DataContextType {
@@ -8,6 +8,7 @@ interface DataContextType {
   mensagens: MensagemChat[];
   notificacoes: Notificacao[];
   solicitacoes: Solicitacao[];
+  demandasAtendimento: DemandaAtendimento[];
   addAtendimento: (a: Omit<Atendimento, 'id' | 'atualizado_em'>) => void;
   updateAtendimento: (id: string, updates: Partial<Atendimento>) => void;
   addComando: (c: Omit<Comando, 'id' | 'criado_em'>) => void;
@@ -16,6 +17,10 @@ interface DataContextType {
   marcarNotificacaoLida: (id: string) => void;
   addSolicitacao: (s: Omit<Solicitacao, 'id' | 'criado_em'>) => void;
   updateSolicitacaoStatus: (id: string, status: Solicitacao['status']) => void;
+  addDemandaAtendimento: (d: Omit<DemandaAtendimento, 'id' | 'criado_em'>, nomeCidadao: string) => void;
+  updateDemandaStatus: (id: string, status: DemandaAtendimento['status']) => void;
+  salvarAnotacoesPresidente: (atendimentoId: string, texto: string, nomeCidadao: string) => void;
+  salvarAnotacoesBrenda: (atendimentoId: string, texto: string) => void;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -32,6 +37,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [mensagens, setMensagens] = useState<MensagemChat[]>(mockMensagens);
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>([]);
+  const [demandasAtendimento, setDemandasAtendimento] = useState<DemandaAtendimento[]>([]);
 
   const criarNotificacao = useCallback((perfil_destino: Perfil, tipo_notificacao: Notificacao['tipo_notificacao'], referencia_tipo: Notificacao['referencia_tipo'], referencia_id: string, mensagem_resumo: string) => {
     const n: Notificacao = {
@@ -121,8 +127,44 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSolicitacoes(prev => prev.map(s => s.id === id ? { ...s, status } : s));
   }, []);
 
+  const addDemandaAtendimento = useCallback((d: Omit<DemandaAtendimento, 'id' | 'criado_em'>, nomeCidadao: string) => {
+    const id = String(Date.now());
+    setDemandasAtendimento(prev => [...prev, { ...d, id, criado_em: new Date().toISOString() }]);
+    criarNotificacao('sala_espera', 'nova_demanda_atendimento', 'demanda_atendimento', id,
+      `Nova demanda da Brenda sobre o atendimento de ${nomeCidadao}: ${d.descricao_demanda}.`);
+  }, [criarNotificacao]);
+
+  const updateDemandaStatus = useCallback((id: string, status: DemandaAtendimento['status']) => {
+    setDemandasAtendimento(prev => prev.map(d => d.id === id ? { ...d, status } : d));
+  }, []);
+
+  const salvarAnotacoesPresidente = useCallback((atendimentoId: string, texto: string, nomeCidadao: string) => {
+    setAtendimentos(prev => prev.map(a => a.id === atendimentoId ? {
+      ...a,
+      anotacoes_presidente: texto,
+      anotacoes_presidente_atualizado_em: new Date().toISOString(),
+      atualizado_em: new Date().toISOString(),
+    } : a));
+    criarNotificacao('brenda', 'ficha_atualizada', 'atendimento', atendimentoId,
+      `O Presidente atualizou as anotações do atendimento de ${nomeCidadao}.`);
+  }, [criarNotificacao]);
+
+  const salvarAnotacoesBrenda = useCallback((atendimentoId: string, texto: string) => {
+    setAtendimentos(prev => prev.map(a => a.id === atendimentoId ? {
+      ...a,
+      anotacoes_brenda: texto,
+      anotacoes_brenda_atualizado_em: new Date().toISOString(),
+      atualizado_em: new Date().toISOString(),
+    } : a));
+  }, []);
+
   return (
-    <DataContext.Provider value={{ atendimentos, comandos, mensagens, notificacoes, solicitacoes, addAtendimento, updateAtendimento, addComando, updateComandoStatus, addMensagem, marcarNotificacaoLida, addSolicitacao, updateSolicitacaoStatus }}>
+    <DataContext.Provider value={{
+      atendimentos, comandos, mensagens, notificacoes, solicitacoes, demandasAtendimento,
+      addAtendimento, updateAtendimento, addComando, updateComandoStatus, addMensagem,
+      marcarNotificacaoLida, addSolicitacao, updateSolicitacaoStatus,
+      addDemandaAtendimento, updateDemandaStatus, salvarAnotacoesPresidente, salvarAnotacoesBrenda,
+    }}>
       {children}
     </DataContext.Provider>
   );

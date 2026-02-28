@@ -51,6 +51,10 @@ export interface Atendimento {
   data_conclusao?: string;
   criado_por: string;
   atualizado_em: string;
+  anotacoes_presidente?: string;
+  anotacoes_presidente_atualizado_em?: string;
+  anotacoes_brenda?: string;
+  anotacoes_brenda_atualizado_em?: string;
 }
 
 export interface MensagemChat {
@@ -88,9 +92,22 @@ export interface Solicitacao {
   criado_por_id: string;
 }
 
-export type TipoNotificacao = 'novo_atendimento' | 'prioridade_alterada' | 'novo_comando' | 'nova_mensagem_chat' | 'status_atualizado' | 'nova_solicitacao';
+export type StatusDemanda = 'Pendente' | 'Em andamento' | 'Concluída';
 
-export type ReferenciaTipo = 'atendimento' | 'comando' | 'chat' | 'solicitacao';
+export interface DemandaAtendimento {
+  id: string;
+  atendimento_id: string;
+  origem_perfil: 'Brenda';
+  destino_perfil: 'Sala de Espera';
+  descricao_demanda: string;
+  status: StatusDemanda;
+  criado_em: string;
+  criado_por_id: string;
+}
+
+export type TipoNotificacao = 'novo_atendimento' | 'prioridade_alterada' | 'novo_comando' | 'nova_mensagem_chat' | 'status_atualizado' | 'nova_solicitacao' | 'ficha_atualizada' | 'nova_demanda_atendimento';
+
+export type ReferenciaTipo = 'atendimento' | 'comando' | 'chat' | 'solicitacao' | 'demanda_atendimento';
 
 export interface Notificacao {
   id: string;
