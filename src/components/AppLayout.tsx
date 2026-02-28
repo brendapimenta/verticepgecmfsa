@@ -1,14 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useViewAs, usePerfilVisual } from '@/contexts/ViewAsContext';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard, Users, ListOrdered, PlusCircle, MessageSquare,
-  Zap, LogOut, Menu, X, Shield, Building2, Bell
+  Zap, LogOut, Menu, X, Shield, Building2, Bell, Eye
 } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { Notificacao } from '@/types';
+import { Notificacao, Perfil } from '@/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const perfilLabels: Record<string, string> = {
   administrador: 'Administrador',
@@ -22,6 +24,8 @@ export const AppLayout: React.FC = () => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { toast } = useToast();
+  const { perfilVisual, setPerfilVisual, isViewingAs } = useViewAs();
+  const perfilUI = usePerfilVisual();
 
   // Sound + toast on new notification for current user
   useEffect(() => {
@@ -30,7 +34,6 @@ export const AppLayout: React.FC = () => {
       if (!usuario) return;
       if (notif.perfil_destino !== usuario.perfil && notif.usuario_destino_id !== usuario.id) return;
 
-      // Play notification sound
       try {
         const ctx = new AudioContext();
         const osc = ctx.createOscillator();
@@ -40,12 +43,11 @@ export const AppLayout: React.FC = () => {
         osc.frequency.value = 880;
         osc.type = 'sine';
         gain.gain.value = 0.15;
-        osc.start();
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
         osc.stop(ctx.currentTime + 0.3);
+        osc.start();
       } catch {}
 
-      // Show toast
       toast({
         title: '🔔 Nova Notificação',
         description: notif.mensagem_resumo,
@@ -57,7 +59,7 @@ export const AppLayout: React.FC = () => {
 
   if (!usuario) return null;
 
-  const perfil = usuario.perfil;
+  const isAdmin = usuario.perfil === 'administrador';
 
   const navItems = [
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['administrador', 'brenda', 'presidente'] },
@@ -67,7 +69,13 @@ export const AppLayout: React.FC = () => {
     { to: '/chat', label: 'Chat', icon: MessageSquare, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
     { to: '/notificacoes', label: 'Notificações', icon: Bell, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
     { to: '/usuarios', label: 'Usuários', icon: Users, roles: ['administrador'] },
-  ].filter(item => item.roles.includes(perfil));
+  ].filter(item => {
+    // When viewing as another profile, show that profile's menu items + admin-only items
+    if (isAdmin && isViewingAs) {
+      return item.roles.includes(perfilUI) || item.roles.includes('administrador');
+    }
+    return item.roles.includes(perfilUI);
+  });
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
@@ -112,7 +120,7 @@ export const AppLayout: React.FC = () => {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-sidebar-foreground truncate">{usuario.nome}</p>
-            <p className="text-xs text-sidebar-foreground/50">{perfilLabels[perfil]}</p>
+            <p className="text-xs text-sidebar-foreground/50">{perfilLabels[usuario.perfil]}</p>
           </div>
         </div>
         <button
@@ -145,11 +153,31 @@ export const AppLayout: React.FC = () => {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-border bg-card">
+        <header className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-border bg-card gap-3">
           <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-lg hover:bg-muted">
             <Menu className="w-5 h-5" />
           </button>
-          <div className="flex-1 md:flex-none" />
+
+          {/* View As Selector – Admin only */}
+          {isAdmin && (
+            <div className="flex items-center gap-2">
+              <Eye className="w-4 h-4 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground hidden sm:inline">Visualizar como:</span>
+              <Select value={perfilVisual} onValueChange={v => setPerfilVisual(v as Perfil)}>
+                <SelectTrigger className="w-36 h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="administrador">Administrador</SelectItem>
+                  <SelectItem value="sala_espera">Sala de Espera</SelectItem>
+                  <SelectItem value="brenda">Brenda</SelectItem>
+                  <SelectItem value="presidente">Presidente</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div className="flex-1" />
           <div className="flex items-center gap-3">
             <NotificationBell />
             <span className="text-xs text-muted-foreground hidden sm:inline">
@@ -157,6 +185,22 @@ export const AppLayout: React.FC = () => {
             </span>
           </div>
         </header>
+
+        {/* View As Banner */}
+        {isViewingAs && (
+          <div className="flex items-center justify-between px-4 md:px-6 py-2 bg-amber-50 border-b border-amber-200 text-amber-800 text-sm">
+            <span className="flex items-center gap-2">
+              <Eye className="w-4 h-4" />
+              Você está visualizando como: <strong>{perfilLabels[perfilVisual]}</strong>
+            </span>
+            <button
+              onClick={() => setPerfilVisual('administrador')}
+              className="text-xs font-medium underline hover:no-underline"
+            >
+              Voltar para Administrador
+            </button>
+          </div>
+        )}
 
         <div className="flex-1 overflow-auto p-4 md:p-6">
           <Outlet />

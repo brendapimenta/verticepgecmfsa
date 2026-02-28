@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePerfilVisual } from '@/contexts/ViewAsContext';
 import { Prioridade, StatusAtendimento, StatusDemanda } from '@/types';
 import { Clock, Phone, User, FileText, AlertCircle, Users, CheckCircle, ClipboardList, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -40,9 +41,10 @@ const FilaAtendimento: React.FC = () => {
   const navigate = useNavigate();
   const { atendimentos, updateAtendimento, demandasAtendimento, updateDemandaStatus } = useData();
   const { usuario } = useAuth();
-  const isBrenda = usuario?.perfil === 'brenda' || usuario?.perfil === 'administrador';
+  const perfilUI = usePerfilVisual();
+  const isBrenda = perfilUI === 'brenda' || perfilUI === 'administrador';
   const [concluirId, setConcluirId] = useState<string | null>(null);
-  const canConcluir = isBrenda || usuario?.perfil === 'presidente';
+  const canConcluir = isBrenda || perfilUI === 'presidente';
 
   const hoje = new Date().toISOString().split('T')[0];
   const filaHoje = atendimentos
@@ -193,7 +195,7 @@ const FilaAtendimento: React.FC = () => {
       )}
 
       {/* Demandas Recebidas – Sala de Espera */}
-      {(usuario?.perfil === 'sala_espera' || usuario?.perfil === 'administrador') && demandasAtendimento.length > 0 && (
+      {(perfilUI === 'sala_espera' || perfilUI === 'administrador') && demandasAtendimento.length > 0 && (
         <div>
           <h2 className="font-display text-lg font-semibold text-foreground mb-3">
             Demandas Recebidas ({demandasAtendimento.filter(d => d.status !== 'Concluída').length} pendentes)

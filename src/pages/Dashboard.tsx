@@ -1,11 +1,13 @@
 import React from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePerfilVisual } from '@/contexts/ViewAsContext';
 import { Clock, Users, AlertTriangle, CheckCircle, CalendarClock, UserCheck, Calendar } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const { atendimentos } = useData();
   const { usuario } = useAuth();
+  const perfilUI = usePerfilVisual();
   const hoje = new Date().toISOString().split('T')[0];
   const atendHoje = atendimentos.filter(a => a.data_chegada === hoje);
   const aguardando = atendHoje.filter(a => a.status === 'Aguardando');
@@ -63,7 +65,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Priority Alerts for Presidente */}
-      {(usuario?.perfil === 'presidente' || usuario?.perfil === 'administrador') && urgencias.length > 0 && (
+      {(perfilUI === 'presidente' || perfilUI === 'administrador') && urgencias.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-3">
             <h2 className="font-display text-lg font-semibold text-foreground">Atendimentos Prioritários</h2>
