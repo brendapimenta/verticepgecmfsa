@@ -5,6 +5,7 @@ import { TipoChamada, StatusComando } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Zap, Send, Clock, CheckCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -12,11 +13,6 @@ import { useToast } from '@/hooks/use-toast';
 const chamadas: { tipo: TipoChamada; label: string }[] = [
   { tipo: 'Diretor Geral', label: 'CHAMAR DIRETOR GERAL' },
   { tipo: 'Procurador Geral', label: 'CHAMAR PROCURADOR GERAL' },
-  { tipo: 'Controladora', label: 'CHAMAR CONTROLADORA' },
-  { tipo: 'Gerência de Recursos Humanos', label: 'CHAMAR GERÊNCIA DE RH' },
-  { tipo: 'Gerência Legislativa', label: 'CHAMAR GERÊNCIA LEGISLATIVA' },
-  { tipo: 'Gerência Financeira', label: 'CHAMAR GERÊNCIA FINANCEIRA' },
-  { tipo: 'Tesoureiro', label: 'CHAMAR TESOUREIRO' },
   { tipo: 'Guarda Municipal', label: 'CHAMAR GUARDA MUNICIPAL' },
 ];
 
@@ -45,6 +41,7 @@ const Comandos: React.FC = () => {
 
   const origemPerfil = perfil === 'presidente' ? 'Presidente' as const : 'Brenda' as const;
   const destinoPerfil = perfil === 'presidente' ? 'Brenda' as const : 'Sala de Espera' as const;
+  const destinoLabel = perfil === 'presidente' ? 'Brenda' : 'Sala de Espera';
 
   const enviarComando = (tipo: TipoChamada, descricao?: string) => {
     addComando({
@@ -60,7 +57,6 @@ const Comandos: React.FC = () => {
     if (tipo === 'Outro') setOutroTexto('');
   };
 
-  // Comandos recebidos
   const recebidos = comandos.filter(c => {
     if (perfil === 'brenda') return c.destino_perfil === 'Brenda';
     if (perfil === 'sala_espera') return c.destino_perfil === 'Sala de Espera';
@@ -69,7 +65,6 @@ const Comandos: React.FC = () => {
   });
 
   const enviados = comandos.filter(c => c.criado_por_id === usuario.id);
-
   const canRespond = perfil === 'brenda' || perfil === 'sala_espera' || perfil === 'administrador';
 
   return (
@@ -79,43 +74,47 @@ const Comandos: React.FC = () => {
         <p className="text-sm text-muted-foreground mt-1">Envie e gerencie chamadas hierárquicas</p>
       </div>
 
-      {/* Send Commands */}
+      {/* Send Commands Card */}
       {canSend && (
-        <div>
-          <h2 className="font-display text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-accent" />
-            Enviar Comando para {destinoPerfil}
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {chamadas.map(c => (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Zap className="w-5 h-5 text-accent" />
+              Enviar Comando para {destinoLabel}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {chamadas.map(c => (
+                <Button
+                  key={c.tipo}
+                  variant="outline"
+                  className="h-14 text-sm font-semibold hover:border-accent hover:bg-accent/5 transition-all"
+                  onClick={() => enviarComando(c.tipo)}
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  {c.label}
+                </Button>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Quem chamar? (Outro)"
+                value={outroTexto}
+                onChange={e => setOutroTexto(e.target.value)}
+                className="flex-1"
+              />
               <Button
-                key={c.tipo}
                 variant="outline"
-                className="h-auto py-3 text-xs font-semibold hover:border-accent hover:bg-accent/5 transition-all"
-                onClick={() => enviarComando(c.tipo)}
+                onClick={() => outroTexto && enviarComando('Outro', outroTexto)}
+                disabled={!outroTexto}
               >
-                <Send className="w-3.5 h-3.5 mr-1.5" />
-                {c.label}
+                <Send className="w-4 h-4 mr-1" />
+                Enviar
               </Button>
-            ))}
-          </div>
-          <div className="mt-3 flex gap-2">
-            <Input
-              placeholder="Quem chamar? (Outro)"
-              value={outroTexto}
-              onChange={e => setOutroTexto(e.target.value)}
-              className="flex-1"
-            />
-            <Button
-              variant="outline"
-              onClick={() => outroTexto && enviarComando('Outro', outroTexto)}
-              disabled={!outroTexto}
-            >
-              <Send className="w-4 h-4 mr-1" />
-              Enviar
-            </Button>
-          </div>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Received Commands */}
