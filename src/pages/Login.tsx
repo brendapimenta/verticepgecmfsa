@@ -157,11 +157,11 @@ const LoginPage: React.FC = () => {
             />
             <img src={logoVerticeFull} alt="VÉRTICE" className="relative w-44 lg:w-56 object-contain mb-6 drop-shadow-none" style={{ background: 'transparent' }} />
           </div>
-          <p className="text-base lg:text-xl tracking-[0.3em] uppercase font-semibold mb-4" style={{ color: '#E6EDF5' }}>
-            Gestão Estratégica de Atendimentos
+          <p className="text-base lg:text-xl tracking-[0.1em] uppercase font-bold mb-4" style={{ color: '#E6EDF5' }}>
+            GESTÃO ESTRATÉGICA DE ATENDIMENTOS
           </p>
-          <p className="text-sm lg:text-base max-w-sm leading-relaxed" style={{ color: '#A9B7C9' }}>
-            Controle, estratégia e precisão no atendimento público.
+          <p className="text-xs lg:text-sm tracking-[0.06em] uppercase max-w-sm leading-relaxed font-medium" style={{ color: '#A9B7C9' }}>
+            CONTROLE, ESTRATÉGIA E PRECISÃO NO ATENDIMENTO PÚBLICO
           </p>
         </div>
 
