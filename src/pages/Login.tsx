@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogIn } from 'lucide-react';
-import verticeSymbol from '@/assets/vertice-symbol.png';
-import verticeName from '@/assets/vertice-name.png';
+import verticeLogoFull from '@/assets/vertice-logo-full.png';
 
 /* ── Particle layer (canvas) ── */
 const ParticleBackground: React.FC = () => {
@@ -157,16 +156,10 @@ const LoginPage: React.FC = () => {
               }}
             />
             <img
-              src={verticeSymbol}
-              alt="VÉRTICE símbolo"
-              className="relative w-40 lg:w-[230px] object-contain"
-              style={{ filter: 'drop-shadow(0 0 40px rgba(60,92,122,0.15))' }}
-            />
-            <div className="h-6" />
-            <img
-              src={verticeName}
+              src={verticeLogoFull}
               alt="VÉRTICE"
-              className="relative w-48 lg:w-[260px] object-contain"
+              className="relative w-52 lg:w-[270px] object-contain"
+              style={{ filter: 'drop-shadow(0 0 40px rgba(60,92,122,0.15))' }}
             />
           </div>
           <div className="h-[18px]" />
