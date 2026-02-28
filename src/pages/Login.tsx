@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Building2, LogIn } from 'lucide-react';
+import { LogIn } from 'lucide-react';
+import logoVerticeFull from '@/assets/logo-vertice-full.png';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,10 +31,7 @@ const LoginPage: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md animate-fade-in">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-primary mx-auto mb-4 flex items-center justify-center shadow-lg">
-            <Building2 className="w-8 h-8 text-primary-foreground" />
-          </div>
-          <h1 className="font-display text-3xl font-bold text-foreground">VÉRTICE</h1>
+          <img src={logoVerticeFull} alt="VÉRTICE - Gestão Estratégica de Atendimentos" className="w-48 mx-auto mb-4 object-contain" />
           <p className="text-muted-foreground mt-1">Gestão Estratégica de Atendimentos</p>
         </div>
 
