@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogIn } from 'lucide-react';
-import logoVerticeFull from '@/assets/logo-vertice-full.png';
+import verticeSymbol from '@/assets/vertice-symbol.png';
+import verticeName from '@/assets/vertice-name.png';
 
 /* ── Particle layer (canvas) ── */
 const ParticleBackground: React.FC = () => {
@@ -148,18 +149,31 @@ const LoginPage: React.FC = () => {
           className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left py-8 lg:py-0"
           style={{ animation: 'login-brand-in 0.6s ease-out both' }}
         >
-          <div className="relative">
+          <div className="relative flex flex-col items-center lg:items-start">
             <div
               className="absolute inset-0 -m-16 pointer-events-none"
               style={{
                 background: 'radial-gradient(circle, rgba(60,92,122,0.25) 0%, rgba(60,92,122,0.1) 40%, transparent 70%)',
               }}
             />
-            <img src={logoVerticeFull} alt="VÉRTICE" className="relative w-44 lg:w-56 object-contain mb-6 drop-shadow-none" style={{ background: 'transparent' }} />
+            <img
+              src={verticeSymbol}
+              alt="VÉRTICE símbolo"
+              className="relative w-40 lg:w-[230px] object-contain"
+              style={{ filter: 'drop-shadow(0 0 40px rgba(60,92,122,0.15))' }}
+            />
+            <div className="h-6" />
+            <img
+              src={verticeName}
+              alt="VÉRTICE"
+              className="relative w-48 lg:w-[260px] object-contain"
+            />
           </div>
-          <p className="text-base lg:text-xl tracking-[0.1em] uppercase font-bold mb-4" style={{ color: '#E6EDF5' }}>
+          <div className="h-[18px]" />
+          <p className="text-base lg:text-xl tracking-[0.12em] uppercase font-semibold" style={{ color: '#DCE6F2' }}>
             GESTÃO ESTRATÉGICA DE ATENDIMENTOS
           </p>
+          <div className="h-3" />
           <p className="text-xs lg:text-sm tracking-[0.06em] uppercase max-w-sm leading-relaxed font-medium" style={{ color: '#A9B7C9' }}>
             CONTROLE, ESTRATÉGIA E PRECISÃO NO ATENDIMENTO PÚBLICO
           </p>
