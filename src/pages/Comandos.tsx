@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { TipoChamada, StatusComando } from '@/types';
+import { TipoChamada, StatusComando, StatusSolicitacao } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Zap, Send, Clock, CheckCircle, Loader2 } from 'lucide-react';
+import { Zap, Send, Clock, CheckCircle, Loader2, ClipboardList } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const chamadas: { tipo: TipoChamada; label: string }[] = [
@@ -28,11 +28,18 @@ const statusStyle: Record<StatusComando, string> = {
   Concluído: 'bg-green-100 text-green-800',
 };
 
+const solicitacaoStatusStyle: Record<StatusSolicitacao, string> = {
+  Pendente: 'bg-yellow-100 text-yellow-800',
+  'Em andamento': 'bg-blue-100 text-blue-800',
+  Concluída: 'bg-green-100 text-green-800',
+};
+
 const Comandos: React.FC = () => {
-  const { comandos, addComando, updateComandoStatus } = useData();
+  const { comandos, addComando, updateComandoStatus, solicitacoes, addSolicitacao, updateSolicitacaoStatus } = useData();
   const { usuario } = useAuth();
   const { toast } = useToast();
   const [outroTexto, setOutroTexto] = useState('');
+  const [solicitacaoTexto, setSolicitacaoTexto] = useState('');
 
   if (!usuario) return null;
   const perfil = usuario.perfil;
@@ -57,9 +64,29 @@ const Comandos: React.FC = () => {
     if (tipo === 'Outro') setOutroTexto('');
   };
 
+  const enviarSolicitacao = () => {
+    if (!solicitacaoTexto.trim()) return;
+    addSolicitacao({
+      origem_perfil: origemPerfil,
+      destino_perfil: destinoPerfil,
+      descricao_solicitacao: solicitacaoTexto,
+      status: 'Pendente',
+      criado_por_id: usuario.id,
+    });
+    toast({ title: 'Solicitação enviada!', description: `Enviada para ${destinoLabel}` });
+    setSolicitacaoTexto('');
+  };
+
   const recebidos = comandos.filter(c => {
     if (perfil === 'brenda') return c.destino_perfil === 'Brenda';
     if (perfil === 'sala_espera') return c.destino_perfil === 'Sala de Espera';
+    if (perfil === 'administrador') return true;
+    return false;
+  });
+
+  const solicitacoesRecebidas = solicitacoes.filter(s => {
+    if (perfil === 'brenda') return s.destino_perfil === 'Brenda';
+    if (perfil === 'sala_espera') return s.destino_perfil === 'Sala de Espera';
     if (perfil === 'administrador') return true;
     return false;
   });
@@ -71,7 +98,7 @@ const Comandos: React.FC = () => {
     <div className="space-y-8 animate-fade-in">
       <div>
         <h1 className="font-display text-2xl font-bold text-foreground">Comandos Rápidos</h1>
-        <p className="text-sm text-muted-foreground mt-1">Envie e gerencie chamadas hierárquicas</p>
+        <p className="text-sm text-muted-foreground mt-1">Envie e gerencie chamadas e solicitações hierárquicas</p>
       </div>
 
       {/* Send Commands Card */}
@@ -117,6 +144,33 @@ const Comandos: React.FC = () => {
         </Card>
       )}
 
+      {/* Solicitação Card */}
+      {canSend && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <ClipboardList className="w-5 h-5 text-accent" />
+              {perfil === 'presidente' ? 'Solicitar' : 'Solicitar à Sala de Espera'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2">
+              <Input
+                placeholder="O que deseja solicitar?"
+                value={solicitacaoTexto}
+                onChange={e => setSolicitacaoTexto(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && enviarSolicitacao()}
+                className="flex-1"
+              />
+              <Button onClick={enviarSolicitacao} disabled={!solicitacaoTexto.trim()}>
+                <Send className="w-4 h-4 mr-1" />
+                Enviar Solicitação
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Received Commands */}
       {canRespond && recebidos.length > 0 && (
         <div>
@@ -149,6 +203,48 @@ const Comandos: React.FC = () => {
                         <SelectItem value="Pendente">Pendente</SelectItem>
                         <SelectItem value="Em andamento">Em andamento</SelectItem>
                         <SelectItem value="Concluído">Concluído</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Received Solicitações */}
+      {canRespond && solicitacoesRecebidas.length > 0 && (
+        <div>
+          <h2 className="font-display text-lg font-semibold text-foreground mb-3">
+            Solicitações Recebidas ({solicitacoesRecebidas.filter(s => s.status !== 'Concluída').length} pendentes)
+          </h2>
+          <div className="space-y-2">
+            {solicitacoesRecebidas.filter(s => s.status !== 'Concluída').map(s => (
+              <div key={s.id} className="bg-card rounded-lg border p-4 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 flex-1">
+                  {s.status === 'Pendente' ? <Clock className="w-3.5 h-3.5 text-yellow-600" /> :
+                   s.status === 'Em andamento' ? <Loader2 className="w-3.5 h-3.5 text-blue-600 animate-spin" /> :
+                   <CheckCircle className="w-3.5 h-3.5 text-green-600" />}
+                  <div>
+                    <span className="font-semibold text-sm">{s.descricao_solicitacao}</span>
+                    <p className="text-xs text-muted-foreground">
+                      De: {s.origem_perfil} • {new Date(s.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge className={solicitacaoStatusStyle[s.status]}>{s.status}</Badge>
+                  {s.status !== 'Concluída' && (
+                    <Select
+                      value={s.status}
+                      onValueChange={v => updateSolicitacaoStatus(s.id, v as StatusSolicitacao)}
+                    >
+                      <SelectTrigger className="w-32 h-8 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Pendente">Pendente</SelectItem>
+                        <SelectItem value="Em andamento">Em andamento</SelectItem>
+                        <SelectItem value="Concluída">Concluída</SelectItem>
                       </SelectContent>
                     </Select>
                   )}

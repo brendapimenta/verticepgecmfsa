@@ -1,7 +1,7 @@
 import React from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Bell, FileText, Zap, MessageSquare, AlertCircle, CheckCheck } from 'lucide-react';
+import { Bell, FileText, Zap, MessageSquare, AlertCircle, CheckCheck, ClipboardList } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { TipoNotificacao } from '@/types';
@@ -14,6 +14,7 @@ const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
   novo_comando: <Zap className="w-3.5 h-3.5 text-yellow-600" />,
   nova_mensagem_chat: <MessageSquare className="w-3.5 h-3.5 text-green-600" />,
   status_atualizado: <CheckCheck className="w-3.5 h-3.5 text-purple-600" />,
+  nova_solicitacao: <ClipboardList className="w-3.5 h-3.5 text-orange-600" />,
 };
 
 export const NotificationBell: React.FC = () => {
@@ -34,6 +35,7 @@ export const NotificationBell: React.FC = () => {
     if (notif.referencia_tipo === 'atendimento') navigate('/fila');
     else if (notif.referencia_tipo === 'comando') navigate('/comandos');
     else if (notif.referencia_tipo === 'chat') navigate('/chat');
+    else if (notif.referencia_tipo === 'solicitacao') navigate('/comandos');
   };
 
   return (

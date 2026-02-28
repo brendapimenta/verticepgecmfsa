@@ -75,9 +75,22 @@ export interface Comando {
   criado_por_nome: string;
 }
 
-export type TipoNotificacao = 'novo_atendimento' | 'prioridade_alterada' | 'novo_comando' | 'nova_mensagem_chat' | 'status_atualizado';
+export type StatusSolicitacao = 'Pendente' | 'Em andamento' | 'Concluída';
 
-export type ReferenciaTipo = 'atendimento' | 'comando' | 'chat';
+export interface Solicitacao {
+  id: string;
+  origem_perfil: 'Presidente' | 'Brenda';
+  destino_perfil: 'Brenda' | 'Sala de Espera';
+  atendimento_id?: string;
+  descricao_solicitacao: string;
+  status: StatusSolicitacao;
+  criado_em: string;
+  criado_por_id: string;
+}
+
+export type TipoNotificacao = 'novo_atendimento' | 'prioridade_alterada' | 'novo_comando' | 'nova_mensagem_chat' | 'status_atualizado' | 'nova_solicitacao';
+
+export type ReferenciaTipo = 'atendimento' | 'comando' | 'chat' | 'solicitacao';
 
 export interface Notificacao {
   id: string;
