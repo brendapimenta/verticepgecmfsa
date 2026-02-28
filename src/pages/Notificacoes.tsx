@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { TipoNotificacao } from '@/types';
-import { Bell, Filter, CheckCheck, FileText, Zap, MessageSquare, AlertCircle } from 'lucide-react';
+import { Bell, Filter, CheckCheck, FileText, Zap, MessageSquare, AlertCircle, ClipboardList } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -15,6 +15,7 @@ const tipoLabel: Record<TipoNotificacao, string> = {
   novo_comando: 'Novo Comando',
   nova_mensagem_chat: 'Nova Mensagem',
   status_atualizado: 'Status Atualizado',
+  nova_solicitacao: 'Nova Solicitação',
 };
 
 const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
@@ -23,6 +24,7 @@ const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
   novo_comando: <Zap className="w-4 h-4 text-yellow-600" />,
   nova_mensagem_chat: <MessageSquare className="w-4 h-4 text-green-600" />,
   status_atualizado: <CheckCheck className="w-4 h-4 text-purple-600" />,
+  nova_solicitacao: <ClipboardList className="w-4 h-4 text-orange-600" />,
 };
 
 const Notificacoes: React.FC = () => {
@@ -45,6 +47,7 @@ const Notificacoes: React.FC = () => {
     if (notif.referencia_tipo === 'atendimento') navigate('/fila');
     else if (notif.referencia_tipo === 'comando') navigate('/comandos');
     else if (notif.referencia_tipo === 'chat') navigate('/chat');
+    else if (notif.referencia_tipo === 'solicitacao') navigate('/comandos');
   };
 
   return (

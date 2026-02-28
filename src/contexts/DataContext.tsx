@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Atendimento, Comando, MensagemChat, Notificacao, Perfil } from '@/types';
+import { Atendimento, Comando, MensagemChat, Notificacao, Perfil, Solicitacao } from '@/types';
 import { mockAtendimentos, mockComandos, mockMensagens } from '@/data/mockData';
 
 interface DataContextType {
@@ -7,12 +7,15 @@ interface DataContextType {
   comandos: Comando[];
   mensagens: MensagemChat[];
   notificacoes: Notificacao[];
+  solicitacoes: Solicitacao[];
   addAtendimento: (a: Omit<Atendimento, 'id' | 'atualizado_em'>) => void;
   updateAtendimento: (id: string, updates: Partial<Atendimento>) => void;
   addComando: (c: Omit<Comando, 'id' | 'criado_em'>) => void;
   updateComandoStatus: (id: string, status: Comando['status']) => void;
   addMensagem: (m: Omit<MensagemChat, 'id' | 'criado_em'>, canal?: 'sala_brenda' | 'brenda_presidente') => void;
   marcarNotificacaoLida: (id: string) => void;
+  addSolicitacao: (s: Omit<Solicitacao, 'id' | 'criado_em'>) => void;
+  updateSolicitacaoStatus: (id: string, status: Solicitacao['status']) => void;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -28,6 +31,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [comandos, setComandos] = useState<Comando[]>(mockComandos);
   const [mensagens, setMensagens] = useState<MensagemChat[]>(mockMensagens);
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
+  const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>([]);
 
   const criarNotificacao = useCallback((perfil_destino: Perfil, tipo_notificacao: Notificacao['tipo_notificacao'], referencia_tipo: Notificacao['referencia_tipo'], referencia_id: string, mensagem_resumo: string) => {
     const n: Notificacao = {
@@ -41,14 +45,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       criado_em: new Date().toISOString(),
     };
     setNotificacoes(prev => [n, ...prev]);
-    // Dispatch custom event for toast/sound
     window.dispatchEvent(new CustomEvent('nova-notificacao', { detail: n }));
   }, []);
 
   const addAtendimento = useCallback((a: Omit<Atendimento, 'id' | 'atualizado_em'>) => {
     const id = String(Date.now());
     setAtendimentos(prev => [...prev, { ...a, id, atualizado_em: new Date().toISOString() }]);
-    // Rule 1: notify Brenda and Presidente
     const msg = `Novo atendimento criado: ${a.nome_cidadao} – ${a.demanda_principal}.`;
     criarNotificacao('brenda', 'novo_atendimento', 'atendimento', id, msg);
     criarNotificacao('presidente', 'novo_atendimento', 'atendimento', id, msg);
@@ -58,14 +60,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAtendimentos(prev => {
       const old = prev.find(a => a.id === id);
       if (!old) return prev;
-
-      // Rule 2: priority changed to Alta
       if (updates.prioridade && updates.prioridade === 'Alta' && old.prioridade !== 'Alta') {
         criarNotificacao('presidente', 'prioridade_alterada', 'atendimento', id,
           `Atendimento com prioridade ALTA: ${old.nome_cidadao} – ${old.demanda_principal}.`);
       }
-
-      // Rule 5: important status change
       if (updates.status) {
         const from = old.status;
         const to = updates.status;
@@ -74,7 +72,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             `Status atualizado para ${to}: ${old.nome_cidadao} – ${old.demanda_principal}.`);
         }
       }
-
       return prev.map(a => a.id === id ? { ...a, ...updates, atualizado_em: new Date().toISOString() } : a);
     });
   }, [criarNotificacao]);
@@ -82,7 +79,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addComando = useCallback((c: Omit<Comando, 'id' | 'criado_em'>) => {
     const id = String(Date.now());
     setComandos(prev => [...prev, { ...c, id, criado_em: new Date().toISOString() }]);
-    // Rule 3: notify destination
     const desc = c.tipo_chamada === 'Outro' ? c.descricao_customizada : c.tipo_chamada;
     if (c.origem_perfil === 'Presidente') {
       criarNotificacao('brenda', 'novo_comando', 'comando', id, `Novo comando do Presidente: ${desc}.`);
@@ -98,10 +94,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addMensagem = useCallback((m: Omit<MensagemChat, 'id' | 'criado_em'>, canal?: 'sala_brenda' | 'brenda_presidente') => {
     const id = String(Date.now());
     setMensagens(prev => [...prev, { ...m, id, criado_em: new Date().toISOString() }]);
-    // Rule 4: chat notification
     const resumo = `Nova mensagem de ${m.remetente_nome} no chat.`;
     if (canal === 'sala_brenda') {
-      // If sender is sala_espera -> notify brenda, vice versa
       const destino: Perfil = m.remetente_nome === 'Brenda' ? 'sala_espera' : 'brenda';
       criarNotificacao(destino, 'nova_mensagem_chat', 'chat', id, resumo);
     } else if (canal === 'brenda_presidente') {
@@ -114,8 +108,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setNotificacoes(prev => prev.map(n => n.id === id ? { ...n, lida: true } : n));
   }, []);
 
+  const addSolicitacao = useCallback((s: Omit<Solicitacao, 'id' | 'criado_em'>) => {
+    const id = String(Date.now());
+    setSolicitacoes(prev => [...prev, { ...s, id, criado_em: new Date().toISOString() }]);
+    const origemLabel = s.origem_perfil;
+    const destinoPerfil: Perfil = s.destino_perfil === 'Brenda' ? 'brenda' : 'sala_espera';
+    criarNotificacao(destinoPerfil, 'nova_solicitacao', 'solicitacao', id,
+      `Nova solicitação ${origemLabel === 'Presidente' ? 'do Presidente' : 'de Brenda'}: ${s.descricao_solicitacao}.`);
+  }, [criarNotificacao]);
+
+  const updateSolicitacaoStatus = useCallback((id: string, status: Solicitacao['status']) => {
+    setSolicitacoes(prev => prev.map(s => s.id === id ? { ...s, status } : s));
+  }, []);
+
   return (
-    <DataContext.Provider value={{ atendimentos, comandos, mensagens, notificacoes, addAtendimento, updateAtendimento, addComando, updateComandoStatus, addMensagem, marcarNotificacaoLida }}>
+    <DataContext.Provider value={{ atendimentos, comandos, mensagens, notificacoes, solicitacoes, addAtendimento, updateAtendimento, addComando, updateComandoStatus, addMensagem, marcarNotificacaoLida, addSolicitacao, updateSolicitacaoStatus }}>
       {children}
     </DataContext.Provider>
   );
