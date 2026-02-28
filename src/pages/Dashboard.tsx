@@ -20,7 +20,7 @@ const Dashboard: React.FC = () => {
 
   const stats = [
     { label: 'Total Hoje', value: atendHoje.length, icon: Users, color: 'text-primary' },
-    { label: 'Aguardando', value: aguardando.length, icon: Clock, color: 'text-yellow-600' },
+    { label: 'Aguardando', value: aguardando.length, icon: Clock, color: 'text-[#136F70]' },
     { label: 'Em Atendimento', value: emAtendimento.length, icon: UserCheck, color: 'text-blue-600' },
     { label: 'Concluídos', value: concluidos.length, icon: CheckCircle, color: 'text-green-600' },
     { label: 'Prioridade Alta', value: urgencias.length, icon: AlertTriangle, color: 'text-red-600' },
