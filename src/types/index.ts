@@ -4,7 +4,7 @@ export type TipoCidadao = 'Autoridade' | 'Vereador' | 'Administração' | 'Lider
 
 export type TipoRegistro = 'Sem agendamento' | 'Atendimento agendado' | 'Reunião agendada';
 
-export type Prioridade = 'Baixa' | 'Média' | 'Alta' | 'Crítica';
+export type Prioridade = 'Baixa' | 'Média' | 'Alta';
 
 export type StatusAtendimento = 'Aguardando' | 'Em Atendimento' | 'Concluído' | 'Adiado';
 

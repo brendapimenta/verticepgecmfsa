@@ -14,7 +14,7 @@ export const mockAtendimentos: Atendimento[] = [
     id: '1', nome_cidadao: 'José da Silva', tipo: 'Cidadão', tipo_registro: 'Sem agendamento',
     telefone_contato: '(63) 99999-0001', indicado_por: 'Vereador Marcos', assunto: 'Infraestrutura',
     demanda_principal: 'Pavimentação da Rua 10', data_chegada: hoje, hora_chegada: '08:15',
-    prioridade: 'Crítica', status: 'Aguardando', responsavel: 'Brenda', criado_por: '2', atualizado_em: new Date().toISOString(),
+    prioridade: 'Alta', status: 'Aguardando', responsavel: 'Brenda', criado_por: '2', atualizado_em: new Date().toISOString(),
   },
   {
     id: '2', nome_cidadao: 'Maria Oliveira', tipo: 'Autoridade', tipo_registro: 'Atendimento agendado',
@@ -66,6 +66,6 @@ export const mockComandos: Comando[] = [
 
 export const mockMensagens: MensagemChat[] = [
   { id: '1', atendimento_id: '1', remetente_id: '2', remetente_nome: 'Recepção', mensagem: 'Cidadão José chegou com urgência, solicita pavimentação.', criado_em: new Date().toISOString(), lido: true },
-  { id: '2', atendimento_id: '1', remetente_id: '3', remetente_nome: 'Brenda', mensagem: 'Entendido. Vou priorizar como Crítica.', criado_em: new Date().toISOString(), lido: true },
-  { id: '3', remetente_id: '3', remetente_nome: 'Brenda', mensagem: 'Presidente, temos atendimento crítico aguardando.', criado_em: new Date().toISOString(), lido: false },
+  { id: '2', atendimento_id: '1', remetente_id: '3', remetente_nome: 'Brenda', mensagem: 'Entendido. Vou priorizar como Alta.', criado_em: new Date().toISOString(), lido: true },
+  { id: '3', remetente_id: '3', remetente_nome: 'Brenda', mensagem: 'Presidente, temos atendimento de alta prioridade aguardando.', criado_em: new Date().toISOString(), lido: false },
 ];

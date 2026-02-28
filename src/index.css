@@ -37,8 +37,7 @@
     --radius: 0.625rem;
 
     /* Custom tokens */
-    --priority-critical: 0 72% 51%;
-    --priority-high: 25 95% 53%;
+    --priority-high: 0 72% 51%;
     --priority-medium: 45 93% 47%;
     --priority-low: 142 71% 45%;
 
@@ -110,11 +109,8 @@
 }
 
 @layer utilities {
-  .priority-critical {
-    @apply bg-red-500/10 text-red-600 border-red-500/30;
-  }
   .priority-high {
-    @apply bg-orange-500/10 text-orange-600 border-orange-500/30;
+    @apply bg-red-500/10 text-red-600 border-red-500/30;
   }
   .priority-medium {
     @apply bg-yellow-500/10 text-yellow-700 border-yellow-500/30;

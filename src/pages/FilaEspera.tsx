@@ -6,13 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 const prioridadeStyles: Record<Prioridade, string> = {
-  Crítica: 'bg-red-100 text-red-800 border-red-300',
-  Alta: 'bg-orange-100 text-orange-800 border-orange-300',
+  Alta: 'bg-red-100 text-red-800 border-red-300',
   Média: 'bg-yellow-100 text-yellow-800 border-yellow-300',
   Baixa: 'bg-green-100 text-green-800 border-green-300',
 };
 
-const prioridadeOrder: Record<Prioridade, number> = { Crítica: 0, Alta: 1, Média: 2, Baixa: 3 };
+const prioridadeOrder: Record<Prioridade, number> = { Alta: 0, Média: 1, Baixa: 2 };
 
 const getTempoEspera = (hora: string) => {
   const [h, m] = hora.split(':').map(Number);
