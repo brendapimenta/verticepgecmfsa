@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Prioridade, StatusAtendimento } from '@/types';
-import { Clock, Phone, User, FileText, AlertCircle, Users, CheckCircle } from 'lucide-react';
+import { Prioridade, StatusAtendimento, StatusDemanda } from '@/types';
+import { Clock, Phone, User, FileText, AlertCircle, Users, CheckCircle, ClipboardList, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -36,7 +37,8 @@ const getTempoEspera = (hora: string) => {
 };
 
 const FilaAtendimento: React.FC = () => {
-  const { atendimentos, updateAtendimento } = useData();
+  const navigate = useNavigate();
+  const { atendimentos, updateAtendimento, demandasAtendimento, updateDemandaStatus } = useData();
   const { usuario } = useAuth();
   const isBrenda = usuario?.perfil === 'brenda' || usuario?.perfil === 'administrador';
   const [concluirId, setConcluirId] = useState<string | null>(null);
@@ -86,7 +88,7 @@ const FilaAtendimento: React.FC = () => {
               <div className="flex flex-col md:flex-row md:items-center gap-3">
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-foreground">{a.nome_cidadao}</span>
+                    <button onClick={() => navigate(`/atendimento/${a.id}`)} className="font-semibold text-foreground hover:text-accent underline-offset-2 hover:underline">{a.nome_cidadao}</button>
                     <span className={cn("px-2 py-0.5 rounded text-xs font-bold border", prioridadeBadge[a.prioridade])}>
                       {a.prioridade}
                     </span>
@@ -186,6 +188,49 @@ const FilaAtendimento: React.FC = () => {
                 <p className="text-xs text-muted-foreground mt-1">{a.demanda_principal}</p>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Demandas Recebidas – Sala de Espera */}
+      {(usuario?.perfil === 'sala_espera' || usuario?.perfil === 'administrador') && demandasAtendimento.length > 0 && (
+        <div>
+          <h2 className="font-display text-lg font-semibold text-foreground mb-3">
+            Demandas Recebidas ({demandasAtendimento.filter(d => d.status !== 'Concluída').length} pendentes)
+          </h2>
+          <div className="space-y-2">
+            {demandasAtendimento.filter(d => d.status !== 'Concluída').map(d => {
+              const atend = atendimentos.find(a => a.id === d.atendimento_id);
+              return (
+                <div key={d.id} className="bg-card rounded-lg border p-4 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 flex-1">
+                    {d.status === 'Pendente' ? <Clock className="w-3.5 h-3.5 text-yellow-600" /> :
+                     d.status === 'Em andamento' ? <Loader2 className="w-3.5 h-3.5 text-blue-600 animate-spin" /> :
+                     <CheckCircle className="w-3.5 h-3.5 text-green-600" />}
+                    <div>
+                      <p className="text-sm font-medium">{d.descricao_demanda}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Atendimento: <button onClick={() => navigate(`/atendimento/${d.atendimento_id}`)} className="text-accent hover:underline">{atend?.nome_cidadao || d.atendimento_id}</button>
+                        {' • '}{new Date(d.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge className={d.status === 'Pendente' ? 'bg-yellow-100 text-yellow-800' : d.status === 'Em andamento' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}>{d.status}</Badge>
+                    {d.status !== 'Concluída' && (
+                      <Select value={d.status} onValueChange={v => updateDemandaStatus(d.id, v as StatusDemanda)}>
+                        <SelectTrigger className="w-32 h-8 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Pendente">Pendente</SelectItem>
+                          <SelectItem value="Em andamento">Em andamento</SelectItem>
+                          <SelectItem value="Concluída">Concluída</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

@@ -16,6 +16,8 @@ const tipoLabel: Record<TipoNotificacao, string> = {
   nova_mensagem_chat: 'Nova Mensagem',
   status_atualizado: 'Status Atualizado',
   nova_solicitacao: 'Nova Solicitação',
+  ficha_atualizada: 'Ficha Atualizada',
+  nova_demanda_atendimento: 'Nova Demanda',
 };
 
 const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
@@ -25,6 +27,8 @@ const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
   nova_mensagem_chat: <MessageSquare className="w-4 h-4 text-green-600" />,
   status_atualizado: <CheckCheck className="w-4 h-4 text-purple-600" />,
   nova_solicitacao: <ClipboardList className="w-4 h-4 text-orange-600" />,
+  ficha_atualizada: <FileText className="w-4 h-4 text-amber-600" />,
+  nova_demanda_atendimento: <ClipboardList className="w-4 h-4 text-teal-600" />,
 };
 
 const Notificacoes: React.FC = () => {
@@ -44,10 +48,11 @@ const Notificacoes: React.FC = () => {
 
   const handleClick = (notif: typeof minhas[0]) => {
     marcarNotificacaoLida(notif.id);
-    if (notif.referencia_tipo === 'atendimento') navigate('/fila');
+    if (notif.referencia_tipo === 'atendimento') navigate(`/atendimento/${notif.referencia_id}`);
     else if (notif.referencia_tipo === 'comando') navigate('/comandos');
     else if (notif.referencia_tipo === 'chat') navigate('/chat');
     else if (notif.referencia_tipo === 'solicitacao') navigate('/comandos');
+    else if (notif.referencia_tipo === 'demanda_atendimento') navigate('/fila');
   };
 
   return (
@@ -77,6 +82,8 @@ const Notificacoes: React.FC = () => {
             <SelectItem value="novo_comando">Novo Comando</SelectItem>
             <SelectItem value="nova_mensagem_chat">Nova Mensagem</SelectItem>
             <SelectItem value="status_atualizado">Status Atualizado</SelectItem>
+            <SelectItem value="ficha_atualizada">Ficha Atualizada</SelectItem>
+            <SelectItem value="nova_demanda_atendimento">Nova Demanda</SelectItem>
           </SelectContent>
         </Select>
       </div>
