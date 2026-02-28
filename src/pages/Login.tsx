@@ -174,7 +174,7 @@ const LoginPage: React.FC = () => {
             GESTÃO ESTRATÉGICA DE ATENDIMENTOS
           </p>
           <div className="h-3" />
-          <p className="text-xs lg:text-sm tracking-[0.06em] uppercase max-w-sm leading-relaxed font-medium" style={{ color: '#A9B7C9' }}>
+          <p className="text-[10px] lg:text-sm tracking-[0.06em] uppercase whitespace-nowrap leading-relaxed font-medium lg:whitespace-nowrap" style={{ color: '#A9B7C9' }}>
             CONTROLE, ESTRATÉGIA E PRECISÃO NO ATENDIMENTO PÚBLICO
           </p>
         </div>
