@@ -3,8 +3,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard, Users, ListOrdered, PlusCircle, MessageSquare,
-  Zap, LogOut, Menu, X, Shield, Building2
+  Zap, LogOut, Menu, X, Shield, Building2, Bell
 } from 'lucide-react';
+import { NotificationBell } from '@/components/NotificationBell';
 import { cn } from '@/lib/utils';
 
 const perfilLabels: Record<string, string> = {
@@ -29,6 +30,7 @@ export const AppLayout: React.FC = () => {
     { to: '/novo-atendimento', label: 'Novo Atendimento', icon: PlusCircle, roles: ['administrador', 'brenda', 'sala_espera'] },
     { to: '/comandos', label: 'Comandos Rápidos', icon: Zap, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
     { to: '/chat', label: 'Chat', icon: MessageSquare, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
+    { to: '/notificacoes', label: 'Notificações', icon: Bell, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
     { to: '/usuarios', label: 'Usuários', icon: Users, roles: ['administrador'] },
   ].filter(item => item.roles.includes(perfil));
 
@@ -113,7 +115,8 @@ export const AppLayout: React.FC = () => {
             <Menu className="w-5 h-5" />
           </button>
           <div className="flex-1 md:flex-none" />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <NotificationBell />
             <span className="text-xs text-muted-foreground hidden sm:inline">
               {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </span>

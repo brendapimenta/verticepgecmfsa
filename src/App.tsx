@@ -12,6 +12,7 @@ import FilaAtendimento from "@/pages/FilaAtendimento";
 import NovoAtendimento from "@/pages/NovoAtendimento";
 import Comandos from "@/pages/Comandos";
 import Chat from "@/pages/Chat";
+import Notificacoes from "@/pages/Notificacoes";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
                 <Route path="/novo-atendimento" element={<NovoAtendimento />} />
                 <Route path="/comandos" element={<Comandos />} />
                 <Route path="/chat" element={<Chat />} />
+                <Route path="/notificacoes" element={<Notificacoes />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
