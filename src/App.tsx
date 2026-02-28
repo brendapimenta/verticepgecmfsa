@@ -9,6 +9,7 @@ import { AppLayout } from "@/components/AppLayout";
 import LoginPage from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import FilaAtendimento from "@/pages/FilaAtendimento";
+import FilaEspera from "@/pages/FilaEspera";
 import NovoAtendimento from "@/pages/NovoAtendimento";
 import Comandos from "@/pages/Comandos";
 import Chat from "@/pages/Chat";
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route element={<ProtectedRoutes />}>
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/fila-espera" element={<FilaEspera />} />
                 <Route path="/fila" element={<FilaAtendimento />} />
                 <Route path="/novo-atendimento" element={<NovoAtendimento />} />
                 <Route path="/comandos" element={<Comandos />} />

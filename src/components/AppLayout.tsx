@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard, Users, ListOrdered, PlusCircle, MessageSquare,
-  Zap, LogOut, Menu, X, Shield, Building2
+  Zap, LogOut, Menu, X, Shield, Building2, Hourglass
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -25,6 +25,7 @@ export const AppLayout: React.FC = () => {
 
   const navItems = [
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['administrador', 'brenda', 'presidente'] },
+    { to: '/fila-espera', label: 'Fila de Espera', icon: Hourglass, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
     { to: '/fila', label: 'Fila de Atendimento', icon: ListOrdered, roles: ['administrador', 'brenda', 'sala_espera'] },
     { to: '/novo-atendimento', label: 'Novo Atendimento', icon: PlusCircle, roles: ['administrador', 'brenda', 'sala_espera'] },
     { to: '/comandos', label: 'Comandos Rápidos', icon: Zap, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
