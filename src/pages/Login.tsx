@@ -158,7 +158,7 @@ const LoginPage: React.FC = () => {
             <img
               src={verticeLogoFull}
               alt="VÉRTICE"
-              className="relative w-52 lg:w-[270px] object-contain"
+              className="relative w-[220px] lg:w-[340px] object-contain"
               style={{ filter: 'drop-shadow(0 0 40px rgba(60,92,122,0.15))' }}
             />
           </div>
