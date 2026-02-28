@@ -40,6 +40,7 @@ const FilaAtendimento: React.FC = () => {
   const { usuario } = useAuth();
   const isBrenda = usuario?.perfil === 'brenda' || usuario?.perfil === 'administrador';
   const [concluirId, setConcluirId] = useState<string | null>(null);
+  const canConcluir = isBrenda || usuario?.perfil === 'presidente';
 
   const hoje = new Date().toISOString().split('T')[0];
   const filaHoje = atendimentos
@@ -147,7 +148,7 @@ const FilaAtendimento: React.FC = () => {
                       </SelectContent>
                     </Select>
                   )}
-                  {isBrenda && (
+                  {canConcluir && (
                     <Button
                       size="sm"
                       variant="outline"
