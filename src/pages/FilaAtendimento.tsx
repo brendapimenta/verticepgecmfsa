@@ -7,10 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
-const prioridadeOrder: Record<Prioridade, number> = { Crítica: 0, Alta: 1, Média: 2, Baixa: 3 };
+const prioridadeOrder: Record<Prioridade, number> = { Alta: 0, Média: 1, Baixa: 2 };
 
 const prioridadeStyles: Record<Prioridade, string> = {
-  Crítica: 'priority-critical',
   Alta: 'priority-high',
   Média: 'priority-medium',
   Baixa: 'priority-low',
@@ -104,7 +103,6 @@ const FilaAtendimento: React.FC = () => {
                         <SelectItem value="Baixa">Baixa</SelectItem>
                         <SelectItem value="Média">Média</SelectItem>
                         <SelectItem value="Alta">Alta</SelectItem>
-                        <SelectItem value="Crítica">Crítica</SelectItem>
                       </SelectContent>
                     </Select>
                   )}

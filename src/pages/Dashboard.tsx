@@ -11,7 +11,7 @@ const Dashboard: React.FC = () => {
   const aguardando = atendHoje.filter(a => a.status === 'Aguardando');
   const emAtendimento = atendHoje.filter(a => a.status === 'Em Atendimento');
   const concluidos = atendHoje.filter(a => a.status === 'Concluído');
-  const urgencias = atendHoje.filter(a => a.prioridade === 'Alta' || a.prioridade === 'Crítica');
+  const urgencias = atendHoje.filter(a => a.prioridade === 'Alta');
   const semAgendamento = atendHoje.filter(a => a.tipo_registro === 'Sem agendamento');
   const agendados = atendHoje.filter(a => a.tipo_registro === 'Atendimento agendado');
   const reunioes = atendHoje.filter(a => a.tipo_registro === 'Reunião agendada');
@@ -21,7 +21,7 @@ const Dashboard: React.FC = () => {
     { label: 'Aguardando', value: aguardando.length, icon: Clock, color: 'text-yellow-600' },
     { label: 'Em Atendimento', value: emAtendimento.length, icon: UserCheck, color: 'text-blue-600' },
     { label: 'Concluídos', value: concluidos.length, icon: CheckCircle, color: 'text-green-600' },
-    { label: 'Urgências', value: urgencias.length, icon: AlertTriangle, color: 'text-red-600' },
+    { label: 'Prioridade Alta', value: urgencias.length, icon: AlertTriangle, color: 'text-red-600' },
   ];
 
   const registroStats = [
@@ -73,14 +73,14 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="space-y-2">
             {urgencias.map(a => (
-              <div key={a.id} className={`p-4 rounded-lg border ${a.prioridade === 'Crítica' ? 'priority-critical animate-pulse-priority' : 'priority-high'}`}>
+              <div key={a.id} className="p-4 rounded-lg border priority-high">
                 <div className="flex items-center justify-between">
                   <div>
                     <span className="font-semibold text-sm">{a.nome_cidadao}</span>
                     <span className="mx-2 text-xs">•</span>
                     <span className="text-xs">{a.tipo}</span>
                   </div>
-                  <span className={`px-2 py-0.5 rounded text-xs font-bold ${a.prioridade === 'Crítica' ? 'bg-red-600 text-white' : 'bg-orange-500 text-white'}`}>
+                  <span className="px-2 py-0.5 rounded text-xs font-bold bg-red-600 text-white">
                     {a.prioridade}
                   </span>
                 </div>
