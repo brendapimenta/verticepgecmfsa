@@ -83,8 +83,8 @@ export const AppLayout: React.FC = () => {
         <div className="flex items-center gap-3">
           <img src={logoVertice} alt="VÉRTICE" className="w-10 h-10 object-contain" />
           <div>
-            <h1 className="font-display text-base font-bold text-sidebar-foreground">VÉRTICE</h1>
-            <p className="text-xs text-sidebar-foreground/60">Gestão Estratégica de Atendimentos</p>
+            <h1 className="font-display text-base font-bold text-[#E6EDF5]">VÉRTICE</h1>
+            <p className="text-xs text-[#A9B7C9]">Gestão Estratégica de Atendimentos</p>
           </div>
         </div>
       </div>
@@ -100,8 +100,8 @@ export const AppLayout: React.FC = () => {
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                 active
-                  ? "bg-accent text-accent-foreground shadow-sm"
-                  : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                  ? "bg-[#102E4F] text-[#E6EDF5] border-l-[3px] border-l-[#3C5C7A] shadow-sm"
+                  : "text-[#A9B7C9] hover:text-[#E6EDF5] hover:bg-[#102E4F]"
               )}
             >
               <item.icon className="w-4 h-4" />
@@ -113,17 +113,17 @@ export const AppLayout: React.FC = () => {
 
       <div className="p-4 border-t border-sidebar-border">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center">
-            <Shield className="w-4 h-4 text-accent" />
+          <div className="w-8 h-8 rounded-full bg-[#102E4F] flex items-center justify-center">
+            <Shield className="w-4 h-4 text-[#A9B7C9]" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-sidebar-foreground truncate">{usuario.nome}</p>
-            <p className="text-xs text-sidebar-foreground/50">{perfilLabels[usuario.perfil]}</p>
+            <p className="text-sm font-medium text-[#E6EDF5] truncate">{usuario.nome}</p>
+            <p className="text-xs text-[#A9B7C9]">{perfilLabels[usuario.perfil]}</p>
           </div>
         </div>
         <button
           onClick={logout}
-          className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+          className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-[#A9B7C9] hover:text-[#E6EDF5] hover:bg-[#102E4F] transition-colors"
         >
           <LogOut className="w-4 h-4" />
           Sair
