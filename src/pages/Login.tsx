@@ -33,8 +33,8 @@ const LoginPage: React.FC = () => {
           <div className="w-16 h-16 rounded-2xl bg-primary mx-auto mb-4 flex items-center justify-center shadow-lg">
             <Building2 className="w-8 h-8 text-primary-foreground" />
           </div>
-          <h1 className="font-display text-3xl font-bold text-foreground">CMFS</h1>
-          <p className="text-muted-foreground mt-1">Sistema de Gestão de Atendimentos</p>
+          <h1 className="font-display text-3xl font-bold text-foreground">VÉRTICE</h1>
+          <p className="text-muted-foreground mt-1">Gestão Estratégica de Atendimentos</p>
         </div>
 
         <div className="bg-card rounded-xl border border-border shadow-sm p-6">

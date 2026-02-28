@@ -84,8 +84,8 @@ export const AppLayout: React.FC = () => {
             <Building2 className="w-5 h-5 text-accent-foreground" />
           </div>
           <div>
-            <h1 className="font-display text-base font-bold text-sidebar-foreground">CMFS</h1>
-            <p className="text-xs text-sidebar-foreground/60">Gestão de Atendimentos</p>
+            <h1 className="font-display text-base font-bold text-sidebar-foreground">VÉRTICE</h1>
+            <p className="text-xs text-sidebar-foreground/60">Gestão Estratégica de Atendimentos</p>
           </div>
         </div>
       </div>
