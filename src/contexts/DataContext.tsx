@@ -41,6 +41,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       criado_em: new Date().toISOString(),
     };
     setNotificacoes(prev => [n, ...prev]);
+    // Dispatch custom event for toast/sound
+    window.dispatchEvent(new CustomEvent('nova-notificacao', { detail: n }));
   }, []);
 
   const addAtendimento = useCallback((a: Omit<Atendimento, 'id' | 'atualizado_em'>) => {

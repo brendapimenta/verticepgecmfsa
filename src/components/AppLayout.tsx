@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import {
@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import { Notificacao } from '@/types';
 
 const perfilLabels: Record<string, string> = {
   administrador: 'Administrador',
@@ -19,6 +21,39 @@ export const AppLayout: React.FC = () => {
   const { usuario, logout } = useAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { toast } = useToast();
+
+  // Sound + toast on new notification for current user
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const notif = (e as CustomEvent<Notificacao>).detail;
+      if (!usuario) return;
+      if (notif.perfil_destino !== usuario.perfil && notif.usuario_destino_id !== usuario.id) return;
+
+      // Play notification sound
+      try {
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        osc.type = 'sine';
+        gain.gain.value = 0.15;
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        osc.stop(ctx.currentTime + 0.3);
+      } catch {}
+
+      // Show toast
+      toast({
+        title: '🔔 Nova Notificação',
+        description: notif.mensagem_resumo,
+      });
+    };
+    window.addEventListener('nova-notificacao', handler);
+    return () => window.removeEventListener('nova-notificacao', handler);
+  }, [usuario, toast]);
 
   if (!usuario) return null;
 
