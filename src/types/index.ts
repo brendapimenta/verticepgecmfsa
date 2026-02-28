@@ -74,3 +74,19 @@ export interface Comando {
   criado_por_id: string;
   criado_por_nome: string;
 }
+
+export type TipoNotificacao = 'novo_atendimento' | 'prioridade_alterada' | 'novo_comando' | 'nova_mensagem_chat' | 'status_atualizado';
+
+export type ReferenciaTipo = 'atendimento' | 'comando' | 'chat';
+
+export interface Notificacao {
+  id: string;
+  usuario_destino_id?: string;
+  perfil_destino: Perfil;
+  tipo_notificacao: TipoNotificacao;
+  referencia_tipo: ReferenciaTipo;
+  referencia_id: string;
+  mensagem_resumo: string;
+  lida: boolean;
+  criado_em: string;
+}

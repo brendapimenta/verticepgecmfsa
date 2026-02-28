@@ -28,7 +28,7 @@ const Chat: React.FC = () => {
       remetente_nome: usuario.nome,
       mensagem: texto,
       lido: false,
-    });
+    }, canal);
     setTexto('');
   };
 
