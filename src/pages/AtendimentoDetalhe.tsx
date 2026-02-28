@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePerfilVisual } from '@/contexts/ViewAsContext';
 import { StatusDemanda } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ const AtendimentoDetalhe: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { usuario } = useAuth();
+  const perfilUI = usePerfilVisual();
   const {
     atendimentos, demandasAtendimento,
     salvarAnotacoesPresidente, salvarAnotacoesBrenda,
@@ -44,10 +46,10 @@ const AtendimentoDetalhe: React.FC = () => {
     );
   }
 
-  const perfil = usuario.perfil;
-  const isPresidente = perfil === 'presidente' || perfil === 'administrador';
-  const isBrenda = perfil === 'brenda' || perfil === 'administrador';
-  const isSalaEspera = perfil === 'sala_espera' || perfil === 'administrador';
+  const isPresidente = perfilUI === 'presidente';
+  const isBrenda = perfilUI === 'brenda';
+  const isSalaEspera = perfilUI === 'sala_espera';
+  const isAdmin = perfilUI === 'administrador';
 
   const demandasDoAtendimento = demandasAtendimento.filter(d => d.atendimento_id === atendimento.id);
 
@@ -191,7 +193,7 @@ const AtendimentoDetalhe: React.FC = () => {
       )}
 
       {/* Administrador vê ambas anotações da Brenda também */}
-      {perfil === 'administrador' && (
+      {isAdmin && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePerfilVisual } from '@/contexts/ViewAsContext';
 import { TipoChamada, StatusComando, StatusSolicitacao } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,12 +38,12 @@ const solicitacaoStatusStyle: Record<StatusSolicitacao, string> = {
 const Comandos: React.FC = () => {
   const { comandos, addComando, updateComandoStatus, solicitacoes, addSolicitacao, updateSolicitacaoStatus } = useData();
   const { usuario } = useAuth();
+  const perfil = usePerfilVisual();
   const { toast } = useToast();
   const [outroTexto, setOutroTexto] = useState('');
   const [solicitacaoTexto, setSolicitacaoTexto] = useState('');
 
   if (!usuario) return null;
-  const perfil = usuario.perfil;
 
   const canSend = perfil === 'presidente' || perfil === 'brenda' || perfil === 'administrador';
 

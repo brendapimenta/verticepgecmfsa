@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePerfilVisual } from '@/contexts/ViewAsContext';
 import { Send, MessageSquare } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -9,12 +10,11 @@ import { cn } from '@/lib/utils';
 const Chat: React.FC = () => {
   const { mensagens, addMensagem } = useData();
   const { usuario } = useAuth();
+  const perfil = usePerfilVisual();
   const [texto, setTexto] = useState('');
   const [canal, setCanal] = useState<'sala_brenda' | 'brenda_presidente'>('sala_brenda');
 
   if (!usuario) return null;
-
-  const perfil = usuario.perfil;
 
   const canais = [
     ...(perfil === 'sala_espera' || perfil === 'brenda' || perfil === 'administrador' ? [{ key: 'sala_brenda' as const, label: 'Sala ↔ Brenda' }] : []),
