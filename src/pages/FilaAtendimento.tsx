@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Prioridade, StatusAtendimento } from '@/types';
-import { Clock, Phone, User, FileText, AlertCircle, Users } from 'lucide-react';
+import { Clock, Phone, User, FileText, AlertCircle, Users, CheckCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 
 const prioridadeOrder: Record<Prioridade, number> = { Alta: 0, Média: 1, Baixa: 2 };
@@ -34,6 +39,7 @@ const FilaAtendimento: React.FC = () => {
   const { atendimentos, updateAtendimento } = useData();
   const { usuario } = useAuth();
   const isBrenda = usuario?.perfil === 'brenda' || usuario?.perfil === 'administrador';
+  const [concluirId, setConcluirId] = useState<string | null>(null);
 
   const hoje = new Date().toISOString().split('T')[0];
   const filaHoje = atendimentos
@@ -45,6 +51,22 @@ const FilaAtendimento: React.FC = () => {
     });
 
   const concluidos = atendimentos.filter(a => a.data_chegada === hoje && a.status === 'Concluído');
+
+  const handleConcluir = () => {
+    if (!concluirId || !usuario) return;
+    const updates: Partial<typeof atendimentos[0]> = {
+      status: 'Concluído' as StatusAtendimento,
+      data_conclusao: new Date().toISOString(),
+    };
+    if (usuario.perfil === 'brenda') {
+      const atendimento = atendimentos.find(a => a.id === concluirId);
+      if (atendimento && !atendimento.responsavel) {
+        updates.responsavel = usuario.nome;
+      }
+    }
+    updateAtendimento(concluirId, updates);
+    setConcluirId(null);
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -93,7 +115,7 @@ const FilaAtendimento: React.FC = () => {
                   )}
                 </div>
 
-                <div className="flex gap-2 items-center flex-shrink-0">
+                <div className="flex gap-2 items-center flex-shrink-0 flex-wrap">
                   {isBrenda && (
                     <Select
                       value={a.prioridade}
@@ -125,6 +147,17 @@ const FilaAtendimento: React.FC = () => {
                       </SelectContent>
                     </Select>
                   )}
+                  {isBrenda && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 text-xs gap-1 border-green-300 text-green-700 hover:bg-green-50 hover:text-green-800"
+                      onClick={() => setConcluirId(a.id)}
+                    >
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      Concluir
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -155,6 +188,21 @@ const FilaAtendimento: React.FC = () => {
           </div>
         </div>
       )}
+
+      <AlertDialog open={!!concluirId} onOpenChange={(open) => !open && setConcluirId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Concluir Atendimento</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deseja marcar este atendimento como CONCLUÍDO?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConcluir}>Confirmar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
