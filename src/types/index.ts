@@ -141,6 +141,40 @@ export interface AutorizacaoFinanceira {
 
 export type TipoEvento = 'Atendimento' | 'Reunião' | 'Sessão' | 'Viagem' | 'Outro';
 
+// ============ PAUTA DESPACHO ============
+
+export type CategoriaPauta = 'Compras' | 'RH' | 'Contratos' | 'Projetos de Lei' | 'Acordos Políticos' | 'Viagens' | 'Estrutura Interna' | 'Outro';
+
+export type TipoRegistroPauta = 'Decisão Presidencial' | 'Tarefa Operacional';
+
+export type StatusPauta = 'Pendente' | 'Em Reunião' | 'Decidido' | 'Em Execução' | 'Concluído';
+
+export type PrioridadePauta = 'Baixa' | 'Média' | 'Alta' | 'Crítica';
+
+export type VinculoTipo = 'Contrato' | 'Projeto de Lei' | 'Atendimento' | 'Autorização Financeira' | 'Viagem' | 'Outro';
+
+export interface PautaDespacho {
+  id: string;
+  titulo: string;
+  categoria: CategoriaPauta;
+  tipo_registro: TipoRegistroPauta;
+  descricao_resumida: string;
+  contexto_para_fala: string;
+  perguntas_para_decisao: string;
+  decisao_registrada?: string;
+  comentario_presidente?: string;
+  status: StatusPauta;
+  prioridade: PrioridadePauta;
+  responsavel: 'Brenda' | 'Presidente';
+  prazo?: string;
+  criado_em: string;
+  atualizado_em: string;
+  criado_por_id: string;
+  criado_por_perfil: 'Brenda' | 'Presidente';
+  vinculado_a_tipo?: VinculoTipo;
+  vinculado_a_id?: string;
+}
+
 export interface EventoAgenda {
   id: string;
   titulo: string;
@@ -158,9 +192,9 @@ export interface EventoAgenda {
   atualizado_em: string;
 }
 
-export type TipoNotificacao = 'novo_atendimento' | 'prioridade_alterada' | 'novo_comando' | 'nova_mensagem_chat' | 'status_atualizado' | 'nova_solicitacao' | 'solicitacao_status_atualizada' | 'ficha_atualizada' | 'nova_demanda' | 'nova_demanda_atendimento' | 'demanda_status_atualizada' | 'nova_autorizacao' | 'autorizacao_concluida' | 'alerta_urgente' | 'chamar_brenda' | 'solicitar_encerramento' | 'novo_evento_agenda' | 'evento_agenda_editado';
+export type TipoNotificacao = 'novo_atendimento' | 'prioridade_alterada' | 'novo_comando' | 'nova_mensagem_chat' | 'status_atualizado' | 'nova_solicitacao' | 'solicitacao_status_atualizada' | 'ficha_atualizada' | 'nova_demanda' | 'nova_demanda_atendimento' | 'demanda_status_atualizada' | 'nova_autorizacao' | 'autorizacao_concluida' | 'alerta_urgente' | 'chamar_brenda' | 'solicitar_encerramento' | 'novo_evento_agenda' | 'evento_agenda_editado' | 'nova_pauta' | 'pauta_decidida' | 'pauta_info_solicitada' | 'pauta_status_atualizada' | 'nova_tarefa_operacional';
 
-export type ReferenciaTipo = 'atendimento' | 'comando' | 'chat' | 'solicitacao' | 'demanda' | 'demanda_atendimento' | 'autorizacao_financeira' | 'alerta' | 'evento_agenda';
+export type ReferenciaTipo = 'atendimento' | 'comando' | 'chat' | 'solicitacao' | 'demanda' | 'demanda_atendimento' | 'autorizacao_financeira' | 'alerta' | 'evento_agenda' | 'pauta_despacho';
 
 export interface Notificacao {
   id: string;
@@ -199,7 +233,13 @@ export type TipoAcaoAuditoria =
   | 'criar_evento'
   | 'editar_evento'
   | 'excluir_evento'
-  | 'chamar_brenda';
+  | 'chamar_brenda'
+  | 'criar_pauta'
+  | 'decidir_pauta'
+  | 'adiar_pauta'
+  | 'pedir_info_pauta'
+  | 'criar_tarefa_operacional'
+  | 'alterar_status_pauta';
 
 export type ModuloAuditoria =
   | 'autenticação'
