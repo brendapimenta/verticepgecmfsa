@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useViewAs, usePerfilVisual } from '@/contexts/ViewAsContext';
 import { useData } from '@/contexts/DataContext';
@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { toast as sonnerToast } from 'sonner';
 import { Notificacao, Perfil, TipoNotificacao } from '@/types';
 import { getRouteForRef } from '@/lib/notificationRoutes';
+import { registerServiceWorker, subscribeToPush, showBrowserNotification, isPushSupported } from '@/lib/pushNotifications';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -122,6 +123,16 @@ export const AppLayout: React.FC = () => {
     window.addEventListener('nova-notificacao', handler);
     return () => window.removeEventListener('nova-notificacao', handler);
   }, [usuario]);
+
+  // Register service worker and subscribe to push on login
+  useEffect(() => {
+    if (!usuario) return;
+    registerServiceWorker();
+    // Auto-subscribe if permission already granted
+    if (isPushSupported() && Notification.permission === 'granted') {
+      subscribeToPush(usuario.id).catch(() => {});
+    }
+  }, [usuario?.id]);
 
   if (!usuario) return null;
 

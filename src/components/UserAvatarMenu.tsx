@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast as sonnerToast } from 'sonner';
-import { LogOut, User, Camera, KeyRound, ChevronDown } from 'lucide-react';
+import { LogOut, User, Camera, KeyRound, ChevronDown, Bell } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NotificationPreferences } from '@/components/NotificationPreferences';
 
 const perfilLabels: Record<string, string> = {
   administrador: 'ADMINISTRADOR',
@@ -42,6 +43,7 @@ export const UserAvatarMenu: React.FC = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [showPhotoDialog, setShowPhotoDialog] = useState(false);
+  const [showNotifPrefs, setShowNotifPrefs] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load avatar signed URL
@@ -197,6 +199,10 @@ export const UserAvatarMenu: React.FC = () => {
             <KeyRound className="w-4 h-4" />
             ALTERAR SENHA
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setShowNotifPrefs(true)} className="gap-2">
+            <Bell className="w-4 h-4" />
+            NOTIFICAÇÕES
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout} className="gap-2 text-destructive focus:text-destructive">
             <LogOut className="w-4 h-4" />
@@ -248,6 +254,8 @@ export const UserAvatarMenu: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <NotificationPreferences open={showNotifPrefs} onOpenChange={setShowNotifPrefs} />
     </>
   );
 };
