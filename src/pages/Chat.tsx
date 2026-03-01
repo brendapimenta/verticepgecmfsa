@@ -35,7 +35,7 @@ const Chat: React.FC = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-10rem)] animate-fade-in">
       <div className="mb-4">
-        <h1 className="font-display text-2xl font-bold text-foreground">Chat Interno</h1>
+        <h1 className="font-display text-2xl font-bold text-foreground uppercase">CHAT INTERNO</h1>
         <div className="flex gap-2 mt-3">
           {canais.map(c => (
             <button

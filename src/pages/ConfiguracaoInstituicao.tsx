@@ -113,7 +113,7 @@ const ConfiguracaoInstituicao: React.FC = () => {
           <Building2 className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-lg font-bold text-foreground uppercase tracking-wide">Configurações da Instituição</h1>
+          <h1 className="text-lg font-bold text-foreground uppercase tracking-wide">CONFIGURAÇÕES DA INSTITUIÇÃO</h1>
           <p className="text-xs text-muted-foreground">Dados cadastrais e personalização visual</p>
         </div>
       </div>

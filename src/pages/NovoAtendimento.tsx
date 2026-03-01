@@ -115,7 +115,7 @@ const NovoAtendimento: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto animate-fade-in">
       <div className="mb-6">
-        <h1 className="font-display text-2xl font-bold text-foreground">Novo Atendimento</h1>
+        <h1 className="font-display text-2xl font-bold text-foreground uppercase">NOVO ATENDIMENTO</h1>
         <p className="text-sm text-muted-foreground mt-1">Registrar novo atendimento na fila</p>
       </div>
 

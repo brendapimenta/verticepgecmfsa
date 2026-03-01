@@ -188,9 +188,9 @@ const LogAuditoria: React.FC = () => {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
+          <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2 uppercase">
             <Shield className="w-6 h-6 text-primary" />
-            Log de Auditoria
+            LOG DE AUDITORIA
           </h1>
           <p className="text-sm text-muted-foreground mt-1">Registro completo de todas as ações do sistema • {registros.length} registros</p>
         </div>

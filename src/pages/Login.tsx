@@ -199,7 +199,7 @@ const LoginPage: React.FC = () => {
               </p>
               <div className="h-3" />
               <p className="text-[10px] lg:text-sm tracking-[0.06em] uppercase leading-relaxed font-medium" style={{ color: '#A9B7C9' }}>
-                🔹 CONTROLE, ESTRATÉGIA E PRECISÃO NA GESTÃO PÚBLICA.
+                CONTROLE, ESTRATÉGIA E PRECISÃO NA GESTÃO PÚBLICA.
               </p>
             </div>
 
