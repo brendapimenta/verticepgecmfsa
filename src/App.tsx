@@ -43,9 +43,9 @@ const LoginGuard = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <DataProvider>
-          <AuditProvider>
+      <AuditProvider>
+        <AuthProvider>
+          <DataProvider>
           <ThemeProvider>
           <Toaster />
           <Sonner />
@@ -72,9 +72,9 @@ const App = () => (
             </ViewAsProvider>
           </BrowserRouter>
           </ThemeProvider>
-          </AuditProvider>
-        </DataProvider>
-      </AuthProvider>
+          </DataProvider>
+        </AuthProvider>
+      </AuditProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
