@@ -103,7 +103,7 @@ const FilaAtendimento: React.FC = () => {
                 isFirst && "ring-1 ring-primary/30",
                 isAlta && !isFirst && "ring-1 ring-red-500/20"
               )}
-              style={isFirst ? { background: 'rgba(60,92,122,0.12)' } : isAlta ? { background: 'rgba(220,60,60,0.04)' } : undefined}
+              style={isFirst ? { background: 'hsl(var(--primary) / 0.08)' } : isAlta ? { background: 'hsl(var(--destructive) / 0.04)' } : undefined}
             >
               <div className="flex flex-col md:flex-row md:items-center gap-3">
                 {/* Position number */}
@@ -117,7 +117,7 @@ const FilaAtendimento: React.FC = () => {
                       <PersonAvatar nome={a.nome_cidadao} fotoUrl={a.foto_url} size="sm" />
                       <button onClick={() => navigate(`/atendimento/${a.id}`)} className="font-semibold text-foreground hover:text-accent underline-offset-2 hover:underline">{a.nome_cidadao}</button>
                     {isFirst && (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider" style={{ background: 'rgba(60,92,122,0.3)', color: '#E6EDF5', border: '1px solid rgba(60,92,122,0.4)' }}>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-primary/20 text-foreground border border-primary/30">
                         Próximo
                       </span>
                     )}

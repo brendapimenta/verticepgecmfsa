@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useViewAs, usePerfilVisual } from '@/contexts/ViewAsContext';
 import { useData } from '@/contexts/DataContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, ListOrdered, PlusCircle, MessageSquare,
   Zap, LogOut, Menu, X, Shield, Bell, Eye, ClipboardList, DollarSign, AlertTriangle,
-  FileText, AlertCircle, CheckCheck, ArrowRightLeft, Calendar
+  FileText, AlertCircle, CheckCheck, ArrowRightLeft, Calendar, Sun, Moon
 } from 'lucide-react';
 import logoVertice from '@/assets/logo-vertice.png';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -36,6 +37,7 @@ export const AppLayout: React.FC = () => {
   const { perfilVisual, setPerfilVisual, isViewingAs } = useViewAs();
   const perfilUI = usePerfilVisual();
   const { notificacoes, marcarNotificacaoLida, criarAlertaUrgente } = useData();
+  const { theme, toggleTheme } = useTheme();
 
   // Brenda alert modal state
   const [alertaOpen, setAlertaOpen] = useState(false);
@@ -116,12 +118,9 @@ export const AppLayout: React.FC = () => {
             navigateRef.current(route);
             sonnerToast.dismiss(toastId);
           }}
-          className="cursor-pointer flex items-start gap-3 w-full px-4 py-3 rounded-xl"
+          className="cursor-pointer flex items-start gap-3 w-full px-4 py-3 rounded-xl bg-card border border-border text-foreground"
           style={{
-            background: '#0D1E3A',
-            border: '1px solid #1F3455',
-            color: '#ffffff',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            boxShadow: 'var(--glass-shadow)',
           }}
         >
           <div className="mt-0.5 shrink-0">{getToastIcon(notif.tipo_notificacao)}</div>
@@ -175,8 +174,8 @@ export const AppLayout: React.FC = () => {
         <div className="flex items-center gap-3">
           <img src={logoVertice} alt="VÉRTICE" className="w-10 h-10 object-contain" />
           <div>
-            <h1 className="font-display text-base font-bold text-[#E6EDF5]">VÉRTICE</h1>
-            <p className="text-xs text-[#A9B7C9]">Gestão Estratégica de Atendimentos</p>
+            <h1 className="font-display text-base font-bold text-sidebar-foreground">VÉRTICE</h1>
+            <p className="text-xs text-sidebar-foreground/60">Gestão Estratégica de Atendimentos</p>
           </div>
         </div>
       </div>
@@ -192,8 +191,8 @@ export const AppLayout: React.FC = () => {
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                 active
-                  ? "bg-[#102E4F] text-[#E6EDF5] border-l-[3px] border-l-[#3C5C7A] shadow-sm"
-                  : "text-[#A9B7C9] hover:text-[#E6EDF5] hover:bg-[#102E4F]"
+                  ? "bg-sidebar-accent text-sidebar-foreground border-l-[3px] border-l-sidebar-primary shadow-sm"
+                  : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent"
               )}
             >
               <item.icon className="w-4 h-4" />
@@ -205,17 +204,17 @@ export const AppLayout: React.FC = () => {
 
       <div className="p-4 border-t border-sidebar-border">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 rounded-full bg-[#102E4F] flex items-center justify-center">
-            <Shield className="w-4 h-4 text-[#A9B7C9]" />
+          <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center">
+            <Shield className="w-4 h-4 text-sidebar-foreground/60" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-[#E6EDF5] truncate">{usuario.nome}</p>
-            <p className="text-xs text-[#A9B7C9]">{perfilLabels[usuario.perfil]}</p>
+            <p className="text-sm font-medium text-sidebar-foreground truncate">{usuario.nome}</p>
+            <p className="text-xs text-sidebar-foreground/60">{perfilLabels[usuario.perfil]}</p>
           </div>
         </div>
         <button
           onClick={logout}
-          className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-[#A9B7C9] hover:text-[#E6EDF5] hover:bg-[#102E4F] transition-colors"
+          className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
         >
           <LogOut className="w-4 h-4" />
           Sair
@@ -243,7 +242,7 @@ export const AppLayout: React.FC = () => {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-border gap-3" style={{ background: 'rgba(7, 27, 52, 0.95)' }}>
+        <header className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-border gap-3 bg-card">
           <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-lg hover:bg-muted">
             <Menu className="w-5 h-5" />
           </button>
@@ -269,14 +268,19 @@ export const AppLayout: React.FC = () => {
 
           <div className="flex-1" />
           <div className="flex items-center gap-3">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg hover:bg-muted transition-colors"
+              title={theme === 'light' ? 'Ativar modo escuro' : 'Ativar modo claro'}
+            >
+              {theme === 'light' ? <Moon className="w-5 h-5 text-muted-foreground" /> : <Sun className="w-5 h-5 text-muted-foreground" />}
+            </button>
             {/* Botão ALERTA - Brenda only */}
             {isBrenda && (
               <button
                 onClick={() => setAlertaOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white transition-colors"
-                style={{ background: '#EF4444' }}
-                onMouseEnter={e => (e.currentTarget.style.background = '#F87171')}
-                onMouseLeave={e => (e.currentTarget.style.background = '#EF4444')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
               >
                 <AlertTriangle className="w-3.5 h-3.5" />
                 ALERTA
@@ -291,14 +295,14 @@ export const AppLayout: React.FC = () => {
 
         {/* View As Banner */}
         {isViewingAs && (
-          <div className="flex items-center justify-between px-4 md:px-6 py-2 border-b text-sm" style={{ background: 'rgba(60,92,122,0.2)', borderColor: 'hsl(215 35% 22%)' }}>
-            <span className="flex items-center gap-2 text-[#A9B7C9]">
+          <div className="flex items-center justify-between px-4 md:px-6 py-2 border-b border-border text-sm bg-primary/10">
+            <span className="flex items-center gap-2 text-muted-foreground">
               <Eye className="w-4 h-4" />
-              Você está visualizando como: <strong className="text-[#E6EDF5]">{perfilLabels[perfilVisual]}</strong>
+              Você está visualizando como: <strong className="text-foreground">{perfilLabels[perfilVisual]}</strong>
             </span>
             <button
               onClick={() => setPerfilVisual('administrador')}
-              className="text-xs font-medium underline hover:no-underline text-[#A9B7C9] hover:text-[#E6EDF5]"
+              className="text-xs font-medium underline hover:no-underline text-muted-foreground hover:text-foreground"
             >
               Voltar para Administrador
             </button>
@@ -333,8 +337,7 @@ export const AppLayout: React.FC = () => {
             <Button
               onClick={handleEnviarAlerta}
               disabled={!alertaMensagem.trim()}
-              className="text-white"
-              style={{ background: '#EF4444' }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Enviar alerta
             </Button>
@@ -345,21 +348,20 @@ export const AppLayout: React.FC = () => {
       {/* Popup: Presidente recebe alerta urgente */}
       <Dialog open={!!alertaPopup} onOpenChange={open => !open && handleFecharAlertaPopup()}>
         <DialogContent
-          className="sm:max-w-md border"
-          style={{ background: '#0D1E3A', borderColor: '#B91C1C' }}
+          className="sm:max-w-md border border-destructive bg-card"
         >
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold flex items-center gap-2" style={{ color: '#EF4444' }}>
+            <DialogTitle className="text-lg font-bold flex items-center gap-2 text-destructive">
               <AlertTriangle className="w-5 h-5" />
               ⚠ ALERTA DE BRENDA
             </DialogTitle>
           </DialogHeader>
           <div className="py-3">
-            <p className="text-sm text-[#E6EDF5] leading-relaxed whitespace-pre-wrap">
+            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
               {alertaPopup?.mensagem_resumo.replace('Alerta de Brenda: ', '')}
             </p>
             {alertaPopup && (
-              <p className="text-[11px] text-[#A9B7C9] mt-3">
+              <p className="text-[11px] text-muted-foreground mt-3">
                 {new Date(alertaPopup.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
               </p>
             )}
