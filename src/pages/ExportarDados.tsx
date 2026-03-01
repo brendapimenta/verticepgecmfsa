@@ -6,7 +6,6 @@ import { Download, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast as sonnerToast } from 'sonner';
-import * as XLSX from 'xlsx';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
@@ -24,8 +23,6 @@ const TABELAS = [
   { nome: 'notificacoes', label: 'NOTIFICAÇÕES' },
 ] as const;
 
-type Formato = 'csv' | 'xlsx';
-
 const ExportarDados: React.FC = () => {
   const { usuario } = useAuth();
   const { registrarAuditoria } = useAudit();
@@ -39,7 +36,7 @@ const ExportarDados: React.FC = () => {
     return data || [];
   };
 
-  const gerarCSV = (dados: Record<string, unknown>[], nomeTabela: string): string => {
+  const gerarCSV = (dados: Record<string, unknown>[]): string => {
     if (dados.length === 0) return '';
     const headers = Object.keys(dados[0]);
     const linhas = dados.map(row => headers.map(h => {
@@ -51,7 +48,7 @@ const ExportarDados: React.FC = () => {
     return [headers.join(','), ...linhas].join('\n');
   };
 
-  const exportar = async (formato: Formato) => {
+  const exportar = async () => {
     setExportando(true);
     try {
       const zip = new JSZip();
@@ -60,21 +57,12 @@ const ExportarDados: React.FC = () => {
       for (const tabela of TABELAS) {
         const dados = await fetchTabela(tabela.nome);
         if (dados.length === 0) continue;
-
-        if (formato === 'csv') {
-          const csv = gerarCSV(dados as unknown as Record<string, unknown>[], tabela.nome);
-          zip.file(`${tabela.nome}_${timestamp}.csv`, csv);
-        } else {
-          const ws = XLSX.utils.json_to_sheet(dados as unknown as Record<string, unknown>[]);
-          const wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb, ws, tabela.label.slice(0, 31));
-          const xlsxBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-          zip.file(`${tabela.nome}_${timestamp}.xlsx`, xlsxBuffer);
-        }
+        const csv = gerarCSV(dados as unknown as Record<string, unknown>[]);
+        zip.file(`${tabela.nome}_${timestamp}.csv`, csv);
       }
 
       const blob = await zip.generateAsync({ type: 'blob' });
-      saveAs(blob, `VERTICE_BACKUP_${formato.toUpperCase()}_${timestamp}.zip`);
+      saveAs(blob, `VERTICE_BACKUP_CSV_${timestamp}.zip`);
 
       registrarAuditoria({
         usuario_id: usuario.id,
@@ -82,11 +70,11 @@ const ExportarDados: React.FC = () => {
         perfil_usuario: usuario.perfil,
         tipo_acao: 'logout' as any,
         modulo: 'sistema',
-        descricao_resumida: `Exportação completa realizada em formato ${formato.toUpperCase()}.`,
+        descricao_resumida: `Exportação completa realizada em formato CSV.`,
         nivel_sensibilidade: 'estratégico',
       });
 
-      sonnerToast.success(`Exportação ${formato.toUpperCase()} concluída!`);
+      sonnerToast.success('Exportação CSV concluída!');
     } catch (err) {
       console.error('Erro na exportação:', err);
       sonnerToast.error('Erro ao exportar dados.');
@@ -99,7 +87,7 @@ const ExportarDados: React.FC = () => {
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="font-display text-2xl font-bold text-foreground uppercase">EXPORTAR DADOS COMPLETOS</h1>
-        <p className="text-sm text-muted-foreground mt-1">Gere um backup de todas as tabelas do sistema em CSV ou Excel</p>
+        <p className="text-sm text-muted-foreground mt-1">Gere um backup de todas as tabelas do sistema em CSV</p>
       </div>
 
       <Card>
@@ -115,17 +103,13 @@ const ExportarDados: React.FC = () => {
             Agenda, Log de Auditoria, Autorizações Financeiras, Demandas, Comandos, Mensagens e Notificações.
           </p>
           <p className="text-sm text-muted-foreground">
-            Cada tabela será exportada como arquivo individual dentro de um ZIP compactado.
+            Cada tabela será exportada como arquivo CSV individual dentro de um ZIP compactado.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <Button onClick={() => exportar('csv')} disabled={exportando} className="gap-2">
+            <Button onClick={() => exportar()} disabled={exportando} className="gap-2">
               {exportando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
               EXPORTAR CSV (ZIP)
-            </Button>
-            <Button onClick={() => exportar('xlsx')} disabled={exportando} variant="outline" className="gap-2">
-              {exportando ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4" />}
-              EXPORTAR EXCEL (ZIP)
             </Button>
           </div>
 
