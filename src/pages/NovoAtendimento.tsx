@@ -65,12 +65,13 @@ const NovoAtendimento: React.FC = () => {
     }
 
     const agora = new Date();
+    const prioridadeAuto = (form.tipo === 'Vereador' || form.tipo === 'Autoridade') ? 'Alta' : 'Média';
     addAtendimento({
       ...form,
       foto_url: fotoPreview || undefined,
       data_chegada: agora.toISOString().split('T')[0],
       hora_chegada: agora.toTimeString().slice(0, 5),
-      prioridade: 'Média',
+      prioridade: prioridadeAuto as Prioridade,
       status: 'Aguardando',
       responsavel: 'Brenda',
       criado_por: usuario?.id || '',

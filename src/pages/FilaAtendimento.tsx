@@ -193,6 +193,11 @@ const FilaAtendimento: React.FC = () => {
                 {a.prioridade}
               </span>
               <Badge variant="outline" className="text-xs">{a.tipo}</Badge>
+              {(a.tipo === 'Vereador' || a.tipo === 'Autoridade') && (
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-primary/20 text-primary border border-primary/30">
+                  Institucional
+                </span>
+              )}
               <Badge variant="outline" className="text-xs">{a.tipo_registro}</Badge>
               <span className={cn("px-2 py-0.5 rounded text-xs font-bold border", statusBadge[a.status])}>
                 {a.status}
