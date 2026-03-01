@@ -89,7 +89,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Prioridade alterada
       if (updates.prioridade && updates.prioridade !== old.prioridade) {
-        if (updates.prioridade === 'Alta') {
+        // Institutional priority reduction notification
+        const isInstitucional = old.tipo === 'Vereador' || old.tipo === 'Autoridade';
+        if (isInstitucional && old.prioridade === 'Alta' && updates.prioridade !== 'Alta') {
+          criarNotificacao('presidente', 'prioridade_alterada', 'atendimento', id,
+            `Prioridade institucional alterada para nível inferior: ${old.nome_cidadao} (${old.tipo}) – de Alta para ${updates.prioridade}.`);
+          criarNotificacao('brenda', 'prioridade_alterada', 'atendimento', id,
+            `Prioridade institucional alterada para nível inferior: ${old.nome_cidadao} (${old.tipo}) – de Alta para ${updates.prioridade}.`);
+        } else if (updates.prioridade === 'Alta') {
           criarNotificacao('presidente', 'prioridade_alterada', 'atendimento', id,
             `Atendimento com prioridade ALTA: ${old.nome_cidadao} – ${old.demanda_principal}.`);
         } else {
