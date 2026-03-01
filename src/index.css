@@ -6,75 +6,76 @@
 
 @layer base {
   :root {
-    /* ═══ LIGHT MODE (default) ═══ */
-    --background: 220 20% 97%;          /* #F5F7FA */
-    --foreground: 220 25% 20%;          /* #2A3344 */
+    /* ═══ LIGHT MODE – Paleta Institucional VÉRTICE ═══ */
+    --background: 216 18% 96%;            /* #F4F6F8 */
+    --foreground: 0 0% 7%;                /* #111111 */
 
-    --card: 0 0% 100%;                  /* #FFFFFF */
-    --card-foreground: 220 25% 20%;
+    --card: 0 0% 100%;                    /* #FFFFFF */
+    --card-foreground: 0 0% 7%;           /* #111111 */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 20%;
+    --popover-foreground: 0 0% 7%;
 
-    --primary: 210 45% 38%;             /* #3A6A94 */
+    --primary: 215 62% 19%;               /* #142B4D */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 18% 93%;           /* #EAEDF2 */
-    --secondary-foreground: 220 25% 20%;
+    --secondary: 216 18% 93%;             /* #ECEEF2 */
+    --secondary-foreground: 0 0% 7%;
 
-    --muted: 220 14% 93%;              /* #ECEEF2 */
-    --muted-foreground: 220 10% 46%;   /* #6B7280 */
+    --muted: 216 14% 93%;                 /* #ECEEF2 */
+    --muted-foreground: 0 0% 33%;         /* #555555 */
 
-    --accent: 185 40% 32%;             /* #1A8587 */
+    --accent: 213 65% 33%;                /* #1E4E8C */
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62% 50%;
+    --destructive: 4 72% 41%;             /* #B3261E */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 14% 87%;             /* #D9DCE3 */
-    --input: 220 14% 87%;
-    --ring: 210 45% 50%;
+    --border: 216 14% 89%;                /* #E3E6EA */
+    --input: 216 14% 89%;
+    --ring: 213 65% 33%;
 
     --radius: 0.625rem;
 
-    /* Custom tokens */
-    --priority-high: 0 72% 51%;
+    /* Priority colors */
+    --priority-high: 4 72% 41%;
     --priority-medium: 45 93% 47%;
     --priority-low: 142 71% 45%;
 
     --status-waiting: 45 93% 47%;
-    --status-in-progress: 217 91% 60%;
+    --status-in-progress: 213 65% 33%;
     --status-completed: 142 71% 45%;
     --status-postponed: 215 15% 47%;
 
     --gold: 40 90% 52%;
     --gold-light: 43 96% 90%;
-    --navy: 220 60% 30%;
-    --navy-light: 220 40% 45%;
-    --navy-dark: 222 47% 18%;
+    --navy: 215 62% 19%;
+    --navy-light: 213 65% 33%;
+    --navy-dark: 215 70% 12%;
 
-    --sidebar-background: 215 50% 22%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 210 40% 60%;
+    /* Sidebar – azul institucional escuro */
+    --sidebar-background: 215 62% 19%;    /* #142B4D */
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 213 65% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 45% 28%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 215 40% 28%;
-    --sidebar-ring: 210 40% 60%;
+    --sidebar-accent: 215 55% 26%;        /* ligeiramente mais claro */
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 215 50% 25%;
+    --sidebar-ring: 213 65% 50%;
 
     /* Header */
-    --header-bg: 215 50% 22%;
-    --header-fg: 0 0% 98%;
+    --header-bg: 0 0% 100%;
+    --header-fg: 0 0% 7%;
 
-    /* Glass card bg for light */
+    /* Glass card */
     --glass-bg: 0 0% 100%;
-    --glass-border: 220 14% 87%;
-    --glass-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    --glass-border: 216 14% 89%;
+    --glass-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
 
-    /* Toast / notification */
+    /* Toast */
     --toast-bg: 0 0% 100%;
-    --toast-border: 220 14% 87%;
-    --toast-fg: 220 25% 20%;
+    --toast-border: 216 14% 89%;
+    --toast-fg: 0 0% 7%;
   }
 
   .dark {
@@ -88,7 +89,7 @@
     --popover: 215 55% 14%;
     --popover-foreground: 213 40% 93%;
 
-    --primary: 210 30% 36%;
+    --primary: 213 50% 40%;
     --primary-foreground: 213 40% 93%;
 
     --secondary: 215 40% 16%;
@@ -97,10 +98,10 @@
     --muted: 215 35% 12%;
     --muted-foreground: 214 20% 66%;
 
-    --accent: 185 35% 26%;
+    --accent: 213 45% 45%;
     --accent-foreground: 213 40% 93%;
 
-    --destructive: 0 62% 42%;
+    --destructive: 4 62% 42%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 215 35% 22%;
@@ -113,14 +114,14 @@
     --navy-light: 220 40% 35%;
     --navy-dark: 222 47% 11%;
 
-    --sidebar-background: 214 70% 11%;
+    --sidebar-background: 215 62% 11%;
     --sidebar-foreground: 213 40% 93%;
-    --sidebar-primary: 210 30% 55%;
+    --sidebar-primary: 213 40% 55%;
     --sidebar-primary-foreground: 213 40% 93%;
     --sidebar-accent: 213 50% 19%;
     --sidebar-accent-foreground: 213 40% 93%;
     --sidebar-border: 215 35% 18%;
-    --sidebar-ring: 210 30% 55%;
+    --sidebar-ring: 213 40% 55%;
 
     --header-bg: 215 55% 10%;
     --header-fg: 213 40% 93%;
@@ -151,61 +152,100 @@
 }
 
 @layer utilities {
+  /* Institutional priority badges – high contrast for light mode */
   .priority-high {
-    @apply bg-red-500/15 text-red-400 border-red-500/30;
+    @apply border;
+    background-color: hsl(4 72% 41% / 0.1);
+    color: hsl(4 72% 35%);
+    border-color: hsl(4 72% 41% / 0.25);
   }
   .priority-medium {
-    @apply bg-yellow-500/15 text-yellow-400 border-yellow-500/30;
+    @apply border;
+    background-color: hsl(45 93% 47% / 0.1);
+    color: hsl(45 80% 30%);
+    border-color: hsl(45 93% 47% / 0.25);
   }
   .priority-low {
-    @apply bg-green-500/15 text-green-400 border-green-500/30;
+    @apply border;
+    background-color: hsl(142 71% 45% / 0.1);
+    color: hsl(142 60% 30%);
+    border-color: hsl(142 71% 45% / 0.25);
+  }
+
+  .dark .priority-high {
+    color: hsl(4 72% 65%);
+  }
+  .dark .priority-medium {
+    color: hsl(45 80% 60%);
+  }
+  .dark .priority-low {
+    color: hsl(142 60% 55%);
   }
 
   .glass-card {
     background: hsl(var(--glass-bg));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
     @apply border border-border rounded-xl;
     box-shadow: var(--glass-shadow);
   }
 
   .stat-card {
     background: hsl(var(--card));
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    @apply rounded-xl border border-border p-5 shadow-sm transition-all duration-200 hover:shadow-md;
+    @apply rounded-xl border border-border p-5 transition-all duration-200;
     box-shadow: var(--glass-shadow);
   }
   .stat-card:hover {
-    border-color: hsl(var(--primary) / 0.4);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
   .sidebar-gradient {
-    background: linear-gradient(180deg, hsl(var(--sidebar-background)) 0%, hsl(var(--sidebar-background)) 100%);
+    background: hsl(var(--sidebar-background));
   }
 
-  /* Badge variants */
+  /* Badge variants – institutional contrast */
   .badge-priority-high {
-    @apply bg-red-500/15 text-red-400 border-red-500/30;
+    background-color: hsl(4 72% 41% / 0.1);
+    color: hsl(4 72% 35%);
+    border-color: hsl(4 72% 41% / 0.25);
   }
   .badge-priority-medium {
-    @apply bg-yellow-500/15 text-yellow-300 border-yellow-500/30;
+    background-color: hsl(45 93% 47% / 0.1);
+    color: hsl(45 80% 30%);
+    border-color: hsl(45 93% 47% / 0.25);
   }
   .badge-priority-low {
-    @apply bg-green-500/15 text-green-400 border-green-500/30;
+    background-color: hsl(142 71% 45% / 0.1);
+    color: hsl(142 60% 30%);
+    border-color: hsl(142 71% 45% / 0.25);
   }
   .badge-status-waiting {
-    @apply bg-yellow-500/15 text-yellow-300 border-yellow-500/30;
+    background-color: hsl(45 93% 47% / 0.1);
+    color: hsl(45 80% 30%);
+    border-color: hsl(45 93% 47% / 0.25);
   }
   .badge-status-in-progress {
-    @apply bg-blue-500/15 text-blue-400 border-blue-500/30;
+    background-color: hsl(213 65% 33% / 0.1);
+    color: hsl(213 65% 33%);
+    border-color: hsl(213 65% 33% / 0.25);
   }
   .badge-status-completed {
-    @apply bg-green-500/15 text-green-400 border-green-500/30;
+    background-color: hsl(142 71% 45% / 0.1);
+    color: hsl(142 60% 30%);
+    border-color: hsl(142 71% 45% / 0.25);
   }
   .badge-status-postponed {
-    @apply bg-gray-500/15 text-gray-400 border-gray-500/30;
+    background-color: hsl(215 15% 47% / 0.1);
+    color: hsl(215 15% 40%);
+    border-color: hsl(215 15% 47% / 0.25);
   }
+
+  .dark .badge-priority-high,
+  .dark .badge-status-waiting + .badge-priority-high { color: hsl(4 72% 65%); }
+  .dark .badge-priority-medium { color: hsl(45 80% 60%); }
+  .dark .badge-priority-low { color: hsl(142 60% 55%); }
+  .dark .badge-status-waiting { color: hsl(45 80% 60%); }
+  .dark .badge-status-in-progress { color: hsl(213 65% 60%); }
+  .dark .badge-status-completed { color: hsl(142 60% 55%); }
+  .dark .badge-status-postponed { color: hsl(215 15% 60%); }
 }
 
 /* Scrollbar discreta para sidebar */
