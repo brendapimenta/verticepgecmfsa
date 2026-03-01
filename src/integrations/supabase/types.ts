@@ -430,6 +430,7 @@ export type Database = {
           id: string
           instituicao_id: string
           local: string | null
+          recorrencia_id: string | null
           relacionado_a_atendimento_id: string | null
           tipo_evento: string
           titulo: string
@@ -447,6 +448,7 @@ export type Database = {
           id?: string
           instituicao_id: string
           local?: string | null
+          recorrencia_id?: string | null
           relacionado_a_atendimento_id?: string | null
           tipo_evento?: string
           titulo: string
@@ -464,6 +466,7 @@ export type Database = {
           id?: string
           instituicao_id?: string
           local?: string | null
+          recorrencia_id?: string | null
           relacionado_a_atendimento_id?: string | null
           tipo_evento?: string
           titulo?: string

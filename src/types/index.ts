@@ -146,18 +146,24 @@ export interface AutorizacaoFinanceira {
   concluido_por_perfil?: 'Presidente' | 'Sala Principal';
 }
 
-export type TipoEvento = 'Atendimento' | 'Reunião' | 'Sessão' | 'Viagem' | 'Outro';
-
-export type CategoriaEvento =
+export type TipoEvento =
+  | 'ATENDIMENTO'
+  | 'REUNIÃO'
+  | 'ENTREVISTA'
+  | 'EVENTO'
+  | 'CONGRESSO'
+  | 'SESSÃO ORDINÁRIA'
+  | 'SESSÃO SOLENE'
+  | 'SESSÃO ESPECIAL'
+  | 'AUDIÊNCIA PÚBLICA'
   | 'AGENDA – PRESIDÊNCIA'
   | 'AGENDA – GABINETE'
-  | 'ENTREVISTAS'
   | 'EVENTOS – PREFEITURA'
-  | 'CONGRESSOS'
-  | 'SESSÕES'
-  | 'PESSOAL'
-  | 'ANIVERSÁRIOS'
-  | 'AUDIÊNCIAS PÚBLICAS';
+  | 'AGENDA – PESSOAL'
+  | 'ANIVERSÁRIOS';
+
+// Keep alias for backward compat
+export type CategoriaEvento = TipoEvento;
 
 // ============ PAUTA DESPACHO ============
 
@@ -199,7 +205,7 @@ export interface EventoAgenda {
   instituicao_id?: string;
   titulo: string;
   descricao?: string;
-  tipo_evento: CategoriaEvento;
+  tipo_evento: TipoEvento;
   local?: string;
   data_inicio: string;
   hora_inicio: string;
@@ -210,6 +216,7 @@ export interface EventoAgenda {
   criado_por_perfil: 'Presidente' | 'Sala Principal';
   criado_em: string;
   atualizado_em: string;
+  recorrencia_id?: string;
 }
 
 export type TipoNotificacao = 'novo_atendimento' | 'prioridade_alterada' | 'novo_comando' | 'nova_mensagem_chat' | 'status_atualizado' | 'nova_solicitacao' | 'solicitacao_status_atualizada' | 'ficha_atualizada' | 'nova_demanda' | 'nova_demanda_atendimento' | 'demanda_status_atualizada' | 'nova_autorizacao' | 'autorizacao_concluida' | 'alerta_urgente' | 'chamar_sala_principal' | 'solicitar_encerramento' | 'novo_evento_agenda' | 'evento_agenda_editado' | 'nova_pauta' | 'pauta_decidida' | 'pauta_info_solicitada' | 'pauta_status_atualizada' | 'nova_tarefa_operacional';
