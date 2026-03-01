@@ -4,7 +4,7 @@ import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePerfilVisual } from '@/contexts/ViewAsContext';
 import { Prioridade, StatusAtendimento, StatusDemanda } from '@/types';
-import { Clock, Phone, User, FileText, AlertCircle, Users, CheckCircle, ClipboardList, Loader2 } from 'lucide-react';
+import { Clock, Phone, User, FileText, AlertCircle, Users, CheckCircle, ClipboardList, Loader2, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -92,6 +92,7 @@ const FilaAtendimento: React.FC = () => {
           const tempo = getTempoEspera(a.hora_chegada);
           const tempoAlerta = tempo > 60 ? 'border-l-red-500' : tempo > 30 ? 'border-l-yellow-500' : 'border-l-transparent';
           const isFirst = index === 0 && a.status === 'Aguardando';
+          const isAlta = a.prioridade === 'Alta';
 
           return (
             <div
@@ -99,9 +100,10 @@ const FilaAtendimento: React.FC = () => {
               className={cn(
                 "bg-card rounded-lg border p-4 border-l-4 transition-all",
                 tempoAlerta,
-                isFirst && "ring-1 ring-primary/30"
+                isFirst && "ring-1 ring-primary/30",
+                isAlta && !isFirst && "ring-1 ring-red-500/20"
               )}
-              style={isFirst ? { background: 'rgba(60,92,122,0.12)' } : undefined}
+              style={isFirst ? { background: 'rgba(60,92,122,0.12)' } : isAlta ? { background: 'rgba(220,60,60,0.04)' } : undefined}
             >
               <div className="flex flex-col md:flex-row md:items-center gap-3">
                 {/* Position number */}
@@ -119,7 +121,11 @@ const FilaAtendimento: React.FC = () => {
                         Próximo
                       </span>
                     )}
-                    <span className={cn("px-2 py-0.5 rounded text-xs font-bold border", prioridadeBadge[a.prioridade])}>
+                    <span
+                      className={cn("px-2 py-0.5 rounded text-xs font-bold border cursor-default", prioridadeBadge[a.prioridade])}
+                      title={isAlta ? 'Posição na fila ajustada automaticamente por prioridade.' : undefined}
+                    >
+                      {isAlta && <AlertTriangle className="w-3 h-3 inline mr-1 -mt-0.5" />}
                       {a.prioridade}
                     </span>
                     <Badge variant="outline" className="text-xs">{a.tipo}</Badge>
