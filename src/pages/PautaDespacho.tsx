@@ -121,15 +121,22 @@ const PautaDespachoPage: React.FC = () => {
 
   const handleCriar = () => {
     if (!form.titulo.trim()) return;
+    const perfilCriador: 'Brenda' | 'Presidente' = isPresidente ? 'Presidente' : 'Brenda';
+    const isTarefa = form.tipo_registro === 'Tarefa Operacional';
+    const statusInicial: StatusPauta = isTarefa ? 'Em Execução' : 'Pendente';
+    const responsavelFinal = isPresidente
+      ? (isTarefa ? 'Brenda' : 'Presidente')
+      : form.responsavel;
     addPautaDespacho({
       ...form,
+      responsavel: responsavelFinal,
       vinculado_a_tipo: form.vinculado_a_tipo as VinculoTipo | undefined || undefined,
       vinculado_a_id: form.vinculado_a_id || undefined,
       criado_por_id: usuario.id,
-      criado_por_perfil: isBrenda || isAdmin ? 'Brenda' : 'Presidente',
-      status: 'Pendente',
+      criado_por_perfil: perfilCriador,
+      status: statusInicial,
     });
-    registrar('criar_pauta', `Pauta criada: ${form.titulo}.`);
+    registrar('criar_pauta', `Pauta criada por ${perfilCriador}: ${form.titulo}.`);
     toast.success('Pauta criada com sucesso.');
     setCriarOpen(false);
     setForm({ titulo: '', categoria: 'Compras', tipo_registro: 'Decisão Presidencial', descricao_resumida: '', contexto_para_fala: '', perguntas_para_decisao: '', prioridade: 'Média', responsavel: 'Brenda', prazo: '', vinculado_a_tipo: '', vinculado_a_id: '' });
@@ -280,8 +287,8 @@ const PautaDespachoPage: React.FC = () => {
         </div>
       )}
 
-      <div className="text-[10px] text-muted-foreground">
-        Criado em {new Date(p.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })} por {p.criado_por_perfil}
+      <div className="text-[10px] text-muted-foreground uppercase">
+        CRIADO POR: {p.criado_por_perfil} — {new Date(p.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })}
       </div>
     </div>
   );
@@ -298,7 +305,7 @@ const PautaDespachoPage: React.FC = () => {
           <p className="text-sm text-muted-foreground mt-1 uppercase">DECISÕES E ENCAMINHAMENTOS ESTRATÉGICOS</p>
           <p className="text-xs text-muted-foreground mt-0.5">Organização das pautas que dependem de decisão do Presidente e das tarefas decorrentes.</p>
         </div>
-        {(isBrenda || isAdmin) && (
+        {(isBrenda || isAdmin || isPresidente) && (
           <Button onClick={() => setCriarOpen(true)} className="gap-1.5">
             <Plus className="w-4 h-4" /> NOVA PAUTA
           </Button>
