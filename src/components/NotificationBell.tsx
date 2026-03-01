@@ -22,6 +22,8 @@ const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
   nova_autorizacao: <DollarSign className="w-3.5 h-3.5 text-emerald-400" />,
   autorizacao_concluida: <CheckCheck className="w-3.5 h-3.5 text-emerald-400" />,
   alerta_urgente: <AlertTriangle className="w-3.5 h-3.5 text-red-500" />,
+  chamar_brenda: <Bell className="w-3.5 h-3.5 text-blue-400" />,
+  solicitar_encerramento: <CheckCheck className="w-3.5 h-3.5 text-red-400" />,
 };
 
 import { getRouteForRef } from '@/lib/notificationRoutes';

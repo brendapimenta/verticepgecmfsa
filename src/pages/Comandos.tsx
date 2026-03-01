@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Zap, Send, Clock, CheckCircle, Loader2, ClipboardList } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Zap, Send, Clock, CheckCircle, Loader2, ClipboardList, UserCheck, XCircle } from 'lucide-react';
+import { toast as sonnerToast } from 'sonner';
 
 const chamadas: { tipo: TipoChamada; label: string }[] = [
   { tipo: 'Diretor Geral', label: 'CHAMAR DIRETOR GERAL' },
@@ -36,10 +36,9 @@ const solicitacaoStatusStyle: Record<StatusSolicitacao, string> = {
 };
 
 const Comandos: React.FC = () => {
-  const { comandos, addComando, updateComandoStatus, solicitacoes, addSolicitacao, updateSolicitacaoStatus } = useData();
+  const { comandos, addComando, updateComandoStatus, solicitacoes, addSolicitacao, updateSolicitacaoStatus, atendimentos, chamarBrenda, solicitarEncerramento } = useData();
   const { usuario } = useAuth();
   const perfil = usePerfilVisual();
-  const { toast } = useToast();
   const [outroTexto, setOutroTexto] = useState('');
   const [solicitacaoTexto, setSolicitacaoTexto] = useState('');
 
@@ -61,7 +60,7 @@ const Comandos: React.FC = () => {
       criado_por_id: usuario.id,
       criado_por_nome: usuario.nome,
     });
-    toast({ title: 'Comando enviado!', description: `${tipo} - enviado para ${destinoPerfil}` });
+    sonnerToast.success(`${tipo} - enviado para ${destinoPerfil}`);
     if (tipo === 'Outro') setOutroTexto('');
   };
 
@@ -74,7 +73,7 @@ const Comandos: React.FC = () => {
       status: 'Pendente',
       criado_por_id: usuario.id,
     });
-    toast({ title: 'Solicitação enviada!', description: `Enviada para ${destinoLabel}` });
+    sonnerToast.success(`Solicitação enviada para ${destinoLabel}`);
     setSolicitacaoTexto('');
   };
 
@@ -95,12 +94,64 @@ const Comandos: React.FC = () => {
   const enviados = comandos.filter(c => c.criado_por_id === usuario.id);
   const canRespond = perfil === 'brenda' || perfil === 'sala_espera' || perfil === 'administrador';
 
+  const isPresidente = perfil === 'presidente' || perfil === 'administrador';
+  const atendimentoEmAndamento = atendimentos.find(a => a.status === 'Em Atendimento');
+
+  const handleChamarBrenda = () => {
+    chamarBrenda(usuario.id);
+    sonnerToast.success('Brenda foi chamada.');
+  };
+
+  const handleSolicitarEncerramento = () => {
+    if (!atendimentoEmAndamento) return;
+    solicitarEncerramento(atendimentoEmAndamento.id, atendimentoEmAndamento.nome_cidadao, usuario.id);
+    sonnerToast.success('Solicitação de encerramento enviada à Brenda.');
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
         <h1 className="font-display text-2xl font-bold text-foreground">Comandos Rápidos</h1>
         <p className="text-sm text-muted-foreground mt-1">Envie e gerencie chamadas e solicitações hierárquicas</p>
       </div>
+
+      {/* Presidente: Chamar Brenda + Encerrar Atendimento */}
+      {isPresidente && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Zap className="w-5 h-5 text-accent" />
+              Ações Rápidas do Presidente
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <Button
+                className="h-14 text-sm font-semibold bg-accent hover:bg-accent/90 text-accent-foreground transition-all"
+                onClick={handleChamarBrenda}
+              >
+                <UserCheck className="w-4 h-4 mr-2" />
+                CHAMAR BRENDA
+              </Button>
+              {atendimentoEmAndamento && (
+                <Button
+                  variant="outline"
+                  className="h-14 text-sm font-semibold border-destructive/50 text-destructive hover:bg-destructive/10 transition-all"
+                  onClick={handleSolicitarEncerramento}
+                >
+                  <XCircle className="w-4 h-4 mr-2" />
+                  ENCERRAR ATENDIMENTO ATUAL
+                </Button>
+              )}
+            </div>
+            {atendimentoEmAndamento && (
+              <p className="text-xs text-muted-foreground">
+                Atendimento atual: <strong>{atendimentoEmAndamento.nome_cidadao}</strong> – {atendimentoEmAndamento.demanda_principal}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Send Commands Card */}
       {canSend && (

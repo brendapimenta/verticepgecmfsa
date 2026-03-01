@@ -29,6 +29,8 @@ interface DataContextType {
   concluirAutorizacao: (id: string, concluido_por_id: string, concluido_por_perfil: 'Presidente' | 'Brenda') => void;
   updateAutorizacao: (id: string, updates: Partial<AutorizacaoFinanceira>) => void;
   criarAlertaUrgente: (mensagem: string, criado_por_id: string) => void;
+  chamarBrenda: (criado_por_id: string) => void;
+  solicitarEncerramento: (atendimentoId: string, nomeCidadao: string, criado_por_id: string) => void;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -257,6 +259,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       `Alerta de Brenda: ${mensagem}`);
   }, [criarNotificacao]);
 
+  const chamarBrenda = useCallback((criado_por_id: string) => {
+    criarNotificacao('brenda', 'chamar_brenda', 'comando', criado_por_id,
+      'O Presidente solicitou sua presença.');
+  }, [criarNotificacao]);
+
+  const solicitarEncerramento = useCallback((atendimentoId: string, nomeCidadao: string, criado_por_id: string) => {
+    criarNotificacao('brenda', 'solicitar_encerramento', 'atendimento', atendimentoId,
+      `O Presidente solicitou o encerramento do atendimento de ${nomeCidadao}.`);
+  }, [criarNotificacao]);
+
   return (
     <DataContext.Provider value={{
       atendimentos, comandos, mensagens, notificacoes, solicitacoes, demandasAtendimento, demandas, autorizacoes,
@@ -264,7 +276,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       marcarNotificacaoLida, addSolicitacao, updateSolicitacaoStatus,
       addDemandaAtendimento, updateDemandaStatus, addDemanda, updateDemandaGlobalStatus,
       salvarAnotacoesPresidente, salvarAnotacoesBrenda, addAutorizacao, concluirAutorizacao, updateAutorizacao,
-      criarAlertaUrgente,
+      criarAlertaUrgente, chamarBrenda, solicitarEncerramento,
     }}>
       {children}
     </DataContext.Provider>

@@ -64,6 +64,8 @@ export const AppLayout: React.FC = () => {
       nova_autorizacao: <DollarSign className="w-4 h-4 text-emerald-400" />,
       autorizacao_concluida: <CheckCheck className="w-4 h-4 text-emerald-400" />,
       alerta_urgente: <AlertTriangle className="w-4 h-4 text-red-500" />,
+      chamar_brenda: <Bell className="w-4 h-4 text-blue-400" />,
+      solicitar_encerramento: <CheckCheck className="w-4 h-4 text-red-400" />,
     };
     return iconMap[tipo] || <Bell className="w-4 h-4 text-muted-foreground" />;
   };
