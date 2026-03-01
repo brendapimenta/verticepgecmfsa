@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePerfilVisual } from '@/contexts/ViewAsContext';
 import {
   Clock, Users, AlertTriangle, CheckCircle, UserCheck, Calendar, MapPin,
-  Shield, Timer, ArrowRight, Bell, DollarSign, Zap
+  Shield, Timer, ArrowRight, Bell, DollarSign, Zap, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isSameMonth, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const Dashboard: React.FC = () => {
@@ -55,11 +55,23 @@ const Dashboard: React.FC = () => {
     return () => clearInterval(interval);
   }, [atendimentoAtual?.id]);
 
-  // Agenda do dia (próximos 3)
-  const eventosHoje = eventosAgenda
-    .filter(e => e.data_inicio === hoje)
+  // Calendar state
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+
+  // Dias com eventos (para marcação no calendário)
+  const diasComEventos = useMemo(() => {
+    const set = new Set<string>();
+    eventosAgenda.forEach(e => set.add(e.data_inicio));
+    return set;
+  }, [eventosAgenda]);
+
+  // Eventos do dia selecionado
+  const eventosDoDia = eventosAgenda
+    .filter(e => e.data_inicio === selectedDateStr)
     .sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio))
-    .slice(0, 3);
+    .slice(0, 5);
 
   // Alertas estratégicos
   const autorizacoesPendentes = autorizacoes.filter(a => a.status === 'Pendente');
@@ -238,22 +250,84 @@ const Dashboard: React.FC = () => {
 
         {/* RIGHT SIDEBAR */}
         <div className="space-y-5">
-          {/* AGENDA DO DIA */}
+          {/* CALENDÁRIO MENSAL */}
+          <div className="stat-card !p-0 overflow-hidden">
+            <div className="px-4 py-2.5 border-b border-border flex items-center justify-between bg-primary/5 dark:bg-primary/10">
+              <button onClick={() => setCalendarMonth(prev => subMonths(prev, 1))} className="p-1 rounded hover:bg-muted transition-colors">
+                <ChevronLeft className="w-4 h-4 text-muted-foreground" />
+              </button>
+              <span className="text-xs font-bold text-foreground capitalize">
+                {format(calendarMonth, 'MMMM yyyy', { locale: ptBR })}
+              </span>
+              <button onClick={() => setCalendarMonth(prev => addMonths(prev, 1))} className="p-1 rounded hover:bg-muted transition-colors">
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </div>
+            <div className="p-3">
+              {/* Day-of-week headers */}
+              <div className="grid grid-cols-7 mb-1">
+                {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(d => (
+                  <div key={d} className="text-center text-[10px] font-medium text-muted-foreground py-1">{d}</div>
+                ))}
+              </div>
+              {/* Calendar grid */}
+              <div className="grid grid-cols-7">
+                {(() => {
+                  const monthStart = startOfMonth(calendarMonth);
+                  const monthEnd = endOfMonth(calendarMonth);
+                  const calStart = startOfWeek(monthStart);
+                  const calEnd = endOfWeek(monthEnd);
+                  const days: React.ReactNode[] = [];
+                  let day = calStart;
+                  while (day <= calEnd) {
+                    const d = day;
+                    const dateStr = format(d, 'yyyy-MM-dd');
+                    const inMonth = isSameMonth(d, calendarMonth);
+                    const isToday = isSameDay(d, new Date());
+                    const isSelected = isSameDay(d, selectedDate);
+                    const hasEvents = diasComEventos.has(dateStr);
+                    days.push(
+                      <button
+                        key={dateStr}
+                        onClick={() => setSelectedDate(d)}
+                        className={`relative flex flex-col items-center justify-center py-1.5 text-[11px] rounded-md transition-colors
+                          ${!inMonth ? 'text-muted-foreground/30' : 'text-foreground'}
+                          ${isToday && !isSelected ? 'bg-primary/10 font-bold' : ''}
+                          ${isSelected ? 'bg-primary text-primary-foreground font-bold ring-1 ring-primary' : 'hover:bg-muted'}
+                        `}
+                      >
+                        {format(d, 'd')}
+                        {hasEvents && inMonth && (
+                          <span className={`absolute bottom-0.5 w-1 h-1 rounded-full ${isSelected ? 'bg-primary-foreground' : 'bg-primary'}`} />
+                        )}
+                      </button>
+                    );
+                    day = addDays(day, 1);
+                  }
+                  return days;
+                })()}
+              </div>
+            </div>
+          </div>
+
+          {/* AGENDA DO DIA (driven by selected date) */}
           <div className="stat-card !p-0 overflow-hidden">
             <div className="px-5 py-3 border-b border-border flex items-center justify-between bg-accent/5 dark:bg-accent/10">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-accent" />
-                <h3 className="font-display text-sm font-bold text-foreground">Agenda do Dia</h3>
+                <h3 className="font-display text-sm font-bold text-foreground">
+                  {isSameDay(selectedDate, new Date()) ? 'Agenda de Hoje' : `Agenda – ${format(selectedDate, "dd/MM")}`}
+                </h3>
               </div>
               <button onClick={() => navigate('/agenda')} className="text-[10px] text-accent hover:underline">Ver agenda</button>
             </div>
-            {eventosHoje.length === 0 ? (
+            {eventosDoDia.length === 0 ? (
               <div className="p-5 text-center">
-                <p className="text-xs text-muted-foreground">Nenhum compromisso para hoje.</p>
+                <p className="text-xs text-muted-foreground">Nenhum compromisso para este dia.</p>
               </div>
             ) : (
               <div className="divide-y divide-border">
-                {eventosHoje.map(e => {
+                {eventosDoDia.map(e => {
                   const proximo = isProximo(e.hora_inicio);
                   return (
                     <div key={e.id} className={`px-4 py-3 ${proximo ? 'bg-accent/5 border-l-2 border-l-accent' : ''}`}>
