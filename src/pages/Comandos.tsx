@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePerfilVisual } from '@/contexts/ViewAsContext';
+import { useAudit } from '@/contexts/AuditContext';
 import { TipoChamada, StatusComando, StatusSolicitacao } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +41,7 @@ const Comandos: React.FC = () => {
   const { comandos, addComando, updateComandoStatus, solicitacoes, addSolicitacao, updateSolicitacaoStatus, atendimentos, chamarBrenda, solicitarEncerramento } = useData();
   const { usuario } = useAuth();
   const perfil = usePerfilVisual();
+  const { registrarAuditoria } = useAudit();
   const [outroTexto, setOutroTexto] = useState('');
   const [solicitacaoTexto, setSolicitacaoTexto] = useState('');
 
@@ -61,6 +63,11 @@ const Comandos: React.FC = () => {
       criado_por_id: usuario.id,
       criado_por_nome: usuario.nome,
     });
+    registrarAuditoria({
+      usuario_id: usuario.id, nome_usuario: usuario.nome, perfil_usuario: usuario.perfil,
+      tipo_acao: 'comando_rapido', modulo: 'comandos',
+      descricao_resumida: `Comando enviado: ${tipo === 'Outro' ? descricao : tipo} → ${destinoPerfil}.`,
+    });
     sonnerToast.success(`${tipo} - enviado para ${destinoPerfil}`);
     if (tipo === 'Outro') setOutroTexto('');
   };
@@ -73,6 +80,11 @@ const Comandos: React.FC = () => {
       descricao_solicitacao: solicitacaoTexto,
       status: 'Pendente',
       criado_por_id: usuario.id,
+    });
+    registrarAuditoria({
+      usuario_id: usuario.id, nome_usuario: usuario.nome, perfil_usuario: usuario.perfil,
+      tipo_acao: 'criar_solicitacao', modulo: 'solicitações',
+      descricao_resumida: `Solicitação enviada para ${destinoLabel}: ${solicitacaoTexto}.`,
     });
     sonnerToast.success(`Solicitação enviada para ${destinoLabel}`);
     setSolicitacaoTexto('');
@@ -100,12 +112,24 @@ const Comandos: React.FC = () => {
 
   const handleChamarBrenda = () => {
     chamarBrenda(usuario.id);
+    registrarAuditoria({
+      usuario_id: usuario.id, nome_usuario: usuario.nome, perfil_usuario: usuario.perfil,
+      tipo_acao: 'chamar_brenda', modulo: 'comandos',
+      descricao_resumida: 'Presidente solicitou presença da Brenda.',
+    });
     sonnerToast.success('Brenda foi chamada.');
   };
 
   const handleSolicitarEncerramento = () => {
     if (!atendimentoEmAndamento) return;
     solicitarEncerramento(atendimentoEmAndamento.id, atendimentoEmAndamento.nome_cidadao, usuario.id);
+    registrarAuditoria({
+      usuario_id: usuario.id, nome_usuario: usuario.nome, perfil_usuario: usuario.perfil,
+      tipo_acao: 'protocolo_encerramento', modulo: 'atendimento',
+      referencia_tipo: 'atendimento', referencia_id: atendimentoEmAndamento.id,
+      descricao_resumida: `Protocolo de encerramento: ${atendimentoEmAndamento.nome_cidadao}.`,
+      nivel_sensibilidade: 'estratégico',
+    });
     sonnerToast.success('Solicitação de encerramento enviada à Brenda.');
   };
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePerfilVisual } from '@/contexts/ViewAsContext';
+import { useAudit } from '@/contexts/AuditContext';
 import { Prioridade, StatusAtendimento, StatusDemanda } from '@/types';
 import {
   Clock, Phone, User, FileText, AlertCircle, Users, CheckCircle, ClipboardList,
@@ -54,6 +55,7 @@ const FilaAtendimento: React.FC = () => {
   const perfilUI = usePerfilVisual();
   const isBrenda = perfilUI === 'brenda' || perfilUI === 'administrador';
   const isSalaEspera = perfilUI === 'sala_espera' || perfilUI === 'administrador';
+  const { registrarAuditoria } = useAudit();
   const [concluirId, setConcluirId] = useState<string | null>(null);
   const canConcluir = isBrenda || perfilUI === 'presidente';
 
@@ -231,6 +233,13 @@ const FilaAtendimento: React.FC = () => {
                 className="h-8 text-xs gap-1 border-primary/30 text-primary hover:bg-primary/10"
                 onClick={() => {
                   confirmarPresenca(a.id, a.nome_cidadao);
+                  if (usuario) {
+                    registrarAuditoria({
+                      usuario_id: usuario.id, nome_usuario: usuario.nome, perfil_usuario: usuario.perfil,
+                      tipo_acao: 'checkin', modulo: 'atendimento', referencia_tipo: 'atendimento', referencia_id: a.id,
+                      descricao_resumida: `Check-in confirmado: ${a.nome_cidadao}.`,
+                    });
+                  }
                   sonnerToast.success(`Presença de ${a.nome_cidadao} confirmada.`);
                 }}
               >

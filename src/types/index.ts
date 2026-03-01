@@ -173,3 +173,60 @@ export interface Notificacao {
   lida: boolean;
   criado_em: string;
 }
+
+// ============ AUDITORIA ============
+
+export type NivelSensibilidade = 'normal' | 'estratégico' | 'financeiro';
+
+export type TipoAcaoAuditoria =
+  | 'login'
+  | 'logout'
+  | 'criar_atendimento'
+  | 'editar_atendimento'
+  | 'alterar_prioridade'
+  | 'alterar_status'
+  | 'checkin'
+  | 'protocolo_encerramento'
+  | 'enviar_alerta'
+  | 'comando_rapido'
+  | 'criar_demanda'
+  | 'criar_solicitacao'
+  | 'criar_autorizacao'
+  | 'concluir_autorizacao'
+  | 'editar_autorizacao'
+  | 'alterar_ficha'
+  | 'mudanca_tema'
+  | 'criar_evento'
+  | 'editar_evento'
+  | 'excluir_evento'
+  | 'chamar_brenda';
+
+export type ModuloAuditoria =
+  | 'autenticação'
+  | 'atendimento'
+  | 'fila'
+  | 'comandos'
+  | 'demandas'
+  | 'solicitações'
+  | 'financeiro'
+  | 'agenda'
+  | 'chat'
+  | 'sistema';
+
+export interface RegistroAuditoria {
+  id: string;
+  data_hora: string;
+  usuario_id: string;
+  nome_usuario: string;
+  perfil_usuario: Perfil;
+  tipo_acao: TipoAcaoAuditoria;
+  modulo: ModuloAuditoria;
+  referencia_tipo?: ReferenciaTipo;
+  referencia_id?: string;
+  descricao_resumida: string;
+  valor_anterior?: string;
+  valor_novo?: string;
+  nivel_sensibilidade: NivelSensibilidade;
+  ip_acesso?: string;
+  dispositivo?: string;
+}

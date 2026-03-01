@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { DataProvider } from "@/contexts/DataContext";
 import { ViewAsProvider } from "@/contexts/ViewAsContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { AuditProvider } from "@/contexts/AuditContext";
 import { AppLayout } from "@/components/AppLayout";
 import LoginPage from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
@@ -19,6 +20,7 @@ import AtendimentoDetalhe from "@/pages/AtendimentoDetalhe";
 import Demandas from "@/pages/Demandas";
 import AutorizacoesFinanceiras from "@/pages/AutorizacoesFinanceiras";
 import Agenda from "@/pages/Agenda";
+import LogAuditoria from "@/pages/LogAuditoria";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +45,7 @@ const App = () => (
     <TooltipProvider>
       <AuthProvider>
         <DataProvider>
+          <AuditProvider>
           <ThemeProvider>
           <Toaster />
           <Sonner />
@@ -62,12 +65,14 @@ const App = () => (
                   <Route path="/autorizacoes" element={<AutorizacoesFinanceiras />} />
                   <Route path="/agenda" element={<Agenda />} />
                   <Route path="/notificacoes" element={<Notificacoes />} />
+                  <Route path="/auditoria" element={<LogAuditoria />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </ViewAsProvider>
           </BrowserRouter>
           </ThemeProvider>
+          </AuditProvider>
         </DataProvider>
       </AuthProvider>
     </TooltipProvider>
