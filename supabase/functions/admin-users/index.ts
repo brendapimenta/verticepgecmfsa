@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.98.0";
+import { checkPasswordLeaked, HIBP_ERROR_MSG } from "../_shared/hibp.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -150,6 +151,15 @@ Deno.serve(async (req) => {
       const erroSenha = validarSenha(senha);
       if (erroSenha) {
         return new Response(JSON.stringify({ error: erroSenha }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Check if password has been leaked
+      const leakedCount = await checkPasswordLeaked(senha);
+      if (leakedCount > 0) {
+        return new Response(JSON.stringify({ error: HIBP_ERROR_MSG }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -388,6 +398,15 @@ Deno.serve(async (req) => {
       const erroSenha = validarSenha(senhaFinal);
       if (erroSenha) {
         return new Response(JSON.stringify({ error: erroSenha }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Check if password has been leaked
+      const leakedCountReset = await checkPasswordLeaked(senhaFinal);
+      if (leakedCountReset > 0) {
+        return new Response(JSON.stringify({ error: HIBP_ERROR_MSG }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
