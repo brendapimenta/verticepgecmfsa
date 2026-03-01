@@ -22,7 +22,7 @@ const NovoAtendimento: React.FC = () => {
   const [form, setForm] = useState({
     nome_cidadao: '', tipo: '' as TipoCidadao, tipo_registro: '' as TipoRegistro,
     data_agendada: '', hora_agendada: '', telefone_contato: '', indicado_por: '',
-    assunto: '', demanda_principal: '', descricao: '', observacao_recepcao: '',
+    demanda_principal: '', descricao: '', observacao_recepcao: '',
   });
 
   const needsSchedule = form.tipo_registro === 'Atendimento agendado' || form.tipo_registro === 'Reunião agendada';
@@ -49,7 +49,7 @@ const NovoAtendimento: React.FC = () => {
     setSucesso(true);
     setTimeout(() => {
       setSucesso(false);
-      setForm({ nome_cidadao: '', tipo: '' as TipoCidadao, tipo_registro: '' as TipoRegistro, data_agendada: '', hora_agendada: '', telefone_contato: '', indicado_por: '', assunto: '', demanda_principal: '', descricao: '', observacao_recepcao: '' });
+      setForm({ nome_cidadao: '', tipo: '' as TipoCidadao, tipo_registro: '' as TipoRegistro, data_agendada: '', hora_agendada: '', telefone_contato: '', indicado_por: '', demanda_principal: '', descricao: '', observacao_recepcao: '' });
     }, 2000);
   };
 
@@ -124,13 +124,8 @@ const NovoAtendimento: React.FC = () => {
         </div>
 
         <div>
-          <Label>Assunto *</Label>
-          <Input className="mt-1.5" value={form.assunto} onChange={e => setForm(f => ({ ...f, assunto: e.target.value }))} required />
-        </div>
-
-        <div>
-          <Label>Demanda Principal *</Label>
-          <Input className="mt-1.5" value={form.demanda_principal} onChange={e => setForm(f => ({ ...f, demanda_principal: e.target.value }))} required placeholder="Qual demanda a pessoa quer tratar?" />
+          <Label>Tema do Atendimento *</Label>
+          <Input className="mt-1.5" value={form.demanda_principal} onChange={e => setForm(f => ({ ...f, demanda_principal: e.target.value }))} required placeholder="Qual é o tema principal do atendimento?" />
         </div>
 
         <div>

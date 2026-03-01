@@ -38,7 +38,7 @@ export interface Atendimento {
   hora_agendada?: string;
   telefone_contato: string;
   indicado_por?: string;
-  assunto: string;
+  assunto?: string;
   demanda_principal: string;
   descricao?: string;
   data_chegada: string;
