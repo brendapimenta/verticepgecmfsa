@@ -1,23 +1,47 @@
 import React from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Bell, FileText, Zap, MessageSquare, AlertCircle, CheckCheck, ClipboardList, DollarSign } from 'lucide-react';
+import { Bell, FileText, Zap, MessageSquare, AlertCircle, CheckCheck, ClipboardList, DollarSign, ArrowRightLeft } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Badge } from '@/components/ui/badge';
-import { TipoNotificacao } from '@/types';
+import { TipoNotificacao, ReferenciaTipo } from '@/types';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 
 const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
-  novo_atendimento: <FileText className="w-3.5 h-3.5 text-blue-600" />,
-  prioridade_alterada: <AlertCircle className="w-3.5 h-3.5 text-red-600" />,
-  novo_comando: <Zap className="w-3.5 h-3.5 text-yellow-600" />,
-  nova_mensagem_chat: <MessageSquare className="w-3.5 h-3.5 text-green-600" />,
-  status_atualizado: <CheckCheck className="w-3.5 h-3.5 text-purple-600" />,
-  nova_solicitacao: <ClipboardList className="w-3.5 h-3.5 text-orange-600" />,
-  ficha_atualizada: <FileText className="w-3.5 h-3.5 text-amber-600" />,
-  nova_demanda_atendimento: <ClipboardList className="w-3.5 h-3.5 text-teal-600" />,
-  nova_autorizacao: <DollarSign className="w-3.5 h-3.5 text-emerald-600" />,
+  novo_atendimento: <FileText className="w-3.5 h-3.5 text-blue-400" />,
+  prioridade_alterada: <AlertCircle className="w-3.5 h-3.5 text-red-400" />,
+  novo_comando: <Zap className="w-3.5 h-3.5 text-yellow-400" />,
+  nova_mensagem_chat: <MessageSquare className="w-3.5 h-3.5 text-green-400" />,
+  status_atualizado: <CheckCheck className="w-3.5 h-3.5 text-purple-400" />,
+  nova_solicitacao: <ClipboardList className="w-3.5 h-3.5 text-orange-400" />,
+  solicitacao_status_atualizada: <ArrowRightLeft className="w-3.5 h-3.5 text-orange-400" />,
+  ficha_atualizada: <FileText className="w-3.5 h-3.5 text-amber-400" />,
+  nova_demanda: <ClipboardList className="w-3.5 h-3.5 text-teal-400" />,
+  nova_demanda_atendimento: <ClipboardList className="w-3.5 h-3.5 text-teal-400" />,
+  demanda_status_atualizada: <ArrowRightLeft className="w-3.5 h-3.5 text-teal-400" />,
+  nova_autorizacao: <DollarSign className="w-3.5 h-3.5 text-emerald-400" />,
+  autorizacao_concluida: <CheckCheck className="w-3.5 h-3.5 text-emerald-400" />,
+};
+
+const getRouteForRef = (tipo: ReferenciaTipo, id: string): string => {
+  switch (tipo) {
+    case 'atendimento': return `/atendimento/${id}`;
+    case 'comando': return '/comandos';
+    case 'chat': return '/chat';
+    case 'solicitacao': return '/comandos';
+    case 'demanda': return '/demandas';
+    case 'demanda_atendimento': return '/fila';
+    case 'autorizacao_financeira': return '/autorizacoes';
+    default: return '/notificacoes';
+  }
+};
+
+const tempoRelativo = (iso: string): string => {
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (diff < 60) return 'agora';
+  if (diff < 3600) return `há ${Math.floor(diff / 60)} min`;
+  if (diff < 86400) return `há ${Math.floor(diff / 3600)}h`;
+  return `há ${Math.floor(diff / 86400)}d`;
 };
 
 export const NotificationBell: React.FC = () => {
@@ -35,11 +59,7 @@ export const NotificationBell: React.FC = () => {
 
   const handleClick = (notif: typeof minhas[0]) => {
     marcarNotificacaoLida(notif.id);
-    if (notif.referencia_tipo === 'atendimento') navigate(`/atendimento/${notif.referencia_id}`);
-    else if (notif.referencia_tipo === 'comando') navigate('/comandos');
-    else if (notif.referencia_tipo === 'chat') navigate('/chat');
-    else if (notif.referencia_tipo === 'solicitacao') navigate('/comandos');
-    else if (notif.referencia_tipo === 'demanda_atendimento') navigate('/fila');
+    navigate(getRouteForRef(notif.referencia_tipo, notif.referencia_id));
   };
 
   return (
@@ -76,7 +96,7 @@ export const NotificationBell: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-foreground line-clamp-2">{n.mensagem_resumo}</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">
-                      {new Date(n.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      {tempoRelativo(n.criado_em)}
                     </p>
                   </div>
                 </div>

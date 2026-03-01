@@ -60,7 +60,7 @@ const AtendimentoDetalhe: React.FC = () => {
   };
 
   const handleSalvarAnotBrenda = () => {
-    salvarAnotacoesBrenda(atendimento.id, anotBrenda);
+    salvarAnotacoesBrenda(atendimento.id, anotBrenda, atendimento.nome_cidadao);
     toast({ title: 'Anotações salvas' });
   };
 
