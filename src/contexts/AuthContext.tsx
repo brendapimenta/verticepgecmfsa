@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export type Perfil = 'administrador' | 'sala_espera' | 'brenda' | 'presidente';
+export type Perfil = 'administrador' | 'sala_espera' | 'sala_principal' | 'presidente';
 
 export interface UsuarioAuth {
   id: string;
@@ -36,7 +36,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [usuario, setUsuario] = useState<UsuarioAuth | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Check session on mount
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
@@ -46,7 +45,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session?.user && !usuario) {
-        // Fetch profile by auth_user_id
         const { data: profile } = await supabase
           .from('usuarios')
           .select('id, nome, email, username, perfil, ativo, instituicao_id, primeiro_login_pendente')
@@ -75,13 +73,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: { username, senha },
       });
 
-      if (error) {
-        return { success: false, error: 'Erro ao conectar. Tente novamente.' };
-      }
-
-      if (data?.error) {
-        return { success: false, error: data.error };
-      }
+      if (error) return { success: false, error: 'Erro ao conectar. Tente novamente.' };
+      if (data?.error) return { success: false, error: data.error };
 
       if (data?.session) {
         await supabase.auth.setSession({

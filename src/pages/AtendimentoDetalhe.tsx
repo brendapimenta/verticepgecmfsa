@@ -30,7 +30,7 @@ const AtendimentoDetalhe: React.FC = () => {
   const perfilUI = usePerfilVisual();
   const {
     atendimentos, demandasAtendimento,
-    salvarAnotacoesPresidente, salvarAnotacoesBrenda,
+    salvarAnotacoesPresidente, salvarAnotacoesSalaPrincipal,
     addDemandaAtendimento, updateDemandaStatus,
   } = useData();
   const { registros } = useAudit();
@@ -38,7 +38,7 @@ const AtendimentoDetalhe: React.FC = () => {
   const atendimento = atendimentos.find(a => a.id === id);
 
   const [anotPresidente, setAnotPresidente] = useState(atendimento?.anotacoes_presidente || '');
-  const [anotBrenda, setAnotBrenda] = useState(atendimento?.anotacoes_brenda || '');
+  const [anotSalaPrincipal, setAnotSalaPrincipal] = useState(atendimento?.anotacoes_sala_principal || '');
   const [novaDemanda, setNovaDemanda] = useState('');
 
   if (!usuario || !atendimento) {
@@ -51,7 +51,7 @@ const AtendimentoDetalhe: React.FC = () => {
   }
 
   const isPresidente = perfilUI === 'presidente';
-  const isBrenda = perfilUI === 'brenda';
+  const isSalaPrincipal = perfilUI === 'sala_principal';
   const isSalaEspera = perfilUI === 'sala_espera';
   const isAdmin = perfilUI === 'administrador';
 
@@ -62,8 +62,8 @@ const AtendimentoDetalhe: React.FC = () => {
     toast({ title: 'Anotações salvas', description: 'Brenda será notificada.' });
   };
 
-  const handleSalvarAnotBrenda = () => {
-    salvarAnotacoesBrenda(atendimento.id, anotBrenda, atendimento.nome_cidadao);
+  const handleSalvarAnotSalaPrincipal = () => {
+    salvarAnotacoesSalaPrincipal(atendimento.id, anotSalaPrincipal, atendimento.nome_cidadao);
     toast({ title: 'Anotações salvas' });
   };
 
@@ -71,7 +71,7 @@ const AtendimentoDetalhe: React.FC = () => {
     if (!novaDemanda.trim()) return;
     addDemandaAtendimento({
       atendimento_id: atendimento.id,
-      origem_perfil: 'Brenda',
+      origem_perfil: 'Sala Principal',
       destino_perfil: 'Sala de Espera',
       descricao_demanda: novaDemanda,
       status: 'Pendente',
@@ -146,8 +146,8 @@ const AtendimentoDetalhe: React.FC = () => {
         </Card>
       )}
 
-      {/* Brenda: anotações do Presidente (somente leitura) + anotações próprias */}
-      {isBrenda && !isPresidente && (
+      {/* Sala Principal: anotações do Presidente (somente leitura) + anotações próprias */}
+      {isSalaPrincipal && !isPresidente && (
         <>
           <Card>
             <CardHeader>
@@ -174,22 +174,22 @@ const AtendimentoDetalhe: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <StickyNote className="w-5 h-5 text-blue-600" />
-                Anotações da Brenda
+                Anotações da Sala Principal
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <Textarea
-                value={anotBrenda}
-                onChange={e => setAnotBrenda(e.target.value)}
+                value={anotSalaPrincipal}
+                onChange={e => setAnotSalaPrincipal(e.target.value)}
                 placeholder="Suas anotações sobre este atendimento..."
                 rows={4}
               />
-              {atendimento.anotacoes_brenda_atualizado_em && (
+              {atendimento.anotacoes_sala_principal_atualizado_em && (
                 <p className="text-xs text-muted-foreground">
-                  Última atualização: {new Date(atendimento.anotacoes_brenda_atualizado_em).toLocaleString('pt-BR')}
+                  Última atualização: {new Date(atendimento.anotacoes_sala_principal_atualizado_em).toLocaleString('pt-BR')}
                 </p>
               )}
-              <Button onClick={handleSalvarAnotBrenda} className="gap-1">
+              <Button onClick={handleSalvarAnotSalaPrincipal} className="gap-1">
                 <Save className="w-4 h-4" /> Salvar anotações
               </Button>
             </CardContent>
@@ -197,36 +197,36 @@ const AtendimentoDetalhe: React.FC = () => {
         </>
       )}
 
-      {/* Administrador vê ambas anotações da Brenda também */}
+      {/* Administrador vê ambas anotações da Sala Principal também */}
       {isAdmin && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <StickyNote className="w-5 h-5 text-blue-600" />
-              Anotações da Brenda
+              Anotações da Sala Principal
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Textarea
-              value={anotBrenda}
-              onChange={e => setAnotBrenda(e.target.value)}
-              placeholder="Anotações da Brenda..."
+              value={anotSalaPrincipal}
+              onChange={e => setAnotSalaPrincipal(e.target.value)}
+              placeholder="Anotações da Sala Principal..."
               rows={4}
             />
-            {atendimento.anotacoes_brenda_atualizado_em && (
+            {atendimento.anotacoes_sala_principal_atualizado_em && (
               <p className="text-xs text-muted-foreground">
-                Última atualização: {new Date(atendimento.anotacoes_brenda_atualizado_em).toLocaleString('pt-BR')}
+                Última atualização: {new Date(atendimento.anotacoes_sala_principal_atualizado_em).toLocaleString('pt-BR')}
               </p>
             )}
-            <Button onClick={handleSalvarAnotBrenda} className="gap-1">
+            <Button onClick={handleSalvarAnotSalaPrincipal} className="gap-1">
               <Save className="w-4 h-4" /> Salvar anotações
             </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* Demandas para Sala de Espera – visível para Brenda e Admin */}
-      {isBrenda && (
+      {/* Demandas para Sala de Espera – visível para Sala Principal e Admin */}
+      {isSalaPrincipal && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -283,7 +283,7 @@ const AtendimentoDetalhe: React.FC = () => {
       )}
 
       {/* Sala de Espera: demandas recebidas para este atendimento */}
-      {isSalaEspera && !isBrenda && (
+      {isSalaEspera && !isSalaPrincipal && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -330,8 +330,8 @@ const AtendimentoDetalhe: React.FC = () => {
         </Card>
       )}
 
-      {/* Histórico do Atendimento – Presidente, Brenda, Admin */}
-      {(isPresidente || isBrenda || isAdmin) && (
+      {/* Histórico do Atendimento – Presidente, Sala Principal, Admin */}
+      {(isPresidente || isSalaPrincipal || isAdmin) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
