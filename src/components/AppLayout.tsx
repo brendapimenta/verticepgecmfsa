@@ -165,7 +165,8 @@ export const AppLayout: React.FC = () => {
   };
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full max-h-screen">
+    <div className="flex flex-col h-screen">
+      {/* Topo fixo */}
       <div className="shrink-0 p-5 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
           <img src={logoVertice} alt="VÉRTICE" className="w-10 h-10 object-contain" />
@@ -175,7 +176,8 @@ export const AppLayout: React.FC = () => {
           </div>
         </div>
       </div>
-      <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+      {/* Menu rolável */}
+      <nav className="flex-1 min-h-0 overflow-y-auto p-3 space-y-1 scrollbar-thin">
         {navItems.map(item => {
           const active = location.pathname === item.to;
           return (
@@ -187,6 +189,7 @@ export const AppLayout: React.FC = () => {
           );
         })}
       </nav>
+      {/* Rodapé fixo */}
       <div className="shrink-0 p-4 border-t border-sidebar-border">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center"><Shield className="w-4 h-4 text-sidebar-foreground/60" /></div>
