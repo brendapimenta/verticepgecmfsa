@@ -178,46 +178,49 @@ export type Database = {
           ativo: boolean
           atualizado_em: string
           auth_user_id: string | null
+          bloqueado_ate: string | null
           criado_em: string
           email: string
-          google_id: string | null
           id: string
           instituicao_id: string
-          login_google_habilitado: boolean
           nome: string
           perfil: Database["public"]["Enums"]["perfil_usuario"]
           primeiro_login_pendente: boolean
+          tentativas_login_falhas: number
           ultimo_login_em: string | null
+          username: string
         }
         Insert: {
           ativo?: boolean
           atualizado_em?: string
           auth_user_id?: string | null
+          bloqueado_ate?: string | null
           criado_em?: string
           email: string
-          google_id?: string | null
           id?: string
           instituicao_id: string
-          login_google_habilitado?: boolean
           nome: string
           perfil?: Database["public"]["Enums"]["perfil_usuario"]
           primeiro_login_pendente?: boolean
+          tentativas_login_falhas?: number
           ultimo_login_em?: string | null
+          username: string
         }
         Update: {
           ativo?: boolean
           atualizado_em?: string
           auth_user_id?: string | null
+          bloqueado_ate?: string | null
           criado_em?: string
           email?: string
-          google_id?: string | null
           id?: string
           instituicao_id?: string
-          login_google_habilitado?: boolean
           nome?: string
           perfil?: Database["public"]["Enums"]["perfil_usuario"]
           primeiro_login_pendente?: boolean
+          tentativas_login_falhas?: number
           ultimo_login_em?: string | null
+          username?: string
         }
         Relationships: [
           {
@@ -236,43 +239,49 @@ export type Database = {
           ativo: boolean | null
           atualizado_em: string | null
           auth_user_id: string | null
+          bloqueado_ate: string | null
           criado_em: string | null
           email: string | null
           id: string | null
           instituicao_id: string | null
-          login_google_habilitado: boolean | null
           nome: string | null
           perfil: Database["public"]["Enums"]["perfil_usuario"] | null
           primeiro_login_pendente: boolean | null
+          tentativas_login_falhas: number | null
           ultimo_login_em: string | null
+          username: string | null
         }
         Insert: {
           ativo?: boolean | null
           atualizado_em?: string | null
           auth_user_id?: string | null
+          bloqueado_ate?: string | null
           criado_em?: string | null
           email?: string | null
           id?: string | null
           instituicao_id?: string | null
-          login_google_habilitado?: boolean | null
           nome?: string | null
           perfil?: Database["public"]["Enums"]["perfil_usuario"] | null
           primeiro_login_pendente?: boolean | null
+          tentativas_login_falhas?: number | null
           ultimo_login_em?: string | null
+          username?: string | null
         }
         Update: {
           ativo?: boolean | null
           atualizado_em?: string | null
           auth_user_id?: string | null
+          bloqueado_ate?: string | null
           criado_em?: string | null
           email?: string | null
           id?: string | null
           instituicao_id?: string | null
-          login_google_habilitado?: boolean | null
           nome?: string | null
           perfil?: Database["public"]["Enums"]["perfil_usuario"] | null
           primeiro_login_pendente?: boolean | null
+          tentativas_login_falhas?: number | null
           ultimo_login_em?: string | null
+          username?: string | null
         }
         Relationships: [
           {

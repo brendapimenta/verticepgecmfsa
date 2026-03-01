@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuditProvider } from "@/contexts/AuditContext";
 import { AppLayout } from "@/components/AppLayout";
 import LoginPage from "@/pages/Login";
+import TrocarSenha from "@/pages/TrocarSenha";
 import Dashboard from "@/pages/Dashboard";
 import FilaAtendimento from "@/pages/FilaAtendimento";
 import NovoAtendimento from "@/pages/NovoAtendimento";
@@ -23,14 +24,17 @@ import Agenda from "@/pages/Agenda";
 import LogAuditoria from "@/pages/LogAuditoria";
 import PautaDespacho from "@/pages/PautaDespacho";
 import ConfiguracaoInstituicao from "@/pages/ConfiguracaoInstituicao";
+import GestaoUsuarios from "@/pages/GestaoUsuarios";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const ProtectedRoutes = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, usuario, loading } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+  // If first login pending, force password change
+  if (usuario?.primeiro_login_pendente) return <Navigate to="/trocar-senha" replace />;
   return <AppLayout />;
 };
 
@@ -38,10 +42,22 @@ const LoginGuard = () => {
   const { isAuthenticated, usuario, loading } = useAuth();
   if (loading) return null;
   if (isAuthenticated) {
+    if (usuario?.primeiro_login_pendente) return <Navigate to="/trocar-senha" replace />;
     const defaultRoute = usuario?.perfil === 'sala_espera' ? '/fila' : '/dashboard';
     return <Navigate to={defaultRoute} replace />;
   }
   return <LoginPage />;
+};
+
+const TrocarSenhaGuard = () => {
+  const { isAuthenticated, usuario, loading } = useAuth();
+  if (loading) return null;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!usuario?.primeiro_login_pendente) {
+    const defaultRoute = usuario?.perfil === 'sala_espera' ? '/fila' : '/dashboard';
+    return <Navigate to={defaultRoute} replace />;
+  }
+  return <TrocarSenha />;
 };
 
 const App = () => (
@@ -57,6 +73,7 @@ const App = () => (
             <ViewAsProvider>
               <Routes>
                 <Route path="/login" element={<LoginGuard />} />
+                <Route path="/trocar-senha" element={<TrocarSenhaGuard />} />
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route element={<ProtectedRoutes />}>
                   <Route path="/dashboard" element={<Dashboard />} />
@@ -72,6 +89,7 @@ const App = () => (
                   <Route path="/auditoria" element={<LogAuditoria />} />
                   <Route path="/pauta-despacho" element={<PautaDespacho />} />
                   <Route path="/configuracao-instituicao" element={<ConfiguracaoInstituicao />} />
+                  <Route path="/usuarios" element={<GestaoUsuarios />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

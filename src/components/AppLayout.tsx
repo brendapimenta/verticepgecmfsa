@@ -168,6 +168,7 @@ export const AppLayout: React.FC = () => {
     { to: '/notificacoes', label: 'Notificações', icon: Bell, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
     { to: '/pauta-despacho', label: 'Pauta para Despacho', icon: Gavel, roles: ['administrador', 'brenda', 'presidente'] },
     { to: '/auditoria', label: 'Log de Auditoria', icon: Shield, roles: ['administrador'] },
+    { to: '/usuarios', label: 'Gestão de Usuários', icon: Users, roles: ['administrador'] },
     { to: '/configuracao-instituicao', label: 'Configuração Instituição', icon: Building2, roles: ['administrador'] },
   ].filter(item => {
     if (isAdmin && isViewingAs) {

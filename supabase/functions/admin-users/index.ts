@@ -6,6 +6,31 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function validarSenha(senha: string): string | null {
+  if (senha.length < 6) return "A senha deve ter no mínimo 6 caracteres.";
+  if (!/[a-zA-Z]/.test(senha)) return "A senha deve conter pelo menos 1 letra.";
+  if (!/[0-9]/.test(senha)) return "A senha deve conter pelo menos 1 número.";
+  if (!/[^a-zA-Z0-9]/.test(senha)) return "A senha deve conter pelo menos 1 caractere especial.";
+  return null;
+}
+
+function gerarSenhaProvisoria(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz";
+  const nums = "23456789";
+  const specials = "@#$%&*!";
+  let senha = "";
+  // 4 letters
+  for (let i = 0; i < 4; i++) senha += chars[Math.floor(Math.random() * chars.length)];
+  // 2 numbers
+  for (let i = 0; i < 2; i++) senha += nums[Math.floor(Math.random() * nums.length)];
+  // 1 special
+  senha += specials[Math.floor(Math.random() * specials.length)];
+  // 1 more letter
+  senha += chars[Math.floor(Math.random() * chars.length)];
+  // Shuffle
+  return senha.split("").sort(() => Math.random() - 0.5).join("");
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -15,7 +40,6 @@ Deno.serve(async (req) => {
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const anonKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!;
 
-  // Verify caller is authenticated admin
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     return new Response(JSON.stringify({ error: "Não autorizado" }), {
@@ -24,27 +48,21 @@ Deno.serve(async (req) => {
     });
   }
 
-  const anonClient = createClient(supabaseUrl, anonKey, {
-    global: { headers: { Authorization: authHeader } },
-  });
+  const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-  const token = authHeader.replace("Bearer ", "");
-  const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
-  if (claimsError || !claimsData?.claims) {
+  // Verify caller identity
+  const { data: { user: authUser }, error: authError } = await adminClient.auth.getUser(authHeader.replace("Bearer ", ""));
+  if (authError || !authUser) {
     return new Response(JSON.stringify({ error: "Token inválido" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
-  const callerAuthId = claimsData.claims.sub;
-  const adminClient = createClient(supabaseUrl, serviceRoleKey);
-
-  // Check caller is admin
   const { data: callerUser } = await adminClient
     .from("usuarios")
     .select("id, perfil, instituicao_id")
-    .eq("auth_user_id", callerAuthId)
+    .eq("auth_user_id", authUser.id)
     .single();
 
   if (!callerUser || callerUser.perfil !== "administrador") {
@@ -62,7 +80,7 @@ Deno.serve(async (req) => {
     if (req.method === "GET" && action === "list") {
       const { data, error } = await adminClient
         .from("usuarios")
-        .select("*")
+        .select("id, nome, email, username, perfil, ativo, primeiro_login_pendente, ultimo_login_em, criado_em")
         .eq("instituicao_id", callerUser.instituicao_id)
         .order("criado_em", { ascending: false });
 
@@ -72,41 +90,72 @@ Deno.serve(async (req) => {
       });
     }
 
+    // GENERATE PASSWORD
+    if (req.method === "GET" && action === "gerar-senha") {
+      return new Response(JSON.stringify({ senha: gerarSenhaProvisoria() }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // CREATE USER
     if (req.method === "POST" && action === "create") {
       const body = await req.json();
-      const { nome, email, perfil, senha, login_google_habilitado } = body;
+      const { nome, username, email, perfil, senha } = body;
 
-      if (!nome || !email || !perfil || !senha) {
-        return new Response(JSON.stringify({ error: "Campos obrigatórios: nome, email, perfil, senha" }), {
+      if (!nome || !username || !perfil || !senha) {
+        return new Response(JSON.stringify({ error: "Campos obrigatórios: nome, username, perfil, senha" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      // Create auth user
-      const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
-        email,
+      // Validate password
+      const erroSenha = validarSenha(senha);
+      if (erroSenha) {
+        return new Response(JSON.stringify({ error: erroSenha }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Check username uniqueness
+      const { data: existingUser } = await adminClient
+        .from("usuarios")
+        .select("id")
+        .eq("username", username)
+        .single();
+
+      if (existingUser) {
+        return new Response(JSON.stringify({ error: "Nome de usuário já está em uso." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Create auth user with email (or generated email from username)
+      const authEmail = email || `${username}@vertice.local`;
+      const { data: newAuthUser, error: authCreateError } = await adminClient.auth.admin.createUser({
+        email: authEmail,
         password: senha,
         email_confirm: true,
       });
 
-      if (authError) {
-        return new Response(JSON.stringify({ error: authError.message }), {
+      if (authCreateError) {
+        return new Response(JSON.stringify({ error: authCreateError.message }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      // Create profile
       const { data: newUser, error: profileError } = await adminClient
         .from("usuarios")
         .insert({
-          auth_user_id: authUser.user.id,
+          auth_user_id: newAuthUser.user.id,
           nome,
-          email,
+          username,
+          email: authEmail,
           perfil,
-          login_google_habilitado: login_google_habilitado || false,
+          primeiro_login_pendente: true,
           instituicao_id: callerUser.instituicao_id,
         })
         .select()
@@ -114,13 +163,12 @@ Deno.serve(async (req) => {
 
       if (profileError) throw profileError;
 
-      // Audit log
       await adminClient.from("log_auditoria").insert({
         usuario_ator_id: callerUser.id,
         usuario_alvo_id: newUser.id,
-        tipo_acao: "CRIAR_USUARIO",
+        tipo_acao: "CRIACAO_USUARIO",
         modulo: "usuarios",
-        descricao: `Usuário criado: ${nome} (${email}) - Perfil: ${perfil}`,
+        descricao: `Usuário criado: ${nome} (@${username}) - Perfil: ${perfil}`,
         instituicao_id: callerUser.instituicao_id,
       });
 
@@ -132,7 +180,7 @@ Deno.serve(async (req) => {
     // UPDATE USER
     if (req.method === "PUT" && action === "update") {
       const body = await req.json();
-      const { id, nome, email, perfil, ativo, login_google_habilitado } = body;
+      const { id, nome, username, email, perfil, ativo } = body;
 
       if (!id) {
         return new Response(JSON.stringify({ error: "ID do usuário é obrigatório" }), {
@@ -162,10 +210,21 @@ Deno.serve(async (req) => {
         updates.nome = nome;
         changes.push(`Nome: ${existingUser.nome} → ${nome}`);
       }
+      if (username !== undefined && username !== existingUser.username) {
+        // Check uniqueness
+        const { data: dup } = await adminClient.from("usuarios").select("id").eq("username", username).single();
+        if (dup) {
+          return new Response(JSON.stringify({ error: "Nome de usuário já está em uso." }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        updates.username = username;
+        changes.push(`Username: ${existingUser.username} → ${username}`);
+      }
       if (email !== undefined && email !== existingUser.email) {
         updates.email = email;
         changes.push(`Email: ${existingUser.email} → ${email}`);
-        // Also update auth email
         if (existingUser.auth_user_id) {
           await adminClient.auth.admin.updateUserById(existingUser.auth_user_id, { email });
         }
@@ -177,19 +236,6 @@ Deno.serve(async (req) => {
       if (ativo !== undefined && ativo !== existingUser.ativo) {
         updates.ativo = ativo;
         changes.push(`Status: ${existingUser.ativo ? "Ativo" : "Inativo"} → ${ativo ? "Ativo" : "Inativo"}`);
-      }
-      if (login_google_habilitado !== undefined && login_google_habilitado !== existingUser.login_google_habilitado) {
-        updates.login_google_habilitado = login_google_habilitado;
-        changes.push(`Login Google: ${existingUser.login_google_habilitado ? "Sim" : "Não"} → ${login_google_habilitado ? "Sim" : "Não"}`);
-
-        await adminClient.from("log_auditoria").insert({
-          usuario_ator_id: callerUser.id,
-          usuario_alvo_id: existingUser.id,
-          tipo_acao: login_google_habilitado ? "HABILITAR_LOGIN_GOOGLE_USUARIO" : "DESABILITAR_LOGIN_GOOGLE_USUARIO",
-          modulo: "usuarios",
-          descricao: `Login Google ${login_google_habilitado ? "habilitado" : "desabilitado"} para: ${existingUser.nome}`,
-          instituicao_id: callerUser.instituicao_id,
-        });
       }
 
       if (Object.keys(updates).length === 0) {
@@ -210,7 +256,7 @@ Deno.serve(async (req) => {
       await adminClient.from("log_auditoria").insert({
         usuario_ator_id: callerUser.id,
         usuario_alvo_id: existingUser.id,
-        tipo_acao: "EDITAR_USUARIO",
+        tipo_acao: "EDICAO_USUARIO",
         modulo: "usuarios",
         descricao: `Usuário editado: ${existingUser.nome}. Alterações: ${changes.join("; ")}`,
         valor_anterior: JSON.stringify(changes.map(c => c.split(" → ")[0])),
@@ -225,7 +271,7 @@ Deno.serve(async (req) => {
 
     // RESET PASSWORD
     if (req.method === "POST" && action === "reset-password") {
-      const { id, nova_senha } = await req.json();
+      const { id, nova_senha, gerar_automatica } = await req.json();
 
       const { data: targetUser } = await adminClient
         .from("usuarios")
@@ -241,15 +287,32 @@ Deno.serve(async (req) => {
         });
       }
 
+      const senhaFinal = gerar_automatica ? gerarSenhaProvisoria() : nova_senha;
+
+      if (!senhaFinal) {
+        return new Response(JSON.stringify({ error: "Senha é obrigatória" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const erroSenha = validarSenha(senhaFinal);
+      if (erroSenha) {
+        return new Response(JSON.stringify({ error: erroSenha }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const { error } = await adminClient.auth.admin.updateUserById(targetUser.auth_user_id, {
-        password: nova_senha,
+        password: senhaFinal,
       });
 
       if (error) throw error;
 
       await adminClient
         .from("usuarios")
-        .update({ primeiro_login_pendente: true })
+        .update({ primeiro_login_pendente: true, tentativas_login_falhas: 0, bloqueado_ate: null })
         .eq("id", id);
 
       await adminClient.from("log_auditoria").insert({
@@ -257,11 +320,11 @@ Deno.serve(async (req) => {
         usuario_alvo_id: targetUser.id,
         tipo_acao: "RESET_SENHA",
         modulo: "usuarios",
-        descricao: `Senha resetada pelo administrador para: ${targetUser.nome}`,
+        descricao: `Senha resetada pelo administrador para: ${targetUser.nome} (@${targetUser.username})`,
         instituicao_id: callerUser.instituicao_id,
       });
 
-      return new Response(JSON.stringify({ success: true }), {
+      return new Response(JSON.stringify({ success: true, senha_gerada: gerar_automatica ? senhaFinal : undefined }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
