@@ -37,7 +37,9 @@ interface DataContextType {
   chamarSalaPrincipal: (criado_por_id: string) => void;
   solicitarEncerramento: (atendimentoId: string, nomeCidadao: string, criado_por_id: string) => void;
   addEventoAgenda: (e: Omit<EventoAgenda, 'id' | 'criado_em' | 'atualizado_em'>) => void;
+  addEventosAgendaBulk: (eventos: Omit<EventoAgenda, 'id' | 'criado_em' | 'atualizado_em'>[]) => void;
   updateEventoAgenda: (id: string, updates: Partial<EventoAgenda>) => void;
+  updateEventosGrupo: (recorrenciaId: string, updates: Partial<EventoAgenda>, apenasFromDate?: string) => void;
   deleteEventoAgenda: (id: string) => void;
   addPautaDespacho: (p: Omit<PautaDespacho, 'id' | 'criado_em' | 'atualizado_em'>) => void;
   updatePautaDespacho: (id: string, updates: Partial<PautaDespacho>) => void;
@@ -410,20 +412,39 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addEventoAgenda = useCallback(async (e: Omit<EventoAgenda, 'id' | 'criado_em' | 'atualizado_em'>) => {
     if (!usuario) return;
-    const { data } = await supabase.from('eventos_agenda').insert({
+    const insertData: any = {
       titulo: e.titulo, descricao: e.descricao || null, tipo_evento: e.tipo_evento,
       local: e.local || null, data_inicio: e.data_inicio, hora_inicio: e.hora_inicio,
       data_fim: e.data_fim, hora_fim: e.hora_fim,
       relacionado_a_atendimento_id: e.relacionado_a_atendimento_id || null,
       criado_por_id: e.criado_por_id, criado_por_perfil: e.criado_por_perfil,
       instituicao_id: usuario.instituicao_id,
-    }).select().single();
+      recorrencia_id: (e as any).recorrencia_id || null,
+    };
+    const { data } = await supabase.from('eventos_agenda').insert(insertData).select().single();
     if (data) {
       setEventosAgenda(prev => [data as unknown as EventoAgenda, ...prev]);
       const destino: Perfil = e.criado_por_perfil === 'Presidente' ? 'sala_principal' : 'presidente';
       criarNotificacao(destino, 'novo_evento_agenda', 'evento_agenda', data.id, `Novo evento na agenda: ${e.titulo} em ${e.data_inicio}.`);
     }
   }, [usuario, criarNotificacao]);
+
+  const addEventosAgendaBulk = useCallback(async (eventos: Omit<EventoAgenda, 'id' | 'criado_em' | 'atualizado_em'>[]) => {
+    if (!usuario || eventos.length === 0) return;
+    const rows = eventos.map(e => ({
+      titulo: e.titulo, descricao: e.descricao || null, tipo_evento: e.tipo_evento,
+      local: e.local || null, data_inicio: e.data_inicio, hora_inicio: e.hora_inicio,
+      data_fim: e.data_fim, hora_fim: e.hora_fim,
+      relacionado_a_atendimento_id: e.relacionado_a_atendimento_id || null,
+      criado_por_id: e.criado_por_id, criado_por_perfil: e.criado_por_perfil,
+      instituicao_id: usuario.instituicao_id,
+      recorrencia_id: (e as any).recorrencia_id || null,
+    }));
+    const { data } = await supabase.from('eventos_agenda').insert(rows).select();
+    if (data) {
+      setEventosAgenda(prev => [...(data as unknown as EventoAgenda[]), ...prev]);
+    }
+  }, [usuario]);
 
   const updateEventoAgenda = useCallback(async (id: string, updates: Partial<EventoAgenda>) => {
     let oldItem: EventoAgenda | undefined;
@@ -435,9 +456,25 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const destino: Perfil = oldItem.criado_por_perfil === 'Presidente' ? 'sala_principal' : 'presidente';
       criarNotificacao(destino, 'evento_agenda_editado', 'evento_agenda', id, `Evento editado: ${updates.titulo || oldItem.titulo}.`);
     }
-    const { id: _, instituicao_id, ...rest } = updates as any;
+    const { id: _, instituicao_id, recorrencia_id, ...rest } = updates as any;
     await supabase.from('eventos_agenda').update(rest).eq('id', id);
   }, [criarNotificacao]);
+
+  const updateEventosGrupo = useCallback(async (recorrenciaId: string, updates: Partial<EventoAgenda>, apenasFromDate?: string) => {
+    const { id: _, instituicao_id, recorrencia_id, ...rest } = updates as any;
+    // Update local state
+    setEventosAgenda(prev => prev.map(e => {
+      if (e.recorrencia_id !== recorrenciaId) return e;
+      if (apenasFromDate && e.data_inicio < apenasFromDate) return e;
+      return { ...e, ...updates, atualizado_em: new Date().toISOString() };
+    }));
+    // Update in DB
+    let query = supabase.from('eventos_agenda').update(rest).eq('recorrencia_id', recorrenciaId);
+    if (apenasFromDate) {
+      query = query.gte('data_inicio', apenasFromDate);
+    }
+    await query;
+  }, []);
 
   const deleteEventoAgenda = useCallback(async (id: string) => {
     setEventosAgenda(prev => prev.filter(e => e.id !== id));
@@ -504,7 +541,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       salvarAnotacoesPresidente, salvarAnotacoesSalaPrincipal,
       addAutorizacao, concluirAutorizacao, updateAutorizacao,
       criarAlertaUrgente, chamarSalaPrincipal, solicitarEncerramento,
-      addEventoAgenda, updateEventoAgenda, deleteEventoAgenda,
+      addEventoAgenda, addEventosAgendaBulk, updateEventoAgenda, updateEventosGrupo, deleteEventoAgenda,
       addPautaDespacho, updatePautaDespacho, decidirPauta, adiarPauta, pedirInfoPauta,
     }}>
       {children}

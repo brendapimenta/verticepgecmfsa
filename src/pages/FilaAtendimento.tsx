@@ -83,9 +83,9 @@ const FilaAtendimento: React.FC = () => {
     .filter(e => e.data_inicio === selectedDateStr)
     .sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio));
 
-  // Atendimentos agendados para hoje (eventos tipo Atendimento/Presidência)
+  // Atendimentos agendados para hoje
   const agendadosHoje = eventosAgenda
-    .filter(e => e.data_inicio === hoje && (e.tipo_evento === 'AGENDA – PRESIDÊNCIA' || e.tipo_evento === 'Atendimento' as string))
+    .filter(e => e.data_inicio === hoje && (e.tipo_evento === 'AGENDA – PRESIDÊNCIA' || e.tipo_evento === 'ATENDIMENTO'))
     .sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio));
 
   // Hybrid ordering: scheduled appointments within their time window get top priority
