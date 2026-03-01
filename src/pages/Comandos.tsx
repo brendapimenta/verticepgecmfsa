@@ -15,6 +15,7 @@ const chamadas: { tipo: TipoChamada; label: string }[] = [
   { tipo: 'Diretor Geral', label: 'CHAMAR DIRETOR GERAL' },
   { tipo: 'Procurador Geral', label: 'CHAMAR PROCURADOR GERAL' },
   { tipo: 'Guarda Municipal', label: 'CHAMAR GUARDA MUNICIPAL' },
+  { tipo: 'ASCOM', label: 'CHAMAR ASCOM' },
 ];
 
 const statusIcon: Record<StatusComando, React.ReactNode> = {

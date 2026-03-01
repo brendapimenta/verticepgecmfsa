@@ -19,6 +19,7 @@ export type TipoChamada =
   | 'Gerência Financeira'
   | 'Tesoureiro'
   | 'Guarda Municipal'
+  | 'ASCOM'
   | 'Outro';
 
 export interface Usuario {
@@ -56,6 +57,8 @@ export interface Atendimento {
   anotacoes_brenda?: string;
   anotacoes_brenda_atualizado_em?: string;
   foto_url?: string;
+  checkin_realizado?: boolean;
+  checkin_hora?: string;
 }
 
 export interface MensagemChat {
