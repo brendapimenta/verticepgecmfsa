@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { DataProvider } from "@/contexts/DataContext";
 import { ViewAsProvider } from "@/contexts/ViewAsContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppLayout } from "@/components/AppLayout";
 import LoginPage from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
@@ -42,6 +43,7 @@ const App = () => (
     <TooltipProvider>
       <AuthProvider>
         <DataProvider>
+          <ThemeProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -65,6 +67,7 @@ const App = () => (
               </Routes>
             </ViewAsProvider>
           </BrowserRouter>
+          </ThemeProvider>
         </DataProvider>
       </AuthProvider>
     </TooltipProvider>

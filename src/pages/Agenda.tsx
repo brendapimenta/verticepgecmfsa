@@ -166,7 +166,7 @@ const Agenda: React.FC = () => {
       )}
 
       {/* Calendar grid */}
-      <div className="rounded-xl border border-border overflow-hidden" style={{ background: 'rgba(7,27,52,0.5)' }}>
+      <div className="rounded-xl border border-border overflow-hidden bg-card/50">
         <div className="grid grid-cols-7">
           {DIAS_SEMANA.map(d => (
             <div key={d} className="py-2 text-center text-xs font-semibold text-muted-foreground border-b border-border">{d}</div>

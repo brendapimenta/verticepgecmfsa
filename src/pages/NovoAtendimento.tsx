@@ -114,14 +114,12 @@ const NovoAtendimento: React.FC = () => {
                 <img
                   src={fotoPreview}
                   alt="Preview"
-                  className="w-24 h-24 rounded-full object-cover"
-                  style={{ border: '2px solid hsl(215 35% 22%)' }}
+                  className="w-24 h-24 rounded-full object-cover border-2 border-border"
                 />
                 <button
                   type="button"
                   onClick={removeFoto}
-                  className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center transition-colors"
-                  style={{ background: '#3C5C7A', color: '#E6EDF5' }}
+                  className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center transition-colors bg-primary text-primary-foreground"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -130,12 +128,7 @@ const NovoAtendimento: React.FC = () => {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-24 h-24 rounded-full flex flex-col items-center justify-center gap-1 transition-colors"
-                style={{
-                  background: '#122544',
-                  border: '2px dashed hsl(215 35% 22%)',
-                  color: '#A9B7C9',
-                }}
+                className="w-24 h-24 rounded-full flex flex-col items-center justify-center gap-1 transition-colors bg-secondary border-2 border-dashed border-border text-muted-foreground"
               >
                 <Camera className="w-5 h-5" />
                 <span className="text-[10px]">Adicionar</span>
