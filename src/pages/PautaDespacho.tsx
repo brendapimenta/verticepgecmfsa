@@ -153,7 +153,7 @@ const PautaDespachoPage: React.FC = () => {
   };
 
   const handleAdiar = () => {
-    if (!adiarOpen || !novoPrazo) return;
+    if (!adiarOpen) return;
     const old = pautasDespacho.find(p => p.id === adiarOpen);
     adiarPauta(adiarOpen, novoPrazo);
     registrar('adiar_pauta', `Pauta adiada: ${old?.titulo}. Novo prazo: ${novoPrazo}.`, adiarOpen, old?.prazo, novoPrazo);
@@ -213,12 +213,26 @@ const PautaDespachoPage: React.FC = () => {
             <Badge variant="outline" className="text-[10px]">{p.tipo_registro}</Badge>
           </div>
         </div>
-        {p.prazo && (
-          <div className="flex items-center gap-1 text-[11px] text-muted-foreground shrink-0">
-            <CalendarDays className="w-3 h-3" />
-            {new Date(p.prazo).toLocaleDateString('pt-BR')}
-          </div>
-        )}
+        {p.prazo && (() => {
+          const hoje = new Date();
+          hoje.setHours(0, 0, 0, 0);
+          const prazoDate = new Date(p.prazo + 'T00:00:00');
+          const diffDays = Math.ceil((prazoDate.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+          const isVencido = diffDays < 0;
+          const isProximo = diffDays >= 0 && diffDays <= 3;
+          const badgeClass = isVencido
+            ? 'bg-red-500/20 text-red-400 border-red-500/40'
+            : isProximo
+              ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
+              : 'bg-muted text-muted-foreground';
+          return (
+            <Badge variant="outline" className={cn('text-[10px] shrink-0 gap-1 border', badgeClass)}>
+              <CalendarDays className="w-3 h-3" />
+              {isVencido ? 'VENCIDO – ' : isProximo ? 'PRÓXIMO – ' : ''}
+              {prazoDate.toLocaleDateString('pt-BR')}
+            </Badge>
+          );
+        })()}
       </div>
 
       {p.descricao_resumida && (
