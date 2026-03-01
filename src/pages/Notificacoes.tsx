@@ -24,6 +24,8 @@ const tipoLabel: Record<TipoNotificacao, string> = {
   nova_autorizacao: 'Nova Autorização',
   autorizacao_concluida: 'Autorização Concluída',
   alerta_urgente: 'Alerta Urgente',
+  chamar_brenda: 'Chamar Brenda',
+  solicitar_encerramento: 'Solicitar Encerramento',
 };
 
 const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
@@ -41,6 +43,8 @@ const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
   nova_autorizacao: <DollarSign className="w-4 h-4 text-emerald-400" />,
   autorizacao_concluida: <CheckCheck className="w-4 h-4 text-emerald-400" />,
   alerta_urgente: <AlertTriangle className="w-4 h-4 text-red-500" />,
+  chamar_brenda: <Bell className="w-4 h-4 text-blue-400" />,
+  solicitar_encerramento: <CheckCheck className="w-4 h-4 text-red-400" />,
 };
 
 const getRouteForRef = (tipo: ReferenciaTipo, id: string): string => {
