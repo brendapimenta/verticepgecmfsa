@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useViewAs, usePerfilVisual } from '@/contexts/ViewAsContext';
 import { useData } from '@/contexts/DataContext';
-import { Link, useLocation, Outlet } from 'react-router-dom';
+import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, ListOrdered, PlusCircle, MessageSquare,
-  Zap, LogOut, Menu, X, Shield, Bell, Eye, ClipboardList, DollarSign, AlertTriangle
+  Zap, LogOut, Menu, X, Shield, Bell, Eye, ClipboardList, DollarSign, AlertTriangle,
+  FileText, AlertCircle, CheckCheck, ArrowRightLeft
 } from 'lucide-react';
 import logoVertice from '@/assets/logo-vertice.png';
 import { NotificationBell } from '@/components/NotificationBell';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
-import { Notificacao, Perfil } from '@/types';
+import { toast as sonnerToast } from 'sonner';
+import { Notificacao, Perfil, TipoNotificacao } from '@/types';
+import { getRouteForRef } from '@/lib/notificationRoutes';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,8 +31,8 @@ const perfilLabels: Record<string, string> = {
 export const AppLayout: React.FC = () => {
   const { usuario, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { toast } = useToast();
   const { perfilVisual, setPerfilVisual, isViewingAs } = useViewAs();
   const perfilUI = usePerfilVisual();
   const { notificacoes, marcarNotificacaoLida, criarAlertaUrgente } = useData();
@@ -45,6 +47,34 @@ export const AppLayout: React.FC = () => {
   const isBrenda = perfilUI === 'brenda' || perfilUI === 'administrador';
   const isPresidente = perfilUI === 'presidente' || perfilUI === 'administrador';
 
+  // Toast icon per notification type
+  const getToastIcon = (tipo: TipoNotificacao) => {
+    const iconMap: Record<TipoNotificacao, React.ReactNode> = {
+      novo_atendimento: <FileText className="w-4 h-4 text-blue-400" />,
+      prioridade_alterada: <AlertCircle className="w-4 h-4 text-red-400" />,
+      novo_comando: <Zap className="w-4 h-4 text-yellow-400" />,
+      nova_mensagem_chat: <MessageSquare className="w-4 h-4 text-green-400" />,
+      status_atualizado: <CheckCheck className="w-4 h-4 text-purple-400" />,
+      nova_solicitacao: <ClipboardList className="w-4 h-4 text-orange-400" />,
+      solicitacao_status_atualizada: <ArrowRightLeft className="w-4 h-4 text-orange-400" />,
+      ficha_atualizada: <FileText className="w-4 h-4 text-amber-400" />,
+      nova_demanda: <ClipboardList className="w-4 h-4 text-teal-400" />,
+      nova_demanda_atendimento: <ClipboardList className="w-4 h-4 text-teal-400" />,
+      demanda_status_atualizada: <ArrowRightLeft className="w-4 h-4 text-teal-400" />,
+      nova_autorizacao: <DollarSign className="w-4 h-4 text-emerald-400" />,
+      autorizacao_concluida: <CheckCheck className="w-4 h-4 text-emerald-400" />,
+      alerta_urgente: <AlertTriangle className="w-4 h-4 text-red-500" />,
+    };
+    return iconMap[tipo] || <Bell className="w-4 h-4 text-muted-foreground" />;
+  };
+
+  // Ref to hold navigate for use inside event handler
+  const navigateRef = React.useRef(navigate);
+  navigateRef.current = navigate;
+
+  const marcarLidaRef = React.useRef(marcarNotificacaoLida);
+  marcarLidaRef.current = marcarNotificacaoLida;
+
   // Sound + toast on new notification for current user
   useEffect(() => {
     const handler = (e: Event) => {
@@ -52,48 +82,52 @@ export const AppLayout: React.FC = () => {
       if (!usuario) return;
       if (notif.perfil_destino !== usuario.perfil && notif.usuario_destino_id !== usuario.id) return;
 
-      // Special handling for alerta_urgente → show popup for presidente
-      if (notif.tipo_notificacao === 'alerta_urgente' && (usuario.perfil === 'presidente' || usuario.perfil === 'administrador')) {
-        // Play urgent alarm sound
-        try {
-          const ctx = new AudioContext();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.frequency.value = 660;
-          osc.type = 'square';
-          gain.gain.value = 0.2;
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
-          osc.stop(ctx.currentTime + 0.8);
-          osc.start();
-        } catch {}
-        setAlertaPopup(notif);
-        return;
-      }
-
+      // Play sound
+      const isUrgent = notif.tipo_notificacao === 'alerta_urgente';
       try {
         const ctx = new AudioContext();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.connect(gain);
         gain.connect(ctx.destination);
-        osc.frequency.value = 880;
-        osc.type = 'sine';
-        gain.gain.value = 0.15;
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-        osc.stop(ctx.currentTime + 0.3);
+        osc.frequency.value = isUrgent ? 660 : 880;
+        osc.type = isUrgent ? 'square' : 'sine';
+        gain.gain.value = isUrgent ? 0.2 : 0.15;
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (isUrgent ? 0.8 : 0.3));
+        osc.stop(ctx.currentTime + (isUrgent ? 0.8 : 0.3));
         osc.start();
       } catch {}
 
-      toast({
-        title: '🔔 Nova Notificação',
-        description: notif.mensagem_resumo,
-      });
+      // Show popup for presidente on alerta_urgente
+      if (isUrgent && (usuario.perfil === 'presidente' || usuario.perfil === 'administrador')) {
+        setAlertaPopup(notif);
+      }
+
+      // ALWAYS show toast for every notification
+      const route = getRouteForRef(notif.referencia_tipo, notif.referencia_id);
+      sonnerToast.custom((toastId) => (
+        <div
+          onClick={() => {
+            marcarLidaRef.current(notif.id);
+            navigateRef.current(route);
+            sonnerToast.dismiss(toastId);
+          }}
+          className="cursor-pointer flex items-start gap-3 w-full px-4 py-3 rounded-xl"
+          style={{
+            background: '#0D1E3A',
+            border: '1px solid #1F3455',
+            color: '#ffffff',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          }}
+        >
+          <div className="mt-0.5 shrink-0">{getToastIcon(notif.tipo_notificacao)}</div>
+          <p className="text-sm leading-snug">{notif.mensagem_resumo}</p>
+        </div>
+      ), { duration: 5000 });
     };
     window.addEventListener('nova-notificacao', handler);
     return () => window.removeEventListener('nova-notificacao', handler);
-  }, [usuario, toast]);
+  }, [usuario]);
 
   if (!usuario) return null;
 
@@ -104,7 +138,7 @@ export const AppLayout: React.FC = () => {
     criarAlertaUrgente(alertaMensagem.trim(), usuario.id);
     setAlertaMensagem('');
     setAlertaOpen(false);
-    toast({ title: '✅ Alerta enviado', description: 'O Presidente foi notificado.' });
+    sonnerToast.success('Alerta enviado – O Presidente foi notificado.');
   };
 
   const handleFecharAlertaPopup = () => {
