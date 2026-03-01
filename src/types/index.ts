@@ -120,9 +120,25 @@ export interface Demanda {
   criado_por_id: string;
 }
 
-export type TipoNotificacao = 'novo_atendimento' | 'prioridade_alterada' | 'novo_comando' | 'nova_mensagem_chat' | 'status_atualizado' | 'nova_solicitacao' | 'ficha_atualizada' | 'nova_demanda_atendimento';
+export type StatusAutorizacao = 'Pendente' | 'Concluída';
 
-export type ReferenciaTipo = 'atendimento' | 'comando' | 'chat' | 'solicitacao' | 'demanda_atendimento';
+export interface AutorizacaoFinanceira {
+  id: string;
+  titulo: string;
+  descricao: string;
+  valor?: number;
+  status: StatusAutorizacao;
+  criado_em: string;
+  criado_por_id: string;
+  criado_por_perfil: 'Brenda';
+  resolvido_em?: string;
+  concluido_por_id?: string;
+  concluido_por_perfil?: 'Presidente' | 'Brenda';
+}
+
+export type TipoNotificacao = 'novo_atendimento' | 'prioridade_alterada' | 'novo_comando' | 'nova_mensagem_chat' | 'status_atualizado' | 'nova_solicitacao' | 'ficha_atualizada' | 'nova_demanda_atendimento' | 'nova_autorizacao';
+
+export type ReferenciaTipo = 'atendimento' | 'comando' | 'chat' | 'solicitacao' | 'demanda_atendimento' | 'autorizacao_financeira';
 
 export interface Notificacao {
   id: string;

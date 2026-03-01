@@ -1,7 +1,7 @@
 import React from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Bell, FileText, Zap, MessageSquare, AlertCircle, CheckCheck, ClipboardList } from 'lucide-react';
+import { Bell, FileText, Zap, MessageSquare, AlertCircle, CheckCheck, ClipboardList, DollarSign } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { TipoNotificacao } from '@/types';
@@ -17,6 +17,7 @@ const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
   nova_solicitacao: <ClipboardList className="w-3.5 h-3.5 text-orange-600" />,
   ficha_atualizada: <FileText className="w-3.5 h-3.5 text-amber-600" />,
   nova_demanda_atendimento: <ClipboardList className="w-3.5 h-3.5 text-teal-600" />,
+  nova_autorizacao: <DollarSign className="w-3.5 h-3.5 text-emerald-600" />,
 };
 
 export const NotificationBell: React.FC = () => {

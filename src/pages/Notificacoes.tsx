@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { TipoNotificacao } from '@/types';
-import { Bell, Filter, CheckCheck, FileText, Zap, MessageSquare, AlertCircle, ClipboardList } from 'lucide-react';
+import { Bell, Filter, CheckCheck, FileText, Zap, MessageSquare, AlertCircle, ClipboardList, DollarSign } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -18,6 +18,7 @@ const tipoLabel: Record<TipoNotificacao, string> = {
   nova_solicitacao: 'Nova Solicitação',
   ficha_atualizada: 'Ficha Atualizada',
   nova_demanda_atendimento: 'Nova Demanda',
+  nova_autorizacao: 'Nova Autorização',
 };
 
 const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
@@ -29,6 +30,7 @@ const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
   nova_solicitacao: <ClipboardList className="w-4 h-4 text-orange-600" />,
   ficha_atualizada: <FileText className="w-4 h-4 text-amber-600" />,
   nova_demanda_atendimento: <ClipboardList className="w-4 h-4 text-teal-600" />,
+  nova_autorizacao: <DollarSign className="w-4 h-4 text-emerald-600" />,
 };
 
 const Notificacoes: React.FC = () => {
