@@ -1059,7 +1059,7 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      get_my_instituicao_id: { Args: never; Returns: string }
     }
     Enums: {
       perfil_usuario:
