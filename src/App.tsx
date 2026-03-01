@@ -9,6 +9,7 @@ import { ViewAsProvider } from "@/contexts/ViewAsContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuditProvider } from "@/contexts/AuditContext";
 import { AppLayout } from "@/components/AppLayout";
+import { RoleGuard } from "@/components/RoleGuard";
 import LoginPage from "@/pages/Login";
 import TrocarSenha from "@/pages/TrocarSenha";
 import Dashboard from "@/pages/Dashboard";
@@ -77,22 +78,25 @@ const App = () => (
                 <Route path="/trocar-senha" element={<TrocarSenhaGuard />} />
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route element={<ProtectedRoutes />}>
+                  {/* All profiles */}
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/fila" element={<FilaAtendimento />} />
                   <Route path="/atendimento/:id" element={<AtendimentoDetalhe />} />
-                  <Route path="/novo-atendimento" element={<NovoAtendimento />} />
-                  <Route path="/comandos" element={<Comandos />} />
                   <Route path="/chat" element={<Chat />} />
-                  <Route path="/demandas" element={<Demandas />} />
-                  <Route path="/autorizacoes" element={<AutorizacoesFinanceiras />} />
-                  <Route path="/agenda" element={<Agenda />} />
                   <Route path="/notificacoes" element={<Notificacoes />} />
-                  <Route path="/auditoria" element={<LogAuditoria />} />
-                  <Route path="/pauta-despacho" element={<PautaDespacho />} />
-                  <Route path="/configuracao-instituicao" element={<ConfiguracaoInstituicao />} />
-                  <Route path="/usuarios" element={<GestaoUsuarios />} />
-                  <Route path="/exportar" element={<ExportarDados />} />
-                  <Route path="/status-sistema" element={<StatusSistema />} />
+                  <Route path="/agenda" element={<Agenda />} />
+                  <Route path="/comandos" element={<Comandos />} />
+                  <Route path="/demandas" element={<Demandas />} />
+                  {/* Excludes sala_espera */}
+                  <Route path="/novo-atendimento" element={<RoleGuard allowedRoles={['administrador', 'sala_principal', 'sala_espera']}><NovoAtendimento /></RoleGuard>} />
+                  <Route path="/autorizacoes" element={<RoleGuard allowedRoles={['administrador', 'sala_principal', 'presidente']}><AutorizacoesFinanceiras /></RoleGuard>} />
+                  <Route path="/pauta-despacho" element={<RoleGuard allowedRoles={['administrador', 'sala_principal', 'presidente']}><PautaDespacho /></RoleGuard>} />
+                  {/* Admin only */}
+                  <Route path="/auditoria" element={<RoleGuard allowedRoles={['administrador']}><LogAuditoria /></RoleGuard>} />
+                  <Route path="/usuarios" element={<RoleGuard allowedRoles={['administrador']}><GestaoUsuarios /></RoleGuard>} />
+                  <Route path="/exportar" element={<RoleGuard allowedRoles={['administrador']}><ExportarDados /></RoleGuard>} />
+                  <Route path="/status-sistema" element={<RoleGuard allowedRoles={['administrador']}><StatusSistema /></RoleGuard>} />
+                  <Route path="/configuracao-instituicao" element={<RoleGuard allowedRoles={['administrador']}><ConfiguracaoInstituicao /></RoleGuard>} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
