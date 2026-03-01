@@ -148,6 +148,17 @@ export interface AutorizacaoFinanceira {
 
 export type TipoEvento = 'Atendimento' | 'Reunião' | 'Sessão' | 'Viagem' | 'Outro';
 
+export type CategoriaEvento =
+  | 'AGENDA – PRESIDÊNCIA'
+  | 'AGENDA – GABINETE'
+  | 'ENTREVISTAS'
+  | 'EVENTOS – PREFEITURA'
+  | 'CONGRESSOS'
+  | 'SESSÕES'
+  | 'PESSOAL'
+  | 'ANIVERSÁRIOS'
+  | 'AUDIÊNCIAS PÚBLICAS';
+
 // ============ PAUTA DESPACHO ============
 
 export type CategoriaPauta = 'Compras' | 'RH' | 'Contratos' | 'Projetos de Lei' | 'Acordos Políticos' | 'Viagens' | 'Estrutura Interna' | 'Outro';
@@ -188,7 +199,7 @@ export interface EventoAgenda {
   instituicao_id?: string;
   titulo: string;
   descricao?: string;
-  tipo_evento: TipoEvento;
+  tipo_evento: CategoriaEvento;
   local?: string;
   data_inicio: string;
   hora_inicio: string;

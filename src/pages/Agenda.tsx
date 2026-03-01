@@ -2,13 +2,14 @@ import React, { useState, useMemo } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePerfilVisual } from '@/contexts/ViewAsContext';
-import { EventoAgenda, TipoEvento } from '@/types';
-import { Calendar, ChevronLeft, ChevronRight, Plus, Pencil, Trash2, MapPin, Link as LinkIcon } from 'lucide-react';
+import { EventoAgenda, CategoriaEvento } from '@/types';
+import { Calendar, ChevronLeft, ChevronRight, Plus, Pencil, Trash2, MapPin, Link as LinkIcon, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 import { toast as sonnerToast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -16,16 +17,23 @@ import { cn } from '@/lib/utils';
 const DIAS_SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
-const tipoEventoCores: Record<TipoEvento, string> = {
-  Atendimento: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  Reunião: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-  Sessão: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-  Viagem: 'bg-green-500/20 text-green-400 border-green-500/30',
-  Outro: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-};
+const CATEGORIAS_EVENTO: { value: CategoriaEvento; label: string; cor: string }[] = [
+  { value: 'AGENDA – PRESIDÊNCIA', label: 'AGENDA – PRESIDÊNCIA', cor: '#1E7D5C' },
+  { value: 'AGENDA – GABINETE', label: 'AGENDA – GABINETE', cor: '#1E4E8C' },
+  { value: 'ENTREVISTAS', label: 'ENTREVISTAS', cor: '#B3261E' },
+  { value: 'EVENTOS – PREFEITURA', label: 'EVENTOS – PREFEITURA', cor: '#1F6F8B' },
+  { value: 'CONGRESSOS', label: 'CONGRESSOS', cor: '#5B3F8C' },
+  { value: 'SESSÕES', label: 'SESSÕES', cor: '#111111' },
+  { value: 'PESSOAL', label: 'PESSOAL', cor: '#C04B73' },
+  { value: 'ANIVERSÁRIOS', label: 'ANIVERSÁRIOS', cor: '#C7A028' },
+  { value: 'AUDIÊNCIAS PÚBLICAS', label: 'AUDIÊNCIAS PÚBLICAS', cor: '#6B4F3B' },
+];
+
+const getCategoriaInfo = (cat: string) =>
+  CATEGORIAS_EVENTO.find(c => c.value === cat) || { value: cat, label: cat, cor: '#6B7280' };
 
 const emptyForm = {
-  titulo: '', descricao: '', tipo_evento: 'Reunião' as TipoEvento, local: '',
+  titulo: '', descricao: '', tipo_evento: 'AGENDA – PRESIDÊNCIA' as CategoriaEvento, local: '',
   data_inicio: '', hora_inicio: '', data_fim: '', hora_fim: '',
   relacionado_a_atendimento_id: '',
 };
@@ -46,7 +54,6 @@ const Agenda: React.FC = () => {
   const hoje = new Date();
   const hojeStr = hoje.toISOString().split('T')[0];
 
-  // ---- Calendar helpers ----
   const ano = mesAtual.getFullYear();
   const mes = mesAtual.getMonth();
 
@@ -54,7 +61,6 @@ const Agenda: React.FC = () => {
     const primeiro = new Date(ano, mes, 1);
     const ultimo = new Date(ano, mes + 1, 0);
     const dias: { date: string; day: number; currentMonth: boolean }[] = [];
-    // Fill leading days
     for (let i = 0; i < primeiro.getDay(); i++) {
       const d = new Date(ano, mes, -primeiro.getDay() + i + 1);
       dias.push({ date: d.toISOString().split('T')[0], day: d.getDate(), currentMonth: false });
@@ -63,7 +69,6 @@ const Agenda: React.FC = () => {
       const dt = new Date(ano, mes, d);
       dias.push({ date: dt.toISOString().split('T')[0], day: d, currentMonth: true });
     }
-    // Fill trailing
     const remaining = 7 - (dias.length % 7);
     if (remaining < 7) {
       for (let i = 1; i <= remaining; i++) {
@@ -84,11 +89,11 @@ const Agenda: React.FC = () => {
     });
   }, []);
 
-  const eventosNoDia = (date: string) => eventosAgenda.filter(e => e.data_inicio === date).sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio));
+  const eventosNoDia = (date: string) =>
+    eventosAgenda.filter(e => e.data_inicio === date).sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio));
 
   const eventosDiaSelecionado = diaSelecionado ? eventosNoDia(diaSelecionado) : [];
 
-  // ---- CRUD ----
   const perfilCriador = perfilUI === 'presidente' || perfilUI === 'administrador' ? 'Presidente' : 'Sala Principal';
 
   const abrirNovo = (date?: string) => {
@@ -131,6 +136,7 @@ const Agenda: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2 uppercase">
@@ -194,11 +200,19 @@ const Agenda: React.FC = () => {
                   {d.day}
                 </span>
                 <div className="mt-1 space-y-0.5">
-                  {evts.slice(0, 3).map(e => (
-                    <div key={e.id} className={cn("text-[10px] px-1 py-0.5 rounded border truncate", tipoEventoCores[e.tipo_evento])}>
-                      {e.hora_inicio} {e.titulo}
-                    </div>
-                  ))}
+                  {evts.slice(0, 3).map(e => {
+                    const cat = getCategoriaInfo(e.tipo_evento);
+                    return (
+                      <div
+                        key={e.id}
+                        className="text-[10px] px-1.5 py-0.5 rounded truncate bg-card border border-border"
+                        style={{ borderLeftWidth: 3, borderLeftColor: cat.cor }}
+                      >
+                        <span className="font-medium text-foreground">{e.hora_inicio}</span>{' '}
+                        <span className="text-muted-foreground">{e.titulo}</span>
+                      </div>
+                    );
+                  })}
                   {evts.length > 3 && <span className="text-[10px] text-muted-foreground">+{evts.length - 3} mais</span>}
                 </div>
               </button>
@@ -209,7 +223,7 @@ const Agenda: React.FC = () => {
 
       {/* Day detail */}
       {diaSelecionado && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-display text-base font-semibold text-foreground">
               Eventos em {new Date(diaSelecionado + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
@@ -219,31 +233,71 @@ const Agenda: React.FC = () => {
             </Button>
           </div>
           {eventosDiaSelecionado.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">Nenhum evento nesta data.</p>
+            <p className="text-sm text-muted-foreground py-6 text-center">Nenhum evento nesta data.</p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {eventosDiaSelecionado.map(e => {
+                const cat = getCategoriaInfo(e.tipo_evento);
                 const atend = e.relacionado_a_atendimento_id ? atendimentos.find(a => a.id === e.relacionado_a_atendimento_id) : null;
                 return (
-                  <div key={e.id} className={cn("p-3 rounded-lg border", tipoEventoCores[e.tipo_evento])}>
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold">{e.hora_inicio} – {e.hora_fim}</span>
-                          <span className="text-xs px-1.5 py-0.5 rounded bg-background/30">{e.tipo_evento}</span>
+                  <div
+                    key={e.id}
+                    className="bg-card rounded-lg border border-border shadow-sm overflow-hidden"
+                    style={{ borderLeftWidth: 4, borderLeftColor: cat.cor }}
+                  >
+                    <div className="p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0 space-y-2">
+                          {/* Category badge */}
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] font-bold uppercase tracking-wider border-0 px-2 py-0.5"
+                            style={{ backgroundColor: `${cat.cor}18`, color: cat.cor }}
+                          >
+                            {cat.label}
+                          </Badge>
+
+                          {/* Title */}
+                          <p className="text-base font-bold text-foreground leading-tight">{e.titulo}</p>
+
+                          {/* Time */}
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Clock className="w-3.5 h-3.5" />
+                            <span>{e.hora_inicio} – {e.hora_fim}</span>
+                          </div>
+
+                          {/* Location */}
+                          {e.local && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                              <MapPin className="w-3.5 h-3.5 shrink-0" />{e.local}
+                            </p>
+                          )}
+
+                          {/* Description */}
+                          {e.descricao && (
+                            <p className="text-xs text-muted-foreground/80 leading-relaxed">{e.descricao}</p>
+                          )}
+
+                          {/* Linked atendimento */}
+                          {atend && (
+                            <button
+                              onClick={() => navigate(`/atendimento/${atend.id}`)}
+                              className="text-xs text-primary underline flex items-center gap-1 hover:opacity-80"
+                            >
+                              <LinkIcon className="w-3 h-3" /> Atendimento: {atend.nome_cidadao}
+                            </button>
+                          )}
                         </div>
-                        <p className="text-sm font-semibold mt-1">{e.titulo}</p>
-                        {e.local && <p className="text-xs mt-0.5 flex items-center gap-1"><MapPin className="w-3 h-3" />{e.local}</p>}
-                        {e.descricao && <p className="text-xs mt-1 opacity-80">{e.descricao}</p>}
-                        {atend && (
-                          <button onClick={() => navigate(`/atendimento/${atend.id}`)} className="text-xs mt-1 underline flex items-center gap-1 hover:opacity-80">
-                            <LinkIcon className="w-3 h-3" /> Atendimento: {atend.nome_cidadao}
-                          </button>
-                        )}
-                      </div>
-                      <div className="flex gap-1 shrink-0">
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => abrirEditar(e)}><Pencil className="w-3.5 h-3.5" /></Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-red-400 hover:text-red-300" onClick={() => excluir(e.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
+
+                        {/* Actions */}
+                        <div className="flex gap-1 shrink-0 pt-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => abrirEditar(e)}>
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => excluir(e.id)}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -260,19 +314,24 @@ const Agenda: React.FC = () => {
           <DialogHeader>
             <DialogTitle>{editando ? 'Editar Evento' : 'Novo Evento'}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-3 py-2">
+          <div className="space-y-4 py-2">
             <div>
               <label className="text-xs font-medium text-muted-foreground">Título *</label>
               <Input value={form.titulo} onChange={e => setForm(f => ({ ...f, titulo: e.target.value }))} placeholder="Título do evento" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-medium text-muted-foreground">Tipo *</label>
-                <Select value={form.tipo_evento} onValueChange={v => setForm(f => ({ ...f, tipo_evento: v as TipoEvento }))}>
+                <label className="text-xs font-medium text-muted-foreground">Categoria *</label>
+                <Select value={form.tipo_evento} onValueChange={v => setForm(f => ({ ...f, tipo_evento: v as CategoriaEvento }))}>
                   <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {(['Atendimento', 'Reunião', 'Sessão', 'Viagem', 'Outro'] as TipoEvento[]).map(t => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                    {CATEGORIAS_EVENTO.map(c => (
+                      <SelectItem key={c.value} value={c.value}>
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: c.cor }} />
+                          <span className="text-xs">{c.label}</span>
+                        </div>
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
