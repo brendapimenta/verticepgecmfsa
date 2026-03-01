@@ -103,7 +103,7 @@ const AtendimentoDetalhe: React.FC = () => {
             <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-muted-foreground" /> <strong>Chegada:</strong> {atendimento.hora_chegada}</div>
             <div className="flex items-center gap-2"><Phone className="w-4 h-4 text-muted-foreground" /> <strong>Telefone:</strong> {atendimento.telefone_contato}</div>
             <div><strong>Registro:</strong> {atendimento.tipo_registro}</div>
-            <div><strong>Assunto:</strong> {atendimento.assunto}</div>
+            {atendimento.assunto && <div><strong>Assunto:</strong> {atendimento.assunto}</div>}
             <div><strong>Status:</strong> <Badge variant="outline">{atendimento.status}</Badge></div>
             <div><strong>Prioridade:</strong> <Badge variant="outline">{atendimento.prioridade}</Badge></div>
             {atendimento.indicado_por && <div><strong>Indicado por:</strong> {atendimento.indicado_por}</div>}
