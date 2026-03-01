@@ -26,6 +26,7 @@ import PautaDespacho from "@/pages/PautaDespacho";
 import ConfiguracaoInstituicao from "@/pages/ConfiguracaoInstituicao";
 import GestaoUsuarios from "@/pages/GestaoUsuarios";
 import ExportarDados from "@/pages/ExportarDados";
+import StatusSistema from "@/pages/StatusSistema";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -91,6 +92,7 @@ const App = () => (
                   <Route path="/configuracao-instituicao" element={<ConfiguracaoInstituicao />} />
                   <Route path="/usuarios" element={<GestaoUsuarios />} />
                   <Route path="/exportar" element={<ExportarDados />} />
+                  <Route path="/status-sistema" element={<StatusSistema />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

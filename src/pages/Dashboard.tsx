@@ -135,7 +135,7 @@ const Dashboard: React.FC = () => {
     { key: 'espera', label: 'EM ESPERA', value: aguardando.length, icon: Clock, color: 'text-accent' },
     { key: 'atendimento', label: 'EM ATENDIMENTO', value: emAtendimento.length, icon: UserCheck, color: 'text-primary' },
     { key: 'alta', label: 'PRIORIDADE ALTA', value: urgencias.length, icon: AlertTriangle, color: 'text-destructive' },
-    { key: 'tempo', label: 'TEMPO MÉDIO', value: `${tempoMedioEspera}min`, icon: Timer, color: 'text-muted-foreground' },
+    { key: 'tempo', label: 'TEMPO MÉDIO', value: tempoMedioEspera < 60 ? `${tempoMedioEspera}min` : `${Math.floor(tempoMedioEspera / 60)}h ${tempoMedioEspera % 60}min`, icon: Timer, color: 'text-muted-foreground' },
   ];
 
   // Detail view for metrics
@@ -236,7 +236,7 @@ const Dashboard: React.FC = () => {
               </h3>
             </div>
 
-            {/* Atendimento atual (Presidente + Brenda) */}
+            {/* Atendimento atual (Presidente + Sala Principal) */}
             {(isPresidente || isSalaPrincipal) && atendimentoAtual ? (
               <div className="p-5 space-y-3">
                 <div className="flex items-start justify-between">
@@ -303,7 +303,7 @@ const Dashboard: React.FC = () => {
               </div>
             ) : null}
 
-            {/* Próximo da fila (Brenda + Sala de Espera) */}
+            {/* Próximo da fila (Sala Principal + Sala de Espera) */}
             {(isSalaPrincipal || isSalaEspera) && proximoFila && (
               <div className={cn("p-4 border-t border-border", (isPresidente || isSalaPrincipal) && atendimentoAtual ? '' : '')}>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase mb-2">PRÓXIMO DA FILA</p>
