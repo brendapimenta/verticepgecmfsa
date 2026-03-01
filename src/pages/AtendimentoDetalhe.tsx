@@ -3,13 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePerfilVisual } from '@/contexts/ViewAsContext';
+import { useAudit } from '@/contexts/AuditContext';
 import { StatusDemanda } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Save, Send, Clock, User, Phone, FileText, StickyNote, ClipboardList, Loader2, CheckCircle } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, Save, Send, Clock, User, Phone, FileText, StickyNote, ClipboardList, Loader2, CheckCircle, History } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { PersonAvatar } from '@/components/PersonAvatar';
@@ -31,6 +33,7 @@ const AtendimentoDetalhe: React.FC = () => {
     salvarAnotacoesPresidente, salvarAnotacoesBrenda,
     addDemandaAtendimento, updateDemandaStatus,
   } = useData();
+  const { registros } = useAudit();
 
   const atendimento = atendimentos.find(a => a.id === id);
 
@@ -323,6 +326,42 @@ const AtendimentoDetalhe: React.FC = () => {
             ) : (
               <p className="text-sm text-muted-foreground italic">Nenhuma demanda para este atendimento.</p>
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Histórico do Atendimento – Presidente, Brenda, Admin */}
+      {(isPresidente || isBrenda || isAdmin) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <History className="w-5 h-5 text-muted-foreground" />
+              Histórico do Atendimento
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              const historico = registros.filter(r => r.referencia_id === atendimento.id && r.referencia_tipo === 'atendimento');
+              if (historico.length === 0) return <p className="text-sm text-muted-foreground italic">Nenhum registro de auditoria para este atendimento.</p>;
+              return (
+                <div className="space-y-2">
+                  {historico.map(r => (
+                    <div key={r.id} className="flex items-start gap-3 py-2 border-b border-border last:border-0">
+                      <Clock className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm">{r.descricao_resumida}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          {r.nome_usuario} ({r.perfil_usuario}) • {new Date(r.data_hora).toLocaleString('pt-BR')}
+                        </p>
+                        {r.valor_anterior && (
+                          <p className="text-[10px] text-muted-foreground">{r.valor_anterior} → {r.valor_novo}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </CardContent>
         </Card>
       )}

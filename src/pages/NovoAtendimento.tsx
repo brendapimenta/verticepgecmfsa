@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAudit } from '@/contexts/AuditContext';
 import { TipoCidadao, TipoRegistro, Prioridade } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +20,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const NovoAtendimento: React.FC = () => {
   const { addAtendimento } = useData();
   const { usuario } = useAuth();
+  const { registrarAuditoria } = useAudit();
   const { toast } = useToast();
   const [sucesso, setSucesso] = useState(false);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
@@ -76,6 +78,18 @@ const NovoAtendimento: React.FC = () => {
       responsavel: 'Brenda',
       criado_por: usuario?.id || '',
     });
+
+    if (usuario) {
+      registrarAuditoria({
+        usuario_id: usuario.id,
+        nome_usuario: usuario.nome,
+        perfil_usuario: usuario.perfil,
+        tipo_acao: 'criar_atendimento',
+        modulo: 'atendimento',
+        descricao_resumida: `Atendimento criado: ${form.nome_cidadao} – ${form.demanda_principal}.`,
+        valor_novo: `Tipo: ${form.tipo}, Prioridade: ${prioridadeAuto}`,
+      });
+    }
 
     toast({ title: 'Atendimento criado!', description: `${form.nome_cidadao} adicionado à fila.` });
     setSucesso(true);

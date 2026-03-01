@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAudit } from '@/contexts/AuditContext';
 
 type Theme = 'light' | 'dark';
 
@@ -14,24 +15,22 @@ export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { usuario } = useAuth();
+  const { registrarAuditoria } = useAudit();
 
   const getStoredTheme = (): Theme => {
     if (usuario) {
       const stored = localStorage.getItem(`vertice-theme-${usuario.id}`);
       if (stored === 'dark' || stored === 'light') return stored;
     }
-    // Default to light
     return 'light';
   };
 
   const [theme, setTheme] = useState<Theme>(getStoredTheme);
 
-  // When user changes, load their preference
   useEffect(() => {
     setTheme(getStoredTheme());
   }, [usuario?.id]);
 
-  // Apply class to <html>
   useEffect(() => {
     const root = document.documentElement;
     if (theme === 'dark') {
@@ -46,6 +45,16 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setTheme(next);
     if (usuario) {
       localStorage.setItem(`vertice-theme-${usuario.id}`, next);
+      registrarAuditoria({
+        usuario_id: usuario.id,
+        nome_usuario: usuario.nome,
+        perfil_usuario: usuario.perfil,
+        tipo_acao: 'mudanca_tema',
+        modulo: 'sistema',
+        descricao_resumida: `Tema alterado para ${next === 'dark' ? 'Escuro' : 'Claro'}.`,
+        valor_anterior: theme,
+        valor_novo: next,
+      });
     }
   };
 

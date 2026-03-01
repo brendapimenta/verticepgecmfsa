@@ -161,6 +161,7 @@ export const AppLayout: React.FC = () => {
     { to: '/autorizacoes', label: 'Autorizações Financeiras', icon: DollarSign, roles: ['administrador', 'brenda', 'presidente'] },
     { to: '/chat', label: 'Chat', icon: MessageSquare, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
     { to: '/notificacoes', label: 'Notificações', icon: Bell, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
+    { to: '/auditoria', label: 'Log de Auditoria', icon: Shield, roles: ['administrador'] },
   ].filter(item => {
     if (isAdmin && isViewingAs) {
       return item.roles.includes(perfilUI) || item.roles.includes('administrador');
