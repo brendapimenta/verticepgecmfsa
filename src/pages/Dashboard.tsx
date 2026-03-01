@@ -348,6 +348,42 @@ const Dashboard: React.FC = () => {
             )}
           </div>
 
+          {/* ATENDIMENTOS AGENDADOS – HOJE */}
+          {(() => {
+            const agendadosHojeDash = eventosAgenda
+              .filter(e => e.data_inicio === hoje && e.tipo_evento === 'Atendimento')
+              .sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio))
+              .slice(0, 3);
+            if (agendadosHojeDash.length === 0) return null;
+            return (
+              <div className="stat-card !p-0 overflow-hidden">
+                <div className="px-5 py-3 border-b border-border flex items-center justify-between bg-primary/5 dark:bg-primary/10">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-primary" />
+                    <h3 className="font-display text-sm font-bold text-foreground">Atendimentos Agendados – Hoje</h3>
+                  </div>
+                  <button onClick={() => navigate('/agenda')} className="text-[10px] text-primary hover:underline">Ver agenda</button>
+                </div>
+                <div className="divide-y divide-border">
+                  {agendadosHojeDash.map(e => (
+                    <div key={e.id} className="px-4 py-3 flex items-center gap-3">
+                      <span className="text-sm font-bold text-primary min-w-[45px]">{e.hora_inicio}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{e.titulo}</p>
+                        {e.local && (
+                          <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                            <MapPin className="w-3 h-3" />{e.local}
+                          </p>
+                        )}
+                      </div>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground shrink-0">{e.tipo_evento}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
           {/* ALERTAS ESTRATÉGICOS */}
           <div className="stat-card !p-0 overflow-hidden">
             <div className="px-5 py-3 border-b border-border flex items-center gap-2 bg-destructive/5 dark:bg-destructive/10">
