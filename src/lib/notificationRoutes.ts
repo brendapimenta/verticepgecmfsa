@@ -11,6 +11,7 @@ export const getRouteForRef = (tipo: ReferenciaTipo, id: string): string => {
     case 'autorizacao_financeira': return '/autorizacoes';
     case 'alerta': return '/notificacoes';
     case 'evento_agenda': return '/agenda';
+    case 'pauta_despacho': return '/pauta-despacho';
     default: return '/notificacoes';
   }
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Bell, FileText, Zap, MessageSquare, AlertCircle, CheckCheck, ClipboardList, DollarSign, ArrowRightLeft, AlertTriangle, Calendar } from 'lucide-react';
+import { Bell, FileText, Zap, MessageSquare, AlertCircle, CheckCheck, ClipboardList, DollarSign, ArrowRightLeft, AlertTriangle, Calendar, Gavel } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { TipoNotificacao, ReferenciaTipo } from '@/types';
 import { cn } from '@/lib/utils';
@@ -26,6 +26,11 @@ const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
   solicitar_encerramento: <CheckCheck className="w-3.5 h-3.5 text-red-400" />,
   novo_evento_agenda: <Calendar className="w-3.5 h-3.5 text-cyan-400" />,
   evento_agenda_editado: <Calendar className="w-3.5 h-3.5 text-cyan-400" />,
+  nova_pauta: <Gavel className="w-3.5 h-3.5 text-indigo-400" />,
+  pauta_decidida: <Gavel className="w-3.5 h-3.5 text-green-400" />,
+  pauta_info_solicitada: <Gavel className="w-3.5 h-3.5 text-amber-400" />,
+  pauta_status_atualizada: <Gavel className="w-3.5 h-3.5 text-indigo-400" />,
+  nova_tarefa_operacional: <ClipboardList className="w-3.5 h-3.5 text-indigo-400" />,
 };
 
 import { getRouteForRef } from '@/lib/notificationRoutes';

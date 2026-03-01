@@ -40,6 +40,12 @@ const tipoAcaoLabels: Record<TipoAcaoAuditoria, string> = {
   editar_evento: 'Editar Evento',
   excluir_evento: 'Excluir Evento',
   chamar_brenda: 'Chamar Brenda',
+  criar_pauta: 'Criar Pauta',
+  decidir_pauta: 'Decidir Pauta',
+  adiar_pauta: 'Adiar Pauta',
+  pedir_info_pauta: 'Pedir Info Pauta',
+  criar_tarefa_operacional: 'Criar Tarefa Operacional',
+  alterar_status_pauta: 'Alterar Status Pauta',
 };
 
 const moduloLabels: Record<ModuloAuditoria, string> = {

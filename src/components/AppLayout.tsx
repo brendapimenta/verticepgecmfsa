@@ -7,7 +7,7 @@ import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, ListOrdered, PlusCircle, MessageSquare,
   Zap, LogOut, Menu, X, Shield, Bell, Eye, ClipboardList, DollarSign, AlertTriangle,
-  FileText, AlertCircle, CheckCheck, ArrowRightLeft, Calendar, Sun, Moon
+  FileText, AlertCircle, CheckCheck, ArrowRightLeft, Calendar, Sun, Moon, Gavel
 } from 'lucide-react';
 import logoVertice from '@/assets/logo-vertice.png';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -70,6 +70,11 @@ export const AppLayout: React.FC = () => {
       solicitar_encerramento: <CheckCheck className="w-4 h-4 text-red-400" />,
       novo_evento_agenda: <Calendar className="w-4 h-4 text-cyan-400" />,
       evento_agenda_editado: <Calendar className="w-4 h-4 text-cyan-400" />,
+      nova_pauta: <Gavel className="w-4 h-4 text-indigo-400" />,
+      pauta_decidida: <Gavel className="w-4 h-4 text-green-400" />,
+      pauta_info_solicitada: <Gavel className="w-4 h-4 text-amber-400" />,
+      pauta_status_atualizada: <Gavel className="w-4 h-4 text-indigo-400" />,
+      nova_tarefa_operacional: <ClipboardList className="w-4 h-4 text-indigo-400" />,
     };
     return iconMap[tipo] || <Bell className="w-4 h-4 text-muted-foreground" />;
   };
@@ -161,6 +166,7 @@ export const AppLayout: React.FC = () => {
     { to: '/autorizacoes', label: 'Autorizações Financeiras', icon: DollarSign, roles: ['administrador', 'brenda', 'presidente'] },
     { to: '/chat', label: 'Chat', icon: MessageSquare, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
     { to: '/notificacoes', label: 'Notificações', icon: Bell, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
+    { to: '/pauta-despacho', label: 'Pauta para Despacho', icon: Gavel, roles: ['administrador', 'brenda', 'presidente'] },
     { to: '/auditoria', label: 'Log de Auditoria', icon: Shield, roles: ['administrador'] },
   ].filter(item => {
     if (isAdmin && isViewingAs) {
