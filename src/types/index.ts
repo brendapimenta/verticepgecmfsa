@@ -136,9 +136,28 @@ export interface AutorizacaoFinanceira {
   concluido_por_perfil?: 'Presidente' | 'Brenda';
 }
 
-export type TipoNotificacao = 'novo_atendimento' | 'prioridade_alterada' | 'novo_comando' | 'nova_mensagem_chat' | 'status_atualizado' | 'nova_solicitacao' | 'solicitacao_status_atualizada' | 'ficha_atualizada' | 'nova_demanda' | 'nova_demanda_atendimento' | 'demanda_status_atualizada' | 'nova_autorizacao' | 'autorizacao_concluida' | 'alerta_urgente' | 'chamar_brenda' | 'solicitar_encerramento';
+export type TipoEvento = 'Atendimento' | 'Reunião' | 'Sessão' | 'Viagem' | 'Outro';
 
-export type ReferenciaTipo = 'atendimento' | 'comando' | 'chat' | 'solicitacao' | 'demanda' | 'demanda_atendimento' | 'autorizacao_financeira' | 'alerta';
+export interface EventoAgenda {
+  id: string;
+  titulo: string;
+  descricao?: string;
+  tipo_evento: TipoEvento;
+  local?: string;
+  data_inicio: string;
+  hora_inicio: string;
+  data_fim: string;
+  hora_fim: string;
+  relacionado_a_atendimento_id?: string;
+  criado_por_id: string;
+  criado_por_perfil: 'Presidente' | 'Brenda';
+  criado_em: string;
+  atualizado_em: string;
+}
+
+export type TipoNotificacao = 'novo_atendimento' | 'prioridade_alterada' | 'novo_comando' | 'nova_mensagem_chat' | 'status_atualizado' | 'nova_solicitacao' | 'solicitacao_status_atualizada' | 'ficha_atualizada' | 'nova_demanda' | 'nova_demanda_atendimento' | 'demanda_status_atualizada' | 'nova_autorizacao' | 'autorizacao_concluida' | 'alerta_urgente' | 'chamar_brenda' | 'solicitar_encerramento' | 'novo_evento_agenda' | 'evento_agenda_editado';
+
+export type ReferenciaTipo = 'atendimento' | 'comando' | 'chat' | 'solicitacao' | 'demanda' | 'demanda_atendimento' | 'autorizacao_financeira' | 'alerta' | 'evento_agenda';
 
 export interface Notificacao {
   id: string;

@@ -10,6 +10,7 @@ export const getRouteForRef = (tipo: ReferenciaTipo, id: string): string => {
     case 'demanda_atendimento': return '/fila';
     case 'autorizacao_financeira': return '/autorizacoes';
     case 'alerta': return '/notificacoes';
+    case 'evento_agenda': return '/agenda';
     default: return '/notificacoes';
   }
 };

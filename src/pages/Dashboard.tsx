@@ -2,12 +2,14 @@ import React from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePerfilVisual } from '@/contexts/ViewAsContext';
-import { Clock, Users, AlertTriangle, CheckCircle, CalendarClock, UserCheck, Calendar } from 'lucide-react';
+import { Clock, Users, AlertTriangle, CheckCircle, CalendarClock, UserCheck, Calendar, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
-  const { atendimentos } = useData();
+  const { atendimentos, eventosAgenda } = useData();
   const { usuario } = useAuth();
   const perfilUI = usePerfilVisual();
+  const navigate = useNavigate();
   const hoje = new Date().toISOString().split('T')[0];
   const atendHoje = atendimentos.filter(a => a.data_chegada === hoje);
   const aguardando = atendHoje.filter(a => a.status === 'Aguardando');
@@ -63,6 +65,40 @@ const Dashboard: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* Próximos Compromissos - Presidente/Admin */}
+      {(perfilUI === 'presidente' || perfilUI === 'administrador' || perfilUI === 'brenda') && (() => {
+        const eventosHoje = eventosAgenda
+          .filter(e => e.data_inicio === hoje)
+          .sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio))
+          .slice(0, 5);
+        return (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
+                <Calendar className="w-5 h-5" /> Próximos Compromissos
+              </h2>
+              <button onClick={() => navigate('/agenda')} className="text-xs text-accent hover:underline">Ver agenda</button>
+            </div>
+            {eventosHoje.length === 0 ? (
+              <div className="stat-card text-center">
+                <p className="text-sm text-muted-foreground">Nenhum compromisso agendado para hoje.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {eventosHoje.map(e => (
+                  <div key={e.id} className="stat-card flex items-center gap-3">
+                    <span className="text-sm font-bold text-primary min-w-[45px]">{e.hora_inicio}</span>
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-muted">{e.tipo_evento}</span>
+                    <span className="text-sm font-medium text-foreground flex-1 truncate">{e.titulo}</span>
+                    {e.local && <span className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" />{e.local}</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Priority Alerts for Presidente */}
       {(perfilUI === 'presidente' || perfilUI === 'administrador') && urgencias.length > 0 && (
