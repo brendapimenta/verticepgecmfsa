@@ -28,6 +28,7 @@ interface DataContextType {
   addAutorizacao: (a: Omit<AutorizacaoFinanceira, 'id' | 'criado_em'>) => void;
   concluirAutorizacao: (id: string, concluido_por_id: string, concluido_por_perfil: 'Presidente' | 'Brenda') => void;
   updateAutorizacao: (id: string, updates: Partial<AutorizacaoFinanceira>) => void;
+  criarAlertaUrgente: (mensagem: string, criado_por_id: string) => void;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -251,6 +252,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setNotificacoes(prev => prev.map(n => n.id === id ? { ...n, lida: true } : n));
   }, []);
 
+  const criarAlertaUrgente = useCallback((mensagem: string, criado_por_id: string) => {
+    criarNotificacao('presidente', 'alerta_urgente', 'alerta', criado_por_id,
+      `Alerta de Brenda: ${mensagem}`);
+  }, [criarNotificacao]);
+
   return (
     <DataContext.Provider value={{
       atendimentos, comandos, mensagens, notificacoes, solicitacoes, demandasAtendimento, demandas, autorizacoes,
@@ -258,6 +264,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       marcarNotificacaoLida, addSolicitacao, updateSolicitacaoStatus,
       addDemandaAtendimento, updateDemandaStatus, addDemanda, updateDemandaGlobalStatus,
       salvarAnotacoesPresidente, salvarAnotacoesBrenda, addAutorizacao, concluirAutorizacao, updateAutorizacao,
+      criarAlertaUrgente,
     }}>
       {children}
     </DataContext.Provider>

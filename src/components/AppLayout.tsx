@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useViewAs, usePerfilVisual } from '@/contexts/ViewAsContext';
+import { useData } from '@/contexts/DataContext';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard, Users, ListOrdered, PlusCircle, MessageSquare,
-  Zap, LogOut, Menu, X, Shield, Bell, Eye, ClipboardList, DollarSign
+  Zap, LogOut, Menu, X, Shield, Bell, Eye, ClipboardList, DollarSign, AlertTriangle
 } from 'lucide-react';
 import logoVertice from '@/assets/logo-vertice.png';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -12,6 +13,11 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Notificacao, Perfil } from '@/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from '@/components/ui/dialog';
 
 const perfilLabels: Record<string, string> = {
   administrador: 'Administrador',
@@ -27,6 +33,17 @@ export const AppLayout: React.FC = () => {
   const { toast } = useToast();
   const { perfilVisual, setPerfilVisual, isViewingAs } = useViewAs();
   const perfilUI = usePerfilVisual();
+  const { notificacoes, marcarNotificacaoLida, criarAlertaUrgente } = useData();
+
+  // Brenda alert modal state
+  const [alertaOpen, setAlertaOpen] = useState(false);
+  const [alertaMensagem, setAlertaMensagem] = useState('');
+
+  // Presidente popup state
+  const [alertaPopup, setAlertaPopup] = useState<Notificacao | null>(null);
+
+  const isBrenda = perfilUI === 'brenda' || perfilUI === 'administrador';
+  const isPresidente = perfilUI === 'presidente' || perfilUI === 'administrador';
 
   // Sound + toast on new notification for current user
   useEffect(() => {
@@ -34,6 +51,26 @@ export const AppLayout: React.FC = () => {
       const notif = (e as CustomEvent<Notificacao>).detail;
       if (!usuario) return;
       if (notif.perfil_destino !== usuario.perfil && notif.usuario_destino_id !== usuario.id) return;
+
+      // Special handling for alerta_urgente → show popup for presidente
+      if (notif.tipo_notificacao === 'alerta_urgente' && (usuario.perfil === 'presidente' || usuario.perfil === 'administrador')) {
+        // Play urgent alarm sound
+        try {
+          const ctx = new AudioContext();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.value = 660;
+          osc.type = 'square';
+          gain.gain.value = 0.2;
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+          osc.stop(ctx.currentTime + 0.8);
+          osc.start();
+        } catch {}
+        setAlertaPopup(notif);
+        return;
+      }
 
       try {
         const ctx = new AudioContext();
@@ -62,6 +99,21 @@ export const AppLayout: React.FC = () => {
 
   const isAdmin = usuario.perfil === 'administrador';
 
+  const handleEnviarAlerta = () => {
+    if (!alertaMensagem.trim() || !usuario) return;
+    criarAlertaUrgente(alertaMensagem.trim(), usuario.id);
+    setAlertaMensagem('');
+    setAlertaOpen(false);
+    toast({ title: '✅ Alerta enviado', description: 'O Presidente foi notificado.' });
+  };
+
+  const handleFecharAlertaPopup = () => {
+    if (alertaPopup) {
+      marcarNotificacaoLida(alertaPopup.id);
+    }
+    setAlertaPopup(null);
+  };
+
   const navItems = [
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['administrador', 'brenda', 'presidente'] },
     { to: '/fila', label: 'Fila de Atendimento', icon: ListOrdered, roles: ['administrador', 'brenda', 'sala_espera', 'presidente'] },
@@ -72,7 +124,6 @@ export const AppLayout: React.FC = () => {
     { to: '/chat', label: 'Chat', icon: MessageSquare, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
     { to: '/notificacoes', label: 'Notificações', icon: Bell, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
   ].filter(item => {
-    // When viewing as another profile, show that profile's menu items + admin-only items
     if (isAdmin && isViewingAs) {
       return item.roles.includes(perfilUI) || item.roles.includes('administrador');
     }
@@ -179,6 +230,19 @@ export const AppLayout: React.FC = () => {
 
           <div className="flex-1" />
           <div className="flex items-center gap-3">
+            {/* Botão ALERTA - Brenda only */}
+            {isBrenda && (
+              <button
+                onClick={() => setAlertaOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white transition-colors"
+                style={{ background: '#EF4444' }}
+                onMouseEnter={e => (e.currentTarget.style.background = '#F87171')}
+                onMouseLeave={e => (e.currentTarget.style.background = '#EF4444')}
+              >
+                <AlertTriangle className="w-3.5 h-3.5" />
+                ALERTA
+              </button>
+            )}
             <NotificationBell />
             <span className="text-xs text-muted-foreground hidden sm:inline">
               {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
@@ -206,6 +270,68 @@ export const AppLayout: React.FC = () => {
           <Outlet />
         </div>
       </main>
+
+      {/* Modal: Brenda envia alerta */}
+      <Dialog open={alertaOpen} onOpenChange={setAlertaOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
+              Enviar alerta ao Presidente
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <label className="text-xs font-medium text-muted-foreground">Mensagem de alerta</label>
+            <Textarea
+              value={alertaMensagem}
+              onChange={e => setAlertaMensagem(e.target.value)}
+              placeholder="Descreva rapidamente o que precisa de atenção imediata..."
+              rows={3}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setAlertaOpen(false); setAlertaMensagem(''); }}>Cancelar</Button>
+            <Button
+              onClick={handleEnviarAlerta}
+              disabled={!alertaMensagem.trim()}
+              className="text-white"
+              style={{ background: '#EF4444' }}
+            >
+              Enviar alerta
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Popup: Presidente recebe alerta urgente */}
+      <Dialog open={!!alertaPopup} onOpenChange={open => !open && handleFecharAlertaPopup()}>
+        <DialogContent
+          className="sm:max-w-md border"
+          style={{ background: '#0D1E3A', borderColor: '#B91C1C' }}
+        >
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold flex items-center gap-2" style={{ color: '#EF4444' }}>
+              <AlertTriangle className="w-5 h-5" />
+              ⚠ ALERTA DE BRENDA
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-3">
+            <p className="text-sm text-[#E6EDF5] leading-relaxed whitespace-pre-wrap">
+              {alertaPopup?.mensagem_resumo.replace('Alerta de Brenda: ', '')}
+            </p>
+            {alertaPopup && (
+              <p className="text-[11px] text-[#A9B7C9] mt-3">
+                {new Date(alertaPopup.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={handleFecharAlertaPopup} className="w-full font-bold" variant="outline">
+              OK, ENTENDI
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
