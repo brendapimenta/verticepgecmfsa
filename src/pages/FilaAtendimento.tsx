@@ -90,7 +90,7 @@ const FilaAtendimento: React.FC = () => {
       <div className="space-y-3">
         {filaHoje.map((a, index) => {
           const tempo = getTempoEspera(a.hora_chegada);
-          const tempoAlerta = tempo > 60 ? 'border-l-red-500' : tempo > 30 ? 'border-l-yellow-500' : 'border-l-transparent';
+          const prioridadeBorda = a.prioridade === 'Alta' ? 'border-l-[#EF4444]' : a.prioridade === 'Média' ? 'border-l-[#EAB308]' : a.prioridade === 'Baixa' ? 'border-l-[#22C55E]' : 'border-l-muted-foreground/30';
           const isFirst = index === 0 && a.status === 'Aguardando';
           const isAlta = a.prioridade === 'Alta';
 
@@ -99,7 +99,7 @@ const FilaAtendimento: React.FC = () => {
               key={a.id}
               className={cn(
                 "bg-card rounded-lg border p-4 border-l-4 transition-all",
-                tempoAlerta,
+                prioridadeBorda,
                 isFirst && "ring-1 ring-primary/30",
                 isAlta && !isFirst && "ring-1 ring-red-500/20"
               )}
