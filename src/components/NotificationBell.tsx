@@ -24,19 +24,7 @@ const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
   alerta_urgente: <AlertTriangle className="w-3.5 h-3.5 text-red-500" />,
 };
 
-const getRouteForRef = (tipo: ReferenciaTipo, id: string): string => {
-  switch (tipo) {
-    case 'atendimento': return `/atendimento/${id}`;
-    case 'comando': return '/comandos';
-    case 'chat': return '/chat';
-    case 'solicitacao': return '/comandos';
-    case 'demanda': return '/demandas';
-    case 'demanda_atendimento': return '/fila';
-    case 'autorizacao_financeira': return '/autorizacoes';
-    case 'alerta': return '/notificacoes';
-    default: return '/notificacoes';
-  }
-};
+import { getRouteForRef } from '@/lib/notificationRoutes';
 
 const tempoRelativo = (iso: string): string => {
   const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
