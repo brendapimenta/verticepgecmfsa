@@ -143,7 +143,7 @@ export const AppLayout: React.FC = () => {
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['administrador', 'sala_principal', 'presidente', 'sala_espera'] },
     { to: '/fila', label: 'Fila de Atendimento', icon: ListOrdered, roles: ['administrador', 'sala_principal', 'sala_espera', 'presidente'] },
     { to: '/novo-atendimento', label: 'Novo Atendimento', icon: PlusCircle, roles: ['administrador', 'sala_principal', 'sala_espera'] },
-    { to: '/agenda', label: 'Agenda', icon: Calendar, roles: ['administrador', 'sala_principal', 'presidente'] },
+    { to: '/agenda', label: 'Agenda', icon: Calendar, roles: ['administrador', 'sala_principal', 'presidente', 'sala_espera'] },
     { to: '/comandos', label: 'Comandos Rápidos', icon: Zap, roles: ['administrador', 'sala_principal', 'presidente', 'sala_espera'] },
     { to: '/demandas', label: 'Demandas', icon: ClipboardList, roles: ['administrador', 'sala_principal', 'presidente', 'sala_espera'] },
     { to: '/autorizacoes', label: 'Autorizações Financeiras', icon: DollarSign, roles: ['administrador', 'sala_principal', 'presidente'] },
@@ -156,13 +156,17 @@ export const AppLayout: React.FC = () => {
     { to: '/status-sistema', label: 'Status do Sistema', icon: Shield, roles: ['administrador'] },
     { to: '/configuracao-instituicao', label: 'Configuração Instituição', icon: Building2, roles: ['administrador'] },
   ].filter(item => {
-    if (isAdmin && isViewingAs) return item.roles.includes(perfilUI) || item.roles.includes('administrador');
     return item.roles.includes(perfilUI);
   });
 
+  const handleLogout = () => {
+    logout();
+    sonnerToast.success('Sessão encerrada com sucesso.');
+  };
+
   const SidebarContent = () => (
-    <div className="flex flex-col h-full">
-      <div className="p-5 border-b border-sidebar-border">
+    <div className="flex flex-col h-full max-h-screen">
+      <div className="shrink-0 p-5 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
           <img src={logoVertice} alt="VÉRTICE" className="w-10 h-10 object-contain" />
           <div>
@@ -171,7 +175,7 @@ export const AppLayout: React.FC = () => {
           </div>
         </div>
       </div>
-      <nav className="flex-1 p-3 space-y-1">
+      <nav className="flex-1 overflow-y-auto p-3 space-y-1">
         {navItems.map(item => {
           const active = location.pathname === item.to;
           return (
@@ -183,7 +187,7 @@ export const AppLayout: React.FC = () => {
           );
         })}
       </nav>
-      <div className="p-4 border-t border-sidebar-border">
+      <div className="shrink-0 p-4 border-t border-sidebar-border">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center"><Shield className="w-4 h-4 text-sidebar-foreground/60" /></div>
           <div className="flex-1 min-w-0">
@@ -191,8 +195,8 @@ export const AppLayout: React.FC = () => {
             <p className="text-xs text-sidebar-foreground/60">{perfilLabels[usuario.perfil]}</p>
           </div>
         </div>
-        <button onClick={logout} className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors">
-          <LogOut className="w-4 h-4" />Sair
+        <button onClick={handleLogout} className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm font-semibold text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors">
+          <LogOut className="w-4 h-4" />SAIR
         </button>
       </div>
     </div>
