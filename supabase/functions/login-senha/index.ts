@@ -15,10 +15,35 @@ Deno.serve(async (req) => {
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!;
 
-  const { username, senha } = await req.json();
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return new Response(JSON.stringify({ error: "Corpo da requisição inválido." }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
-  if (!username || !senha) {
+  const { username, senha } = body as Record<string, string>;
+
+  if (!username || typeof username !== "string" || !senha || typeof senha !== "string") {
     return new Response(JSON.stringify({ error: "Usuário e senha são obrigatórios." }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  if (username.length > 50 || senha.length > 128) {
+    return new Response(JSON.stringify({ error: "Dados excedem o tamanho permitido." }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Sanitize username: only allow alphanumeric, dots, underscores, hyphens
+  if (!/^[a-zA-Z0-9._-]+$/.test(username)) {
+    return new Response(JSON.stringify({ error: "Nome de usuário contém caracteres inválidos." }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
