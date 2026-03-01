@@ -1,7 +1,7 @@
 import React from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Bell, FileText, Zap, MessageSquare, AlertCircle, CheckCheck, ClipboardList, DollarSign, ArrowRightLeft } from 'lucide-react';
+import { Bell, FileText, Zap, MessageSquare, AlertCircle, CheckCheck, ClipboardList, DollarSign, ArrowRightLeft, AlertTriangle } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { TipoNotificacao, ReferenciaTipo } from '@/types';
 import { cn } from '@/lib/utils';
@@ -21,6 +21,7 @@ const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
   demanda_status_atualizada: <ArrowRightLeft className="w-3.5 h-3.5 text-teal-400" />,
   nova_autorizacao: <DollarSign className="w-3.5 h-3.5 text-emerald-400" />,
   autorizacao_concluida: <CheckCheck className="w-3.5 h-3.5 text-emerald-400" />,
+  alerta_urgente: <AlertTriangle className="w-3.5 h-3.5 text-red-500" />,
 };
 
 const getRouteForRef = (tipo: ReferenciaTipo, id: string): string => {
@@ -32,6 +33,7 @@ const getRouteForRef = (tipo: ReferenciaTipo, id: string): string => {
     case 'demanda': return '/demandas';
     case 'demanda_atendimento': return '/fila';
     case 'autorizacao_financeira': return '/autorizacoes';
+    case 'alerta': return '/notificacoes';
     default: return '/notificacoes';
   }
 };
@@ -89,12 +91,15 @@ export const NotificationBell: React.FC = () => {
               <button
                 key={n.id}
                 onClick={() => handleClick(n)}
-                className="w-full text-left px-3 py-2.5 border-b last:border-b-0 hover:bg-muted/50 transition-colors"
+                className={cn(
+                  "w-full text-left px-3 py-2.5 border-b last:border-b-0 hover:bg-muted/50 transition-colors",
+                  n.tipo_notificacao === 'alerta_urgente' && "bg-red-500/10"
+                )}
               >
                 <div className="flex items-start gap-2">
                   <div className="mt-0.5">{tipoIcon[n.tipo_notificacao]}</div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-foreground line-clamp-2">{n.mensagem_resumo}</p>
+                    <p className={cn("text-xs line-clamp-2", n.tipo_notificacao === 'alerta_urgente' ? "text-red-400 font-semibold" : "text-foreground")}>{n.mensagem_resumo}</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">
                       {tempoRelativo(n.criado_em)}
                     </p>

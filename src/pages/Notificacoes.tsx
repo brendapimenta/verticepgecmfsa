@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { TipoNotificacao, ReferenciaTipo } from '@/types';
-import { Bell, Filter, CheckCheck, FileText, Zap, MessageSquare, AlertCircle, ClipboardList, DollarSign, ArrowRightLeft } from 'lucide-react';
+import { Bell, Filter, CheckCheck, FileText, Zap, MessageSquare, AlertCircle, ClipboardList, DollarSign, ArrowRightLeft, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -23,6 +23,7 @@ const tipoLabel: Record<TipoNotificacao, string> = {
   demanda_status_atualizada: 'Demanda Atualizada',
   nova_autorizacao: 'Nova Autorização',
   autorizacao_concluida: 'Autorização Concluída',
+  alerta_urgente: 'Alerta Urgente',
 };
 
 const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
@@ -39,6 +40,7 @@ const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
   demanda_status_atualizada: <ArrowRightLeft className="w-4 h-4 text-teal-400" />,
   nova_autorizacao: <DollarSign className="w-4 h-4 text-emerald-400" />,
   autorizacao_concluida: <CheckCheck className="w-4 h-4 text-emerald-400" />,
+  alerta_urgente: <AlertTriangle className="w-4 h-4 text-red-500" />,
 };
 
 const getRouteForRef = (tipo: ReferenciaTipo, id: string): string => {
@@ -117,6 +119,7 @@ const Notificacoes: React.FC = () => {
             <SelectItem value="demanda_status_atualizada">Demanda Atualizada</SelectItem>
             <SelectItem value="nova_autorizacao">Nova Autorização</SelectItem>
             <SelectItem value="autorizacao_concluida">Autorização Concluída</SelectItem>
+            <SelectItem value="alerta_urgente">Alerta Urgente</SelectItem>
           </SelectContent>
         </Select>
       </div>
