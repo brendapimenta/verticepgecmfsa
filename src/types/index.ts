@@ -1,4 +1,4 @@
-export type Perfil = 'administrador' | 'sala_espera' | 'brenda' | 'presidente';
+export type Perfil = 'administrador' | 'sala_espera' | 'sala_principal' | 'presidente';
 
 export type TipoCidadao = 'Autoridade' | 'Vereador' | 'Administração' | 'Liderança' | 'Assessor' | 'Servidor' | 'Efetivo' | 'Família' | 'Cidadão';
 
@@ -32,6 +32,7 @@ export interface Usuario {
 
 export interface Atendimento {
   id: string;
+  instituicao_id?: string;
   nome_cidadao: string;
   tipo: TipoCidadao;
   tipo_registro: TipoRegistro;
@@ -54,8 +55,8 @@ export interface Atendimento {
   atualizado_em: string;
   anotacoes_presidente?: string;
   anotacoes_presidente_atualizado_em?: string;
-  anotacoes_brenda?: string;
-  anotacoes_brenda_atualizado_em?: string;
+  anotacoes_sala_principal?: string;
+  anotacoes_sala_principal_atualizado_em?: string;
   foto_url?: string;
   checkin_realizado?: boolean;
   checkin_hora?: string;
@@ -63,6 +64,7 @@ export interface Atendimento {
 
 export interface MensagemChat {
   id: string;
+  instituicao_id?: string;
   atendimento_id?: string;
   remetente_id: string;
   remetente_nome: string;
@@ -73,8 +75,9 @@ export interface MensagemChat {
 
 export interface Comando {
   id: string;
-  origem_perfil: 'Presidente' | 'Brenda';
-  destino_perfil: 'Brenda' | 'Sala de Espera';
+  instituicao_id?: string;
+  origem_perfil: 'Presidente' | 'Sala Principal';
+  destino_perfil: 'Sala Principal' | 'Sala de Espera';
   tipo_chamada: TipoChamada;
   descricao_customizada?: string;
   status: StatusComando;
@@ -87,8 +90,9 @@ export type StatusSolicitacao = 'Pendente' | 'Em andamento' | 'Concluída';
 
 export interface Solicitacao {
   id: string;
-  origem_perfil: 'Presidente' | 'Brenda';
-  destino_perfil: 'Brenda' | 'Sala de Espera';
+  instituicao_id?: string;
+  origem_perfil: 'Presidente' | 'Sala Principal';
+  destino_perfil: 'Sala Principal' | 'Sala de Espera';
   atendimento_id?: string;
   descricao_solicitacao: string;
   status: StatusSolicitacao;
@@ -100,8 +104,9 @@ export type StatusDemanda = 'Pendente' | 'Em andamento' | 'Concluída';
 
 export interface DemandaAtendimento {
   id: string;
+  instituicao_id?: string;
   atendimento_id: string;
-  origem_perfil: 'Brenda';
+  origem_perfil: 'Sala Principal';
   destino_perfil: 'Sala de Espera';
   descricao_demanda: string;
   status: StatusDemanda;
@@ -111,10 +116,11 @@ export interface DemandaAtendimento {
 
 export interface Demanda {
   id: string;
+  instituicao_id?: string;
   titulo: string;
   descricao: string;
-  origem_perfil: 'Presidente' | 'Brenda' | 'Sala de Espera';
-  destino_perfil: 'Brenda' | 'Sala de Espera';
+  origem_perfil: 'Presidente' | 'Sala Principal' | 'Sala de Espera';
+  destino_perfil: 'Sala Principal' | 'Sala de Espera';
   atendimento_id?: string;
   prioridade: Prioridade;
   status: StatusDemanda;
@@ -127,16 +133,17 @@ export type StatusAutorizacao = 'Pendente' | 'Concluída';
 
 export interface AutorizacaoFinanceira {
   id: string;
+  instituicao_id?: string;
   titulo: string;
   descricao: string;
   valor?: number;
   status: StatusAutorizacao;
   criado_em: string;
   criado_por_id: string;
-  criado_por_perfil: 'Brenda';
+  criado_por_perfil: 'Sala Principal';
   resolvido_em?: string;
   concluido_por_id?: string;
-  concluido_por_perfil?: 'Presidente' | 'Brenda';
+  concluido_por_perfil?: 'Presidente' | 'Sala Principal';
 }
 
 export type TipoEvento = 'Atendimento' | 'Reunião' | 'Sessão' | 'Viagem' | 'Outro';
@@ -155,6 +162,7 @@ export type VinculoTipo = 'Contrato' | 'Projeto de Lei' | 'Atendimento' | 'Autor
 
 export interface PautaDespacho {
   id: string;
+  instituicao_id?: string;
   titulo: string;
   categoria: CategoriaPauta;
   tipo_registro: TipoRegistroPauta;
@@ -165,18 +173,19 @@ export interface PautaDespacho {
   comentario_presidente?: string;
   status: StatusPauta;
   prioridade: PrioridadePauta;
-  responsavel: 'Brenda' | 'Presidente';
+  responsavel: 'Sala Principal' | 'Presidente';
   prazo?: string;
   criado_em: string;
   atualizado_em: string;
   criado_por_id: string;
-  criado_por_perfil: 'Brenda' | 'Presidente';
+  criado_por_perfil: 'Sala Principal' | 'Presidente';
   vinculado_a_tipo?: VinculoTipo;
   vinculado_a_id?: string;
 }
 
 export interface EventoAgenda {
   id: string;
+  instituicao_id?: string;
   titulo: string;
   descricao?: string;
   tipo_evento: TipoEvento;
@@ -187,17 +196,18 @@ export interface EventoAgenda {
   hora_fim: string;
   relacionado_a_atendimento_id?: string;
   criado_por_id: string;
-  criado_por_perfil: 'Presidente' | 'Brenda';
+  criado_por_perfil: 'Presidente' | 'Sala Principal';
   criado_em: string;
   atualizado_em: string;
 }
 
-export type TipoNotificacao = 'novo_atendimento' | 'prioridade_alterada' | 'novo_comando' | 'nova_mensagem_chat' | 'status_atualizado' | 'nova_solicitacao' | 'solicitacao_status_atualizada' | 'ficha_atualizada' | 'nova_demanda' | 'nova_demanda_atendimento' | 'demanda_status_atualizada' | 'nova_autorizacao' | 'autorizacao_concluida' | 'alerta_urgente' | 'chamar_brenda' | 'solicitar_encerramento' | 'novo_evento_agenda' | 'evento_agenda_editado' | 'nova_pauta' | 'pauta_decidida' | 'pauta_info_solicitada' | 'pauta_status_atualizada' | 'nova_tarefa_operacional';
+export type TipoNotificacao = 'novo_atendimento' | 'prioridade_alterada' | 'novo_comando' | 'nova_mensagem_chat' | 'status_atualizado' | 'nova_solicitacao' | 'solicitacao_status_atualizada' | 'ficha_atualizada' | 'nova_demanda' | 'nova_demanda_atendimento' | 'demanda_status_atualizada' | 'nova_autorizacao' | 'autorizacao_concluida' | 'alerta_urgente' | 'chamar_sala_principal' | 'solicitar_encerramento' | 'novo_evento_agenda' | 'evento_agenda_editado' | 'nova_pauta' | 'pauta_decidida' | 'pauta_info_solicitada' | 'pauta_status_atualizada' | 'nova_tarefa_operacional';
 
 export type ReferenciaTipo = 'atendimento' | 'comando' | 'chat' | 'solicitacao' | 'demanda' | 'demanda_atendimento' | 'autorizacao_financeira' | 'alerta' | 'evento_agenda' | 'pauta_despacho';
 
 export interface Notificacao {
   id: string;
+  instituicao_id?: string;
   usuario_destino_id?: string;
   perfil_destino: Perfil;
   tipo_notificacao: TipoNotificacao;
@@ -233,7 +243,7 @@ export type TipoAcaoAuditoria =
   | 'criar_evento'
   | 'editar_evento'
   | 'excluir_evento'
-  | 'chamar_brenda'
+  | 'chamar_sala_principal'
   | 'criar_pauta'
   | 'decidir_pauta'
   | 'adiar_pauta'

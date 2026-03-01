@@ -53,11 +53,11 @@ const FilaAtendimento: React.FC = () => {
   const { atendimentos, updateAtendimento, confirmarPresenca, demandasAtendimento, updateDemandaStatus, eventosAgenda } = useData();
   const { usuario } = useAuth();
   const perfilUI = usePerfilVisual();
-  const isBrenda = perfilUI === 'brenda' || perfilUI === 'administrador';
+  const isSalaPrincipal = perfilUI === 'sala_principal' || perfilUI === 'administrador';
   const isSalaEspera = perfilUI === 'sala_espera' || perfilUI === 'administrador';
   const { registrarAuditoria } = useAudit();
   const [concluirId, setConcluirId] = useState<string | null>(null);
-  const canConcluir = isBrenda || perfilUI === 'presidente';
+  const canConcluir = isSalaPrincipal || perfilUI === 'presidente';
 
   const hoje = new Date().toISOString().split('T')[0];
 
@@ -121,7 +121,7 @@ const FilaAtendimento: React.FC = () => {
       status: 'Concluído' as StatusAtendimento,
       data_conclusao: new Date().toISOString(),
     };
-    if (usuario.perfil === 'brenda') {
+    if (usuario.perfil === 'sala_principal') {
       const atendimento = atendimentos.find(a => a.id === concluirId);
       if (atendimento && !atendimento.responsavel) {
         updates.responsavel = usuario.nome;
@@ -136,7 +136,7 @@ const FilaAtendimento: React.FC = () => {
     const prioridadeBorda = a.prioridade === 'Alta' ? 'border-l-[#EF4444]' : a.prioridade === 'Média' ? 'border-l-[#EAB308]' : a.prioridade === 'Baixa' ? 'border-l-[#22C55E]' : 'border-l-muted-foreground/30';
     const isFirst = index === 0 && a.status === 'Aguardando';
     const isAlta = a.prioridade === 'Alta';
-    const canCheckin = isAgendado && !a.checkin_realizado && (isBrenda || isSalaEspera);
+    const canCheckin = isAgendado && !a.checkin_realizado && (isSalaPrincipal || isSalaEspera);
     
     // Check if scheduled time has passed without check-in
     const aguardandoComparecimento = isAgendado && !a.checkin_realizado && a.hora_agendada && (() => {
@@ -247,7 +247,7 @@ const FilaAtendimento: React.FC = () => {
                 Confirmar Presença
               </Button>
             )}
-            {isBrenda && (
+            {isSalaPrincipal && (
               <Select
                 value={a.prioridade}
                 onValueChange={(v) => updateAtendimento(a.id, { prioridade: v as Prioridade })}
@@ -262,7 +262,7 @@ const FilaAtendimento: React.FC = () => {
                 </SelectContent>
               </Select>
             )}
-            {isBrenda && (
+            {isSalaPrincipal && (
               <Select
                 value={a.status}
                 onValueChange={(v) => updateAtendimento(a.id, { status: v as StatusAtendimento, ...(v === 'Concluído' ? { data_conclusao: new Date().toISOString() } : {}) })}

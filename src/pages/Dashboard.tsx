@@ -26,9 +26,9 @@ const Dashboard: React.FC = () => {
   const urgencias = atendHoje.filter(a => a.prioridade === 'Alta');
 
   const isPresidente = perfilUI === 'presidente' || perfilUI === 'administrador';
-  const isBrenda = perfilUI === 'brenda' || perfilUI === 'administrador';
+  const isSalaPrincipal = perfilUI === 'sala_principal' || perfilUI === 'administrador';
   const isSalaEspera = perfilUI === 'sala_espera';
-  const showGestao = isPresidente || isBrenda;
+  const showGestao = isPresidente || isSalaPrincipal;
 
   // Tempo médio de espera
   const tempoMedioEspera = (() => {
@@ -232,7 +232,7 @@ const Dashboard: React.FC = () => {
             <div className="px-5 py-3 border-b border-border flex items-center gap-2 bg-primary/5 dark:bg-primary/10">
               <Shield className="w-4 h-4 text-primary" />
               <h3 className="font-display text-sm font-bold text-foreground uppercase">
-                {isPresidente ? 'SALA PRESIDENCIAL – ATENDIMENTO ATUAL' : isBrenda ? 'ATENDIMENTO EM ANDAMENTO' : 'STATUS DA FILA'}
+                {isPresidente ? 'SALA PRESIDENCIAL – ATENDIMENTO ATUAL' : isSalaPrincipal ? 'ATENDIMENTO EM ANDAMENTO' : 'STATUS DA FILA'}
               </h3>
             </div>
 

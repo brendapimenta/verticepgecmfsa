@@ -25,6 +25,7 @@ import LogAuditoria from "@/pages/LogAuditoria";
 import PautaDespacho from "@/pages/PautaDespacho";
 import ConfiguracaoInstituicao from "@/pages/ConfiguracaoInstituicao";
 import GestaoUsuarios from "@/pages/GestaoUsuarios";
+import ExportarDados from "@/pages/ExportarDados";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,7 +34,6 @@ const ProtectedRoutes = () => {
   const { isAuthenticated, usuario, loading } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  // If first login pending, force password change
   if (usuario?.primeiro_login_pendente) return <Navigate to="/trocar-senha" replace />;
   return <AppLayout />;
 };
@@ -90,6 +90,7 @@ const App = () => (
                   <Route path="/pauta-despacho" element={<PautaDespacho />} />
                   <Route path="/configuracao-instituicao" element={<ConfiguracaoInstituicao />} />
                   <Route path="/usuarios" element={<GestaoUsuarios />} />
+                  <Route path="/exportar" element={<ExportarDados />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
