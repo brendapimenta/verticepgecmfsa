@@ -205,12 +205,12 @@ const AutorizacoesFinanceiras: React.FC = () => {
       <AlertDialog open={!!concluirId} onOpenChange={open => !open && setConcluirId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Concluir Autorização</AlertDialogTitle>
-            <AlertDialogDescription>Deseja marcar esta autorização financeira como CONCLUÍDA?</AlertDialogDescription>
+            <AlertDialogTitle>Confirmar conclusão</AlertDialogTitle>
+            <AlertDialogDescription>Tem certeza de que deseja marcar esta autorização financeira como CONCLUÍDA?</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConcluir}>Confirmar</AlertDialogAction>
+            <AlertDialogAction onClick={handleConcluir}>Sim, concluir</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
