@@ -183,7 +183,7 @@ export const AppLayout: React.FC = () => {
           <img src={logoVertice} alt="VÉRTICE" className="w-10 h-10 object-contain" />
           <div>
             <h1 className="font-display text-base font-bold text-sidebar-foreground">VÉRTICE</h1>
-            <p className="text-xs text-sidebar-foreground/60">Gestão Estratégica de Atendimentos</p>
+            <p className="text-[9px] text-sidebar-foreground/60 uppercase tracking-wider leading-tight">PLATAFORMA DE GESTÃO ESTRATÉGICA PARA CÂMARAS MUNICIPAIS</p>
           </div>
         </div>
       </div>
@@ -320,6 +320,13 @@ export const AppLayout: React.FC = () => {
         <div className="flex-1 overflow-auto p-4 md:p-6">
           <Outlet />
         </div>
+
+        {/* Rodapé institucional */}
+        <footer className="px-4 md:px-6 py-2 border-t border-border text-center">
+          <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wider">
+            © 2026 VÉRTICE TECNOLOGIA INSTITUCIONAL &nbsp;·&nbsp; CONTROLE, ESTRATÉGIA E PRECISÃO NA GESTÃO PÚBLICA.
+          </p>
+        </footer>
       </main>
 
       {/* Modal: Brenda envia alerta */}
