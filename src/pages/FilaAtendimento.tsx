@@ -6,10 +6,11 @@ import { usePerfilVisual } from '@/contexts/ViewAsContext';
 import { Prioridade, StatusAtendimento, StatusDemanda } from '@/types';
 import {
   Clock, Phone, User, FileText, AlertCircle, Users, CheckCircle, ClipboardList,
-  Loader2, AlertTriangle, Calendar, MapPin, ChevronLeft, ChevronRight, CalendarClock
+  Loader2, AlertTriangle, Calendar, MapPin, ChevronLeft, ChevronRight, CalendarClock, UserCheck
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { toast as sonnerToast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -48,7 +49,7 @@ const getTempoEspera = (hora: string) => {
 
 const FilaAtendimento: React.FC = () => {
   const navigate = useNavigate();
-  const { atendimentos, updateAtendimento, demandasAtendimento, updateDemandaStatus, eventosAgenda } = useData();
+  const { atendimentos, updateAtendimento, confirmarPresenca, demandasAtendimento, updateDemandaStatus, eventosAgenda } = useData();
   const { usuario } = useAuth();
   const perfilUI = usePerfilVisual();
   const isBrenda = perfilUI === 'brenda' || perfilUI === 'administrador';
@@ -78,7 +79,18 @@ const FilaAtendimento: React.FC = () => {
     .filter(e => e.data_inicio === hoje && e.tipo_evento === 'Atendimento')
     .sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio));
 
-  // Sort: Aguardando first, then Em Atendimento, then by priority, then by arrival time
+  // Hybrid ordering: scheduled appointments within their time window get top priority
+  const isWithinScheduledWindow = (a: typeof atendimentos[0]) => {
+    if (a.tipo_registro === 'Sem agendamento' || !a.hora_agendada) return false;
+    const [h, m] = a.hora_agendada.split(':').map(Number);
+    const scheduled = new Date();
+    scheduled.setHours(h, m, 0, 0);
+    const now = Date.now();
+    const diff = now - scheduled.getTime();
+    // 15min before (-15*60000) to 30min after (30*60000)
+    return diff >= -15 * 60000 && diff <= 30 * 60000;
+  };
+
   const statusOrder: Record<StatusAtendimento, number> = { Aguardando: 0, 'Em Atendimento': 1, Concluído: 2, Adiado: 3 };
 
   const filaHoje = atendimentos
@@ -86,12 +98,16 @@ const FilaAtendimento: React.FC = () => {
     .sort((a, b) => {
       const sDiff = statusOrder[a.status] - statusOrder[b.status];
       if (sDiff !== 0) return sDiff;
+      // Hybrid: scheduled within window goes first
+      const aInWindow = isWithinScheduledWindow(a) ? 0 : 1;
+      const bInWindow = isWithinScheduledWindow(b) ? 0 : 1;
+      if (aInWindow !== bInWindow) return aInWindow - bInWindow;
       const pDiff = prioridadeOrder[a.prioridade] - prioridadeOrder[b.prioridade];
       if (pDiff !== 0) return pDiff;
       return a.hora_chegada.localeCompare(b.hora_chegada);
     });
 
-  // Identify scheduled attendances (tipo_registro includes "agendado/agendada")
+  // Identify scheduled attendances
   const agendados = filaHoje.filter(a => a.tipo_registro === 'Atendimento agendado' || a.tipo_registro === 'Reunião agendada');
   const espontaneos = filaHoje.filter(a => a.tipo_registro === 'Sem agendamento');
 
@@ -118,6 +134,15 @@ const FilaAtendimento: React.FC = () => {
     const prioridadeBorda = a.prioridade === 'Alta' ? 'border-l-[#EF4444]' : a.prioridade === 'Média' ? 'border-l-[#EAB308]' : a.prioridade === 'Baixa' ? 'border-l-[#22C55E]' : 'border-l-muted-foreground/30';
     const isFirst = index === 0 && a.status === 'Aguardando';
     const isAlta = a.prioridade === 'Alta';
+    const canCheckin = isAgendado && !a.checkin_realizado && (isBrenda || isSalaEspera);
+    
+    // Check if scheduled time has passed without check-in
+    const aguardandoComparecimento = isAgendado && !a.checkin_realizado && a.hora_agendada && (() => {
+      const [h, m] = a.hora_agendada!.split(':').map(Number);
+      const agendado = new Date();
+      agendado.setHours(h, m, 0, 0);
+      return Date.now() > agendado.getTime();
+    })();
 
     return (
       <div
@@ -148,6 +173,16 @@ const FilaAtendimento: React.FC = () => {
               {isAgendado && (
                 <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-primary/15 text-primary border border-primary/25 flex items-center gap-1">
                   <CalendarClock className="w-3 h-3" /> Agendado
+                </span>
+              )}
+              {a.checkin_realizado && (
+                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-green-500/15 text-green-500 border border-green-500/25 flex items-center gap-1">
+                  <CheckCircle className="w-3 h-3" /> Presente {a.checkin_hora && `às ${a.checkin_hora}`}
+                </span>
+              )}
+              {aguardandoComparecimento && (
+                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> Aguardando Comparecimento
                 </span>
               )}
               <span
@@ -184,6 +219,20 @@ const FilaAtendimento: React.FC = () => {
           </div>
 
           <div className="flex gap-2 items-center flex-shrink-0 flex-wrap">
+            {canCheckin && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 text-xs gap-1 border-primary/30 text-primary hover:bg-primary/10"
+                onClick={() => {
+                  confirmarPresenca(a.id, a.nome_cidadao);
+                  sonnerToast.success(`Presença de ${a.nome_cidadao} confirmada.`);
+                }}
+              >
+                <UserCheck className="w-3.5 h-3.5" />
+                Confirmar Presença
+              </Button>
+            )}
             {isBrenda && (
               <Select
                 value={a.prioridade}

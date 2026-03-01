@@ -14,6 +14,7 @@ interface DataContextType {
   eventosAgenda: EventoAgenda[];
   addAtendimento: (a: Omit<Atendimento, 'id' | 'atualizado_em'>) => void;
   updateAtendimento: (id: string, updates: Partial<Atendimento>) => void;
+  confirmarPresenca: (id: string, nomeCidadao: string) => void;
   addComando: (c: Omit<Comando, 'id' | 'criado_em'>) => void;
   updateComandoStatus: (id: string, status: Comando['status']) => void;
   addMensagem: (m: Omit<MensagemChat, 'id' | 'criado_em'>, canal?: 'sala_brenda' | 'brenda_presidente') => void;
@@ -274,6 +275,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       `O Presidente solicitou o encerramento do atendimento de ${nomeCidadao}.`);
   }, [criarNotificacao]);
 
+  const confirmarPresenca = useCallback((id: string, nomeCidadao: string) => {
+    setAtendimentos(prev => prev.map(a => a.id === id ? {
+      ...a,
+      checkin_realizado: true,
+      checkin_hora: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      atualizado_em: new Date().toISOString(),
+    } : a));
+    criarNotificacao('brenda', 'status_atualizado', 'atendimento', id,
+      `Check-in confirmado: ${nomeCidadao} está presente.`);
+    criarNotificacao('presidente', 'status_atualizado', 'atendimento', id,
+      `Check-in confirmado: ${nomeCidadao} está presente.`);
+  }, [criarNotificacao]);
+
   // ============ 7) AGENDA ============
 
   const addEventoAgenda = useCallback((e: Omit<EventoAgenda, 'id' | 'criado_em' | 'atualizado_em'>) => {
@@ -304,7 +318,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <DataContext.Provider value={{
       atendimentos, comandos, mensagens, notificacoes, solicitacoes, demandasAtendimento, demandas, autorizacoes, eventosAgenda,
-      addAtendimento, updateAtendimento, addComando, updateComandoStatus, addMensagem,
+      addAtendimento, updateAtendimento, confirmarPresenca, addComando, updateComandoStatus, addMensagem,
       marcarNotificacaoLida, addSolicitacao, updateSolicitacaoStatus,
       addDemandaAtendimento, updateDemandaStatus, addDemanda, updateDemandaGlobalStatus,
       salvarAnotacoesPresidente, salvarAnotacoesBrenda, addAutorizacao, concluirAutorizacao, updateAutorizacao,
