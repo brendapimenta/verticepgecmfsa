@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import logoVertice from '@/assets/logo-vertice.png';
 import { NotificationBell } from '@/components/NotificationBell';
+import { UserAvatarMenu } from '@/components/UserAvatarMenu';
 import { cn } from '@/lib/utils';
 import { toast as sonnerToast } from 'sonner';
 import { Notificacao, Perfil, TipoNotificacao } from '@/types';
@@ -243,7 +244,10 @@ export const AppLayout: React.FC = () => {
               </button>
             )}
             <NotificationBell />
-            <span className="text-xs text-muted-foreground hidden sm:inline">{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+            <span className="text-xs text-muted-foreground hidden lg:inline">{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+            <div className="border-l border-border pl-3 ml-1">
+              <UserAvatarMenu />
+            </div>
           </div>
         </header>
         {isViewingAs && (
