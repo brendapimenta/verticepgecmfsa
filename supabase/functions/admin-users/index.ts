@@ -99,13 +99,50 @@ Deno.serve(async (req) => {
 
     // CREATE USER
     if (req.method === "POST" && action === "create") {
-      const body = await req.json();
-      const { nome, username, email, perfil, senha } = body;
+      let body: unknown;
+      try {
+        body = await req.json();
+      } catch {
+        return new Response(JSON.stringify({ error: "Corpo da requisição inválido." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { nome, username, email, perfil, senha } = body as Record<string, string>;
 
       if (!nome || !username || !perfil || !senha) {
         return new Response(JSON.stringify({ error: "Campos obrigatórios: nome, username, perfil, senha" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Input validation: types and length limits
+      if (typeof nome !== "string" || nome.length > 200) {
+        return new Response(JSON.stringify({ error: "Nome inválido ou excede 200 caracteres." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (typeof username !== "string" || username.length > 50 || !/^[a-z0-9._-]+$/.test(username)) {
+        return new Response(JSON.stringify({ error: "Username inválido. Use apenas letras minúsculas, números, pontos, hífens e underscores (máx 50)." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (email && (typeof email !== "string" || email.length > 255 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
+        return new Response(JSON.stringify({ error: "Formato de email inválido." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (typeof senha !== "string" || senha.length > 128) {
+        return new Response(JSON.stringify({ error: "Senha excede o tamanho permitido." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const validPerfis = ["administrador", "sala_espera", "sala_principal", "presidente"];
+      if (!validPerfis.includes(perfil)) {
+        return new Response(JSON.stringify({ error: "Perfil inválido." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
@@ -179,14 +216,47 @@ Deno.serve(async (req) => {
 
     // UPDATE USER
     if (req.method === "PUT" && action === "update") {
-      const body = await req.json();
-      const { id, nome, username, email, perfil, ativo } = body;
+      let body: unknown;
+      try {
+        body = await req.json();
+      } catch {
+        return new Response(JSON.stringify({ error: "Corpo da requisição inválido." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
-      if (!id) {
+      const { id, nome, username, email, perfil, ativo } = body as Record<string, unknown>;
+
+      if (!id || typeof id !== "string") {
         return new Response(JSON.stringify({ error: "ID do usuário é obrigatório" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
+      }
+
+      // Validate optional fields
+      if (nome !== undefined && (typeof nome !== "string" || nome.length > 200)) {
+        return new Response(JSON.stringify({ error: "Nome inválido ou excede 200 caracteres." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (username !== undefined && (typeof username !== "string" || username.length > 50 || !/^[a-z0-9._-]+$/.test(username as string))) {
+        return new Response(JSON.stringify({ error: "Username inválido." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (email !== undefined && (typeof email !== "string" || email.length > 255 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email as string))) {
+        return new Response(JSON.stringify({ error: "Formato de email inválido." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (perfil !== undefined) {
+        const validPerfis = ["administrador", "sala_espera", "sala_principal", "presidente"];
+        if (typeof perfil !== "string" || !validPerfis.includes(perfil as string)) {
+          return new Response(JSON.stringify({ error: "Perfil inválido." }), {
+            status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
       }
 
       const { data: existingUser } = await adminClient
@@ -271,7 +341,26 @@ Deno.serve(async (req) => {
 
     // RESET PASSWORD
     if (req.method === "POST" && action === "reset-password") {
-      const { id, nova_senha, gerar_automatica } = await req.json();
+      let resetBody: unknown;
+      try {
+        resetBody = await req.json();
+      } catch {
+        return new Response(JSON.stringify({ error: "Corpo da requisição inválido." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { id, nova_senha, gerar_automatica } = resetBody as Record<string, unknown>;
+
+      if (!id || typeof id !== "string") {
+        return new Response(JSON.stringify({ error: "ID do usuário é obrigatório." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (nova_senha !== undefined && (typeof nova_senha !== "string" || nova_senha.length > 128)) {
+        return new Response(JSON.stringify({ error: "Senha excede o tamanho permitido." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
       const { data: targetUser } = await adminClient
         .from("usuarios")

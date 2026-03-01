@@ -30,8 +30,25 @@ Deno.serve(async (req) => {
     });
   }
 
-  const { nova_senha } = await req.json();
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return new Response(JSON.stringify({ error: "Corpo da requisição inválido." }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const { nova_senha } = body as Record<string, string>;
   const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
+  if (!nova_senha || typeof nova_senha !== "string" || nova_senha.length > 128) {
+    return new Response(JSON.stringify({ error: "Senha inválida ou excede o tamanho permitido." }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   // Validate new password
   const erroValidacao = validarSenha(nova_senha);
