@@ -106,6 +106,20 @@ export interface DemandaAtendimento {
   criado_por_id: string;
 }
 
+export interface Demanda {
+  id: string;
+  titulo: string;
+  descricao: string;
+  origem_perfil: 'Presidente' | 'Brenda' | 'Sala de Espera';
+  destino_perfil: 'Brenda' | 'Sala de Espera';
+  atendimento_id?: string;
+  prioridade: Prioridade;
+  status: StatusDemanda;
+  prazo?: string;
+  criado_em: string;
+  criado_por_id: string;
+}
+
 export type TipoNotificacao = 'novo_atendimento' | 'prioridade_alterada' | 'novo_comando' | 'nova_mensagem_chat' | 'status_atualizado' | 'nova_solicitacao' | 'ficha_atualizada' | 'nova_demanda_atendimento';
 
 export type ReferenciaTipo = 'atendimento' | 'comando' | 'chat' | 'solicitacao' | 'demanda_atendimento';
