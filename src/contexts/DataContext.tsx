@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Atendimento, AutorizacaoFinanceira, Comando, Demanda, MensagemChat, Notificacao, Perfil, Solicitacao, DemandaAtendimento, StatusDemanda, StatusAutorizacao, EventoAgenda, PautaDespacho, StatusPauta } from '@/types';
+import { getRouteForRef } from '@/lib/notificationRoutes';
 
 interface DataContextType {
   loading: boolean;
@@ -127,7 +128,40 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [usuario?.id, fetchAll]);
 
   // ─── NOTIFICATION HELPER ───
-  const criarNotificacao = useCallback(async (perfil_destino: Perfil, tipo_notificacao: Notificacao['tipo_notificacao'], referencia_tipo: Notificacao['referencia_tipo'], referencia_id: string, mensagem_resumo: string) => {
+  const tipoLabels: Record<string, string> = {
+    novo_atendimento: 'Novo Atendimento', prioridade_alterada: 'Prioridade Alterada',
+    novo_comando: 'Novo Comando', nova_mensagem_chat: 'Nova Mensagem',
+    status_atualizado: 'Status Atualizado', nova_solicitacao: 'Nova Solicitação',
+    solicitacao_status_atualizada: 'Solicitação Atualizada', ficha_atualizada: 'Ficha Atualizada',
+    nova_demanda: 'Nova Demanda', nova_demanda_atendimento: 'Demanda de Atendimento',
+    demanda_status_atualizada: 'Demanda Atualizada', nova_autorizacao: 'Nova Autorização',
+    autorizacao_concluida: 'Autorização Concluída', alerta_urgente: 'Alerta Urgente',
+    chamar_sala_principal: 'Chamar Sala Principal', solicitar_encerramento: 'Solicitar Encerramento',
+    novo_evento_agenda: 'Novo Evento', evento_agenda_editado: 'Evento Editado',
+    nova_pauta: 'Nova Pauta', pauta_decidida: 'Pauta Decidida',
+    pauta_info_solicitada: 'Info Solicitada', pauta_status_atualizada: 'Pauta Atualizada',
+    nova_tarefa_operacional: 'Nova Tarefa',
+  };
+
+  const URGENT_TYPES = ['alerta_urgente', 'solicitar_encerramento'];
+
+  const dispararPush = useCallback((perfil_destino: string, tipo_notificacao: string, referencia_tipo: string, referencia_id: string, mensagem_resumo: string, usuario_destino_id?: string) => {
+    const route = getRouteForRef(referencia_tipo as any, referencia_id);
+    const urgente = URGENT_TYPES.includes(tipo_notificacao);
+    supabase.functions.invoke('send-push', {
+      body: {
+        perfil_destino,
+        usuario_destino_id: usuario_destino_id || null,
+        titulo: tipoLabels[tipo_notificacao] || 'VÉRTICE',
+        mensagem: mensagem_resumo,
+        url: route,
+        tag: `${tipo_notificacao}-${referencia_id}`,
+        urgente,
+      }
+    }).catch(() => {}); // Fire-and-forget
+  }, []);
+
+  const criarNotificacao = useCallback(async (perfil_destino: Perfil, tipo_notificacao: Notificacao['tipo_notificacao'], referencia_tipo: Notificacao['referencia_tipo'], referencia_id: string, mensagem_resumo: string, usuario_destino_id?: string) => {
     if (!usuario) return;
     const { data } = await supabase.from('notificacoes').insert({
       instituicao_id: usuario.instituicao_id,
@@ -136,13 +170,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       referencia_tipo,
       referencia_id: String(referencia_id),
       mensagem_resumo,
+      usuario_destino_id: usuario_destino_id || null,
     }).select().single();
     if (data) {
       const n = data as unknown as Notificacao;
       setNotificacoes(prev => prev.find(x => x.id === n.id) ? prev : [n, ...prev]);
       window.dispatchEvent(new CustomEvent('nova-notificacao', { detail: n }));
+      // Dispatch push notification
+      dispararPush(perfil_destino, tipo_notificacao, referencia_tipo, referencia_id, mensagem_resumo, usuario_destino_id);
     }
-  }, [usuario]);
+  }, [usuario, dispararPush]);
 
   // ============ 1) ATENDIMENTOS ============
 

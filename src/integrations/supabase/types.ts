@@ -729,6 +729,42 @@ export type Database = {
           },
         ]
       }
+      notificacoes_push_dispositivos: {
+        Row: {
+          ativo: boolean
+          auth: string
+          criado_em: string
+          dispositivo: string | null
+          endpoint: string
+          id: string
+          navegador: string | null
+          p256dh: string
+          usuario_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          auth: string
+          criado_em?: string
+          dispositivo?: string | null
+          endpoint: string
+          id?: string
+          navegador?: string | null
+          p256dh: string
+          usuario_id: string
+        }
+        Update: {
+          ativo?: boolean
+          auth?: string
+          criado_em?: string
+          dispositivo?: string | null
+          endpoint?: string
+          id?: string
+          navegador?: string | null
+          p256dh?: string
+          usuario_id?: string
+        }
+        Relationships: []
+      }
       pautas_despacho: {
         Row: {
           atualizado_em: string
@@ -820,6 +856,33 @@ export type Database = {
           },
         ]
       }
+      preferencias_notificacao: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          id: string
+          push_ativo: boolean
+          som_alerta_urgente: boolean
+          usuario_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          id?: string
+          push_ativo?: boolean
+          som_alerta_urgente?: boolean
+          usuario_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          id?: string
+          push_ativo?: boolean
+          som_alerta_urgente?: boolean
+          usuario_id?: string
+        }
+        Relationships: []
+      }
       sessoes_usuario: {
         Row: {
           criado_em: string
@@ -874,6 +937,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sistema_config: {
+        Row: {
+          chave: string
+          criado_em: string | null
+          valor: string
+        }
+        Insert: {
+          chave: string
+          criado_em?: string | null
+          valor: string
+        }
+        Update: {
+          chave?: string
+          criado_em?: string | null
+          valor?: string
+        }
+        Relationships: []
       }
       solicitacoes: {
         Row: {
