@@ -9,7 +9,11 @@ import { toast as sonnerToast } from 'sonner';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
-const TABELAS = [
+const ALLOWED_TABLES = ['usuarios', 'atendimentos', 'pautas_despacho', 'solicitacoes', 'eventos_agenda', 'log_auditoria', 'autorizacoes_financeiras', 'demandas', 'comandos', 'mensagens_chat', 'notificacoes'] as const;
+
+type AllowedTable = typeof ALLOWED_TABLES[number];
+
+const TABELAS: readonly { nome: AllowedTable; label: string }[] = [
   { nome: 'usuarios', label: 'USUÁRIOS' },
   { nome: 'atendimentos', label: 'ATENDIMENTOS' },
   { nome: 'pautas_despacho', label: 'PAUTAS DE DESPACHO' },
@@ -21,8 +25,7 @@ const TABELAS = [
   { nome: 'comandos', label: 'COMANDOS' },
   { nome: 'mensagens_chat', label: 'MENSAGENS DO CHAT' },
   { nome: 'notificacoes', label: 'NOTIFICAÇÕES' },
-] as const;
-
+];
 const ExportarDados: React.FC = () => {
   const { usuario } = useAuth();
   const { registrarAuditoria } = useAudit();
@@ -30,8 +33,12 @@ const ExportarDados: React.FC = () => {
 
   if (!usuario) return null;
 
-  const fetchTabela = async (nome: string) => {
-    const { data, error } = await supabase.from(nome as any).select('*');
+  const fetchTabela = async (nome: AllowedTable) => {
+    if (!ALLOWED_TABLES.includes(nome)) {
+      console.error(`Tabela não permitida: ${nome}`);
+      return [];
+    }
+    const { data, error } = await supabase.from(nome).select('*');
     if (error) { console.error(`Erro ao exportar ${nome}:`, error); return []; }
     return data || [];
   };
