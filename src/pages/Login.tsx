@@ -142,13 +142,13 @@ const LoginPage: React.FC = () => {
         </svg>
       </div>
 
-      <div className="relative z-10 flex flex-col lg:flex-row items-center w-full max-w-5xl mx-auto px-4 gap-12 lg:gap-16">
+      <div className="relative z-10 flex flex-col lg:flex-row items-center justify-center w-full max-w-5xl mx-auto px-4 gap-12 lg:gap-16">
         {/* Left: Branding */}
         <div
-          className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left py-8 lg:py-0"
+          className="flex-1 flex flex-col items-center justify-center text-center py-8 lg:py-0"
           style={{ animation: 'login-brand-in 0.6s ease-out both' }}
         >
-          <div className="relative flex flex-col items-center lg:items-start">
+          <div className="relative flex flex-col items-center">
             <div
               className="absolute inset-0 -m-16 pointer-events-none"
               style={{
@@ -167,7 +167,7 @@ const LoginPage: React.FC = () => {
             GESTÃO ESTRATÉGICA DE ATENDIMENTOS
           </p>
           <div className="h-3" />
-          <p className="text-[10px] lg:text-sm tracking-[0.06em] uppercase whitespace-nowrap leading-relaxed font-medium lg:whitespace-nowrap" style={{ color: '#A9B7C9' }}>
+          <p className="text-[10px] lg:text-sm tracking-[0.06em] uppercase whitespace-nowrap leading-relaxed font-medium" style={{ color: '#A9B7C9' }}>
             CONTROLE, ESTRATÉGIA E PRECISÃO NO ATENDIMENTO PÚBLICO
           </p>
         </div>
