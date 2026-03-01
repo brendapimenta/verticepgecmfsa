@@ -140,7 +140,7 @@ export const AppLayout: React.FC = () => {
   };
 
   const navItems = [
-    { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['administrador', 'sala_principal', 'presidente'] },
+    { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['administrador', 'sala_principal', 'presidente', 'sala_espera'] },
     { to: '/fila', label: 'Fila de Atendimento', icon: ListOrdered, roles: ['administrador', 'sala_principal', 'sala_espera', 'presidente'] },
     { to: '/novo-atendimento', label: 'Novo Atendimento', icon: PlusCircle, roles: ['administrador', 'sala_principal', 'sala_espera'] },
     { to: '/agenda', label: 'Agenda', icon: Calendar, roles: ['administrador', 'sala_principal', 'presidente'] },
@@ -153,6 +153,7 @@ export const AppLayout: React.FC = () => {
     { to: '/auditoria', label: 'Log de Auditoria', icon: Shield, roles: ['administrador'] },
     { to: '/usuarios', label: 'Gestão de Usuários', icon: Users, roles: ['administrador'] },
     { to: '/exportar', label: 'Exportar Dados', icon: Download, roles: ['administrador'] },
+    { to: '/status-sistema', label: 'Status do Sistema', icon: Shield, roles: ['administrador'] },
     { to: '/configuracao-instituicao', label: 'Configuração Instituição', icon: Building2, roles: ['administrador'] },
   ].filter(item => {
     if (isAdmin && isViewingAs) return item.roles.includes(perfilUI) || item.roles.includes('administrador');

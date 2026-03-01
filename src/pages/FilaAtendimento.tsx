@@ -48,6 +48,13 @@ const getTempoEspera = (hora: string) => {
   return diff > 0 ? diff : 0;
 };
 
+const formatarTempo = (minutos: number): string => {
+  if (minutos < 60) return `${minutos} min`;
+  const horas = Math.floor(minutos / 60);
+  const mins = minutos % 60;
+  return mins > 0 ? `${horas}h ${mins}min` : `${horas}h`;
+};
+
 const FilaAtendimento: React.FC = () => {
   const navigate = useNavigate();
   const { atendimentos, updateAtendimento, confirmarPresenca, demandasAtendimento, updateDemandaStatus, eventosAgenda } = useData();
@@ -220,7 +227,7 @@ const FilaAtendimento: React.FC = () => {
             {tempo > 30 && (
               <div className="flex items-center gap-1 text-xs font-medium">
                 <AlertCircle className="w-3 h-3" />
-                <span>{tempo} min de espera</span>
+                <span>{formatarTempo(tempo)} de espera</span>
               </div>
             )}
           </div>

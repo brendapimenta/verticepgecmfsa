@@ -47,7 +47,7 @@ const Demandas: React.FC = () => {
 
   const origemLabel = perfilUI === 'presidente' ? 'Presidente' : perfilUI === 'sala_principal' ? 'Sala Principal' : 'Sala de Espera';
 
-  // Presidente can't send to himself, only Brenda/Sala de Espera
+  // Presidente can't send to himself, only Sala Principal/Sala de Espera
   const destinoOptions = perfilUI === 'presidente'
     ? [{ value: 'Sala Principal', label: 'Sala Principal' }, { value: 'Sala de Espera', label: 'Sala de Espera' }]
     : perfilUI === 'sala_principal'

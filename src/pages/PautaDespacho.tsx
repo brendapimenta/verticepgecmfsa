@@ -67,7 +67,7 @@ const PautaDespachoPage: React.FC = () => {
   });
 
   const isPresidente = perfilUI === 'presidente';
-  const isBrenda = perfilUI === 'sala_principal';
+  const isSalaPrincipal = perfilUI === 'sala_principal';
   const isAdmin = perfilUI === 'administrador';
 
   // Filter based on profile
@@ -196,7 +196,7 @@ const PautaDespachoPage: React.FC = () => {
     toast.success(`Status alterado para ${newStatus}.`);
   };
 
-  // Brenda sections
+  // Sala Principal sections
   const aguardandoDecisao = pautasDespacho.filter(p => p.tipo_registro === 'Decisão Presidencial' && ['Pendente', 'Em Reunião'].includes(p.status));
   const emExecucao = pautasDespacho.filter(p => p.tipo_registro === 'Tarefa Operacional' && p.status === 'Em Execução');
   const concluidos = pautasDespacho.filter(p => p.status === 'Concluído');
@@ -281,8 +281,8 @@ const PautaDespachoPage: React.FC = () => {
         </div>
       )}
 
-      {/* Brenda actions */}
-      {(isBrenda || isAdmin) && p.status === 'Decidido' && (
+      {/* Sala Principal actions */}
+      {(isSalaPrincipal || isAdmin) && p.status === 'Decidido' && (
         <div className="flex gap-2 pt-1">
           <Button size="sm" variant="outline" onClick={() => { setTarefaOpen(p.id); setFormTarefa({ titulo: '', descricao_resumida: '', prioridade: 'Média', prazo: '' }); }} className="text-xs gap-1">
             <Plus className="w-3 h-3" /> CRIAR TAREFA OPERACIONAL
@@ -293,7 +293,7 @@ const PautaDespachoPage: React.FC = () => {
         </div>
       )}
 
-      {(isBrenda || isAdmin) && p.tipo_registro === 'Tarefa Operacional' && p.status === 'Em Execução' && (
+      {(isSalaPrincipal || isAdmin) && p.tipo_registro === 'Tarefa Operacional' && p.status === 'Em Execução' && (
         <div className="flex gap-2 pt-1">
           <Button size="sm" variant="outline" onClick={() => handleStatusChange(p.id, 'Concluído')} className="text-xs gap-1">
             <CheckCheck className="w-3 h-3" /> CONCLUIR TAREFA
@@ -319,7 +319,7 @@ const PautaDespachoPage: React.FC = () => {
           <p className="text-sm text-muted-foreground mt-1 uppercase">DECISÕES E ENCAMINHAMENTOS ESTRATÉGICOS</p>
           <p className="text-xs text-muted-foreground mt-0.5">Organização das pautas que dependem de decisão do Presidente e das tarefas decorrentes.</p>
         </div>
-        {(isBrenda || isAdmin || isPresidente) && (
+        {(isSalaPrincipal || isAdmin || isPresidente) && (
           <Button onClick={() => setCriarOpen(true)} className="gap-1.5">
             <Plus className="w-4 h-4" /> NOVA PAUTA
           </Button>
@@ -338,8 +338,8 @@ const PautaDespachoPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Brenda sectioned view */}
-      {(isBrenda || isAdmin) && (
+      {/* Sala Principal sectioned view */}
+      {(isSalaPrincipal || isAdmin) && (
         <div className="space-y-8">
           {/* Seção vermelha */}
           <section>
