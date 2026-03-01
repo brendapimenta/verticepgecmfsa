@@ -1006,7 +1006,6 @@ export type Database = {
           ativo: boolean | null
           atualizado_em: string | null
           auth_user_id: string | null
-          bloqueado_ate: string | null
           criado_em: string | null
           email: string | null
           id: string | null
@@ -1014,7 +1013,6 @@ export type Database = {
           nome: string | null
           perfil: Database["public"]["Enums"]["perfil_usuario"] | null
           primeiro_login_pendente: boolean | null
-          tentativas_login_falhas: number | null
           ultimo_login_em: string | null
           username: string | null
         }
@@ -1022,7 +1020,6 @@ export type Database = {
           ativo?: boolean | null
           atualizado_em?: string | null
           auth_user_id?: string | null
-          bloqueado_ate?: string | null
           criado_em?: string | null
           email?: string | null
           id?: string | null
@@ -1030,7 +1027,6 @@ export type Database = {
           nome?: string | null
           perfil?: Database["public"]["Enums"]["perfil_usuario"] | null
           primeiro_login_pendente?: boolean | null
-          tentativas_login_falhas?: number | null
           ultimo_login_em?: string | null
           username?: string | null
         }
@@ -1038,7 +1034,6 @@ export type Database = {
           ativo?: boolean | null
           atualizado_em?: string | null
           auth_user_id?: string | null
-          bloqueado_ate?: string | null
           criado_em?: string | null
           email?: string | null
           id?: string | null
@@ -1046,7 +1041,6 @@ export type Database = {
           nome?: string | null
           perfil?: Database["public"]["Enums"]["perfil_usuario"] | null
           primeiro_login_pendente?: boolean | null
-          tentativas_login_falhas?: number | null
           ultimo_login_em?: string | null
           username?: string | null
         }
