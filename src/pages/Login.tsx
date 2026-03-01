@@ -184,11 +184,11 @@ const LoginPage: React.FC = () => {
               </div>
               <div className="h-[18px]" />
               <p className="text-base lg:text-xl tracking-[0.12em] uppercase font-semibold" style={{ color: '#DCE6F2' }}>
-                GESTÃO ESTRATÉGICA DE ATENDIMENTOS
+                PLATAFORMA DE GESTÃO ESTRATÉGICA PARA CÂMARAS MUNICIPAIS
               </p>
               <div className="h-3" />
-              <p className="text-[10px] lg:text-sm tracking-[0.06em] uppercase whitespace-nowrap leading-relaxed font-medium" style={{ color: '#A9B7C9' }}>
-                CONTROLE, ESTRATÉGIA E PRECISÃO NO ATENDIMENTO PÚBLICO
+              <p className="text-[10px] lg:text-sm tracking-[0.06em] uppercase leading-relaxed font-medium" style={{ color: '#A9B7C9' }}>
+                🔹 CONTROLE, ESTRATÉGIA E PRECISÃO NA GESTÃO PÚBLICA.
               </p>
             </div>
 
@@ -322,6 +322,13 @@ const LoginPage: React.FC = () => {
           transform: scale(0.98);
         }
       `}</style>
+
+      {/* Footer */}
+      <div className="absolute bottom-4 left-0 right-0 text-center z-10">
+        <p className="text-[10px] tracking-[0.08em] uppercase font-medium" style={{ color: '#5A6F8A' }}>
+          © 2026 VÉRTICE TECNOLOGIA INSTITUCIONAL
+        </p>
+      </div>
     </div>
   );
 };
