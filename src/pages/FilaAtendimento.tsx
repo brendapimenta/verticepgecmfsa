@@ -13,6 +13,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
+import { PersonAvatar } from '@/components/PersonAvatar';
 
 const prioridadeOrder: Record<Prioridade, number> = { Alta: 0, Média: 1, Baixa: 2 };
 
@@ -89,8 +90,9 @@ const FilaAtendimento: React.FC = () => {
             <div key={a.id} className={cn("bg-card rounded-lg border p-4 border-l-4 transition-all", tempoAlerta)}>
               <div className="flex flex-col md:flex-row md:items-center gap-3">
                 <div className="flex-1 space-y-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <button onClick={() => navigate(`/atendimento/${a.id}`)} className="font-semibold text-foreground hover:text-accent underline-offset-2 hover:underline">{a.nome_cidadao}</button>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <PersonAvatar nome={a.nome_cidadao} fotoUrl={a.foto_url} size="sm" />
+                      <button onClick={() => navigate(`/atendimento/${a.id}`)} className="font-semibold text-foreground hover:text-accent underline-offset-2 hover:underline">{a.nome_cidadao}</button>
                     <span className={cn("px-2 py-0.5 rounded text-xs font-bold border", prioridadeBadge[a.prioridade])}>
                       {a.prioridade}
                     </span>

@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Save, Send, Clock, User, Phone, FileText, StickyNote, ClipboardList, Loader2, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { PersonAvatar } from '@/components/PersonAvatar';
 
 const statusDemandaStyle: Record<StatusDemanda, string> = {
   Pendente: 'bg-yellow-500/15 text-yellow-300',
@@ -79,10 +80,11 @@ const AtendimentoDetalhe: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
+        <PersonAvatar nome={atendimento.nome_cidadao} fotoUrl={atendimento.foto_url} size="lg" />
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground">{atendimento.nome_cidadao}</h1>
           <p className="text-sm text-muted-foreground">{atendimento.demanda_principal}</p>
