@@ -942,6 +942,7 @@ export type Database = {
           ativo: boolean
           atualizado_em: string
           auth_user_id: string | null
+          avatar_path: string | null
           bloqueado_ate: string | null
           criado_em: string
           email: string
@@ -958,6 +959,7 @@ export type Database = {
           ativo?: boolean
           atualizado_em?: string
           auth_user_id?: string | null
+          avatar_path?: string | null
           bloqueado_ate?: string | null
           criado_em?: string
           email: string
@@ -974,6 +976,7 @@ export type Database = {
           ativo?: boolean
           atualizado_em?: string
           auth_user_id?: string | null
+          avatar_path?: string | null
           bloqueado_ate?: string | null
           criado_em?: string
           email?: string

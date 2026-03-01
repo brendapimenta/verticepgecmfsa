@@ -12,6 +12,8 @@ export interface UsuarioAuth {
   ativo: boolean;
   instituicao_id: string;
   primeiro_login_pendente?: boolean;
+  avatar_path?: string | null;
+  auth_user_id?: string | null;
 }
 
 interface AuthContextType {
@@ -22,6 +24,7 @@ interface AuthContextType {
   loading: boolean;
   trocarSenha: (novaSenha: string) => Promise<{ success: boolean; error?: string }>;
   setPrimeiroLoginDone: () => void;
+  updateAvatar: (avatarPath: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -41,7 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data: profile } = await supabase
         .from('usuarios')
-        .select('id, nome, email, username, perfil, ativo, instituicao_id, primeiro_login_pendente')
+        .select('id, nome, email, username, perfil, ativo, instituicao_id, primeiro_login_pendente, avatar_path, auth_user_id')
         .eq('auth_user_id', userId)
         .single();
 
@@ -146,13 +149,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUsuario(prev => prev ? { ...prev, primeiro_login_pendente: false } : prev);
   }, []);
 
+  const updateAvatar = useCallback((avatarPath: string | null) => {
+    setUsuario(prev => prev ? { ...prev, avatar_path: avatarPath } : prev);
+  }, []);
+
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
     setUsuario(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ usuario, login, logout, isAuthenticated: !!usuario, loading, trocarSenha, setPrimeiroLoginDone }}>
+    <AuthContext.Provider value={{ usuario, login, logout, isAuthenticated: !!usuario, loading, trocarSenha, setPrimeiroLoginDone, updateAvatar }}>
       {children}
     </AuthContext.Provider>
   );
