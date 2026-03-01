@@ -17,16 +17,16 @@ import { cn } from '@/lib/utils';
 const prioridadeOrder: Record<Prioridade, number> = { Alta: 0, Média: 1, Baixa: 2 };
 
 const prioridadeBadge: Record<Prioridade, string> = {
-  Alta: 'bg-red-100 text-red-800 border-red-300',
-  Média: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-  Baixa: 'bg-green-100 text-green-800 border-green-300',
+  Alta: 'bg-red-500/15 text-red-400 border-red-500/30',
+  Média: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30',
+  Baixa: 'bg-green-500/15 text-green-400 border-green-500/30',
 };
 
 const statusBadge: Record<StatusAtendimento, string> = {
-  Aguardando: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-  'Em Atendimento': 'bg-blue-100 text-blue-800 border-blue-300',
-  Concluído: 'bg-green-100 text-green-800 border-green-300',
-  Adiado: 'bg-gray-100 text-gray-700 border-gray-300',
+  Aguardando: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30',
+  'Em Atendimento': 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+  Concluído: 'bg-green-500/15 text-green-400 border-green-500/30',
+  Adiado: 'bg-gray-500/15 text-gray-400 border-gray-500/30',
 };
 
 const getTempoEspera = (hora: string) => {
@@ -156,7 +156,7 @@ const FilaAtendimento: React.FC = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-8 text-xs gap-1 border-green-300 text-green-700 hover:bg-green-50 hover:text-green-800"
+                      className="h-8 text-xs gap-1 border-green-500/30 text-green-400 hover:bg-green-500/15 hover:text-green-300"
                       onClick={() => setConcluirId(a.id)}
                     >
                       <CheckCircle className="w-3.5 h-3.5" />
@@ -218,7 +218,7 @@ const FilaAtendimento: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className={d.status === 'Pendente' ? 'bg-yellow-100 text-yellow-800' : d.status === 'Em andamento' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}>{d.status}</Badge>
+                    <Badge className={d.status === 'Pendente' ? 'bg-yellow-500/15 text-yellow-300' : d.status === 'Em andamento' ? 'bg-blue-500/15 text-blue-400' : 'bg-green-500/15 text-green-400'}>{d.status}</Badge>
                     {d.status !== 'Concluída' && (
                       <Select value={d.status} onValueChange={v => updateDemandaStatus(d.id, v as StatusDemanda)}>
                         <SelectTrigger className="w-32 h-8 text-xs"><SelectValue /></SelectTrigger>

@@ -24,15 +24,15 @@ const statusIcon: Record<StatusComando, React.ReactNode> = {
 };
 
 const statusStyle: Record<StatusComando, string> = {
-  Pendente: 'bg-yellow-100 text-yellow-800',
-  'Em andamento': 'bg-blue-100 text-blue-800',
-  Concluído: 'bg-green-100 text-green-800',
+  Pendente: 'bg-yellow-500/15 text-yellow-300',
+  'Em andamento': 'bg-blue-500/15 text-blue-400',
+  Concluído: 'bg-green-500/15 text-green-400',
 };
 
 const solicitacaoStatusStyle: Record<StatusSolicitacao, string> = {
-  Pendente: 'bg-yellow-100 text-yellow-800',
-  'Em andamento': 'bg-blue-100 text-blue-800',
-  Concluída: 'bg-green-100 text-green-800',
+  Pendente: 'bg-yellow-500/15 text-yellow-300',
+  'Em andamento': 'bg-blue-500/15 text-blue-400',
+  Concluída: 'bg-green-500/15 text-green-400',
 };
 
 const Comandos: React.FC = () => {
