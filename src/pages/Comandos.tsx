@@ -136,7 +136,7 @@ const Comandos: React.FC = () => {
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
-        <h1 className="font-display text-2xl font-bold text-foreground">Comandos Rápidos</h1>
+        <h1 className="font-display text-2xl font-bold text-foreground uppercase">COMANDOS RÁPIDOS</h1>
         <p className="text-sm text-muted-foreground mt-1">Envie e gerencie chamadas e solicitações hierárquicas</p>
       </div>
 

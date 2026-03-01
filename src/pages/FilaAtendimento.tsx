@@ -298,7 +298,7 @@ const FilaAtendimento: React.FC = () => {
   return (
     <div className="animate-fade-in">
       <div className="mb-6">
-        <h1 className="font-display text-2xl font-bold text-foreground">Fila de Atendimento</h1>
+        <h1 className="font-display text-2xl font-bold text-foreground uppercase">FILA DE ATENDIMENTO</h1>
         <p className="text-sm text-muted-foreground mt-1">{filaHoje.length} em espera ou em atendimento</p>
       </div>
 

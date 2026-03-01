@@ -142,7 +142,7 @@ const AutorizacoesFinanceiras: React.FC = () => {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold text-foreground">Autorizações Financeiras</h1>
+          <h1 className="font-display text-2xl font-bold text-foreground uppercase">AUTORIZAÇÕES FINANCEIRAS</h1>
           <p className="text-sm text-muted-foreground mt-1">{pendentes.length} pendente{pendentes.length !== 1 ? 's' : ''}</p>
         </div>
         {canCreate && (

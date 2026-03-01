@@ -107,7 +107,7 @@ const Notificacoes: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="font-display text-2xl font-bold text-foreground">Notificações</h1>
+        <h1 className="font-display text-2xl font-bold text-foreground uppercase">NOTIFICAÇÕES</h1>
         <p className="text-sm text-muted-foreground mt-1">Todas as suas notificações</p>
       </div>
 
