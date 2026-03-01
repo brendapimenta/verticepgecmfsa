@@ -131,11 +131,11 @@ const Dashboard: React.FC = () => {
   const dataFormatada = format(new Date(), "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR });
 
   const stats = [
-    { key: 'hoje', label: 'ATENDIMENTOS HOJE', value: atendHoje.length, icon: Users, color: 'text-primary' },
-    { key: 'espera', label: 'EM ESPERA', value: aguardando.length, icon: Clock, color: 'text-accent' },
-    { key: 'atendimento', label: 'EM ATENDIMENTO', value: emAtendimento.length, icon: UserCheck, color: 'text-primary' },
-    { key: 'alta', label: 'PRIORIDADE ALTA', value: urgencias.length, icon: AlertTriangle, color: 'text-destructive' },
-    { key: 'tempo', label: 'TEMPO MÉDIO', value: tempoMedioEspera < 60 ? `${tempoMedioEspera}min` : `${Math.floor(tempoMedioEspera / 60)}h ${tempoMedioEspera % 60}min`, icon: Timer, color: 'text-muted-foreground' },
+    { key: 'hoje', label: 'ATENDIMENTOS HOJE', value: atendHoje.length, icon: Users, borderColor: '#1E4E8C' },
+    { key: 'espera', label: 'EM ESPERA', value: aguardando.length, icon: Clock, borderColor: '#EAB308' },
+    { key: 'atendimento', label: 'EM ATENDIMENTO', value: emAtendimento.length, icon: UserCheck, borderColor: '#1E7D5C' },
+    { key: 'alta', label: 'PRIORIDADE ALTA', value: urgencias.length, icon: AlertTriangle, borderColor: '#B3261E' },
+    { key: 'tempo', label: 'TEMPO MÉDIO', value: tempoMedioEspera < 60 ? `${tempoMedioEspera}min` : `${Math.floor(tempoMedioEspera / 60)}h ${tempoMedioEspera % 60}min`, icon: Timer, borderColor: '#555555' },
   ];
 
   // Detail view for metrics
@@ -179,9 +179,9 @@ const Dashboard: React.FC = () => {
   return (
     <div className="space-y-5 animate-fade-in">
       {/* ═══════════════════ 1) CABEÇALHO INSTITUCIONAL ═══════════════════ */}
-      <div className="rounded-xl bg-primary/10 dark:bg-primary/20 border border-primary/20 px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div className="rounded-xl bg-card border border-border shadow-sm px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-t-[3px] border-t-[#142B4D]">
         <div>
-          <h2 className="font-display text-base font-bold text-primary tracking-wide uppercase">
+          <h2 className="font-display text-base font-bold text-foreground tracking-wide uppercase">
             CÂMARA MUNICIPAL DE FEIRA DE SANTANA
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">Gabinete da Presidência</p>
@@ -195,7 +195,7 @@ const Dashboard: React.FC = () => {
             {perfilUI === 'administrador' ? 'Administrador' : perfilUI === 'presidente' ? 'Presidente' : perfilUI === 'sala_principal' ? 'Sala Principal' : 'Sala de Espera'}
           </p>
           <div className="flex items-center gap-1.5 mt-0.5 sm:justify-end">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
             <span className="text-[10px] text-muted-foreground">Online</span>
           </div>
         </div>
@@ -204,15 +204,19 @@ const Dashboard: React.FC = () => {
       {/* ═══════════════════ 2) LINHA EXECUTIVA DE MÉTRICAS ═══════════════════ */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {stats.map(s => (
-          <div key={s.key} className="stat-card !py-3 !px-4">
-            <div className="flex items-center gap-2 mb-1">
-              <s.icon className={`w-4 h-4 ${s.color}`} />
+          <div
+            key={s.key}
+            className="stat-card !py-4 !px-4 border-t-[3px]"
+            style={{ borderTopColor: s.borderColor }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <s.icon className="w-4 h-4 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground truncate uppercase font-medium">{s.label}</span>
             </div>
-            <p className="text-xl font-bold text-foreground">{s.value}</p>
+            <p className="text-2xl font-bold text-foreground">{s.value}</p>
             <button
               onClick={() => setExpandMetrica(expandMetrica === s.key ? null : s.key)}
-              className="flex items-center gap-1 text-[10px] text-primary hover:underline mt-1"
+              className="flex items-center gap-1 text-[10px] text-accent hover:underline mt-2"
             >
               {expandMetrica === s.key ? 'FECHAR' : 'VER DETALHES'}
               {expandMetrica === s.key ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -229,8 +233,8 @@ const Dashboard: React.FC = () => {
 
           {/* ═══════════════════ 3) BLOCO ATENDIMENTO ATUAL ═══════════════════ */}
           <div className="stat-card !p-0 overflow-hidden">
-            <div className="px-5 py-3 border-b border-border flex items-center gap-2 bg-primary/5 dark:bg-primary/10">
-              <Shield className="w-4 h-4 text-primary" />
+            <div className="px-5 py-3 border-b border-border flex items-center gap-2 border-t-[3px] border-t-[#142B4D] rounded-t-xl">
+              <Shield className="w-4 h-4 text-foreground" />
               <h3 className="font-display text-sm font-bold text-foreground uppercase">
                 {isPresidente ? 'SALA PRESIDENCIAL – ATENDIMENTO ATUAL' : isSalaPrincipal ? 'ATENDIMENTO EM ANDAMENTO' : 'STATUS DA FILA'}
               </h3>
@@ -251,10 +255,10 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <span className="px-2 py-0.5 rounded text-xs font-medium bg-secondary text-secondary-foreground">{atendimentoAtual.tipo}</span>
-                  <span className={cn("px-2 py-0.5 rounded text-xs font-bold",
-                    atendimentoAtual.prioridade === 'Alta' ? 'bg-destructive/15 text-destructive' :
-                    atendimentoAtual.prioridade === 'Média' ? 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400' :
-                    'bg-green-500/15 text-green-600 dark:text-green-400'
+                  <span className={cn("px-2 py-0.5 rounded text-xs font-bold border",
+                    atendimentoAtual.prioridade === 'Alta' ? 'priority-high' :
+                    atendimentoAtual.prioridade === 'Média' ? 'priority-medium' :
+                    'priority-low'
                   )}>{atendimentoAtual.prioridade}</span>
                 </div>
 
@@ -312,9 +316,9 @@ const Dashboard: React.FC = () => {
                     <p className="text-sm font-semibold text-foreground">{proximoFila.nome_cidadao}</p>
                     <p className="text-xs text-muted-foreground">{proximoFila.demanda_principal}</p>
                   </div>
-                  <Badge variant="outline" className={cn("text-[10px]",
-                    proximoFila.prioridade === 'Alta' ? 'border-destructive text-destructive' :
-                    proximoFila.prioridade === 'Média' ? 'border-yellow-500 text-yellow-600' : ''
+                  <Badge variant="outline" className={cn("text-[10px] border",
+                    proximoFila.prioridade === 'Alta' ? 'priority-high' :
+                    proximoFila.prioridade === 'Média' ? 'priority-medium' : ''
                   )}>{proximoFila.prioridade}</Badge>
                 </div>
               </div>
@@ -351,9 +355,9 @@ const Dashboard: React.FC = () => {
           {/* ═══════════════════ 4) BLOCO PAUTAS PARA DESPACHO ═══════════════════ */}
           {!isSalaEspera && (
             <div className="stat-card !p-0 overflow-hidden">
-              <div className="px-5 py-3 border-b border-border flex items-center justify-between bg-accent/5 dark:bg-accent/10">
+              <div className="px-5 py-3 border-b border-border flex items-center justify-between border-t-[3px] border-t-[#1E7D5C] rounded-t-xl">
                 <div className="flex items-center gap-2">
-                  <Gavel className="w-4 h-4 text-accent" />
+                  <Gavel className="w-4 h-4 text-foreground" />
                   <h3 className="font-display text-sm font-bold text-foreground uppercase">PAUTAS PARA DESPACHO</h3>
                 </div>
                 {pautasPendentes.length > 0 && (
@@ -377,7 +381,7 @@ const Dashboard: React.FC = () => {
                     <p className="text-[10px] text-muted-foreground uppercase">EM EXECUÇÃO</p>
                   </div>
                   <div>
-                    <p className="text-lg font-bold text-green-600 dark:text-green-400">{pautasConcluidas.length}</p>
+                    <p className="text-lg font-bold text-[#22C55E]">{pautasConcluidas.length}</p>
                     <p className="text-[10px] text-muted-foreground uppercase">CONCLUÍDAS</p>
                   </div>
                 </div>
@@ -394,8 +398,8 @@ const Dashboard: React.FC = () => {
           {/* ═══════════════════ 6) BLOCO INDICADORES DE GESTÃO ═══════════════════ */}
           {showGestao && (
             <div className="stat-card !p-0 overflow-hidden">
-              <div className="px-5 py-3 border-b border-border flex items-center gap-2 bg-primary/5 dark:bg-primary/10">
-                <BarChart3 className="w-4 h-4 text-primary" />
+              <div className="px-5 py-3 border-b border-border flex items-center gap-2 border-t-[3px] border-t-[#1E4E8C] rounded-t-xl">
+                <BarChart3 className="w-4 h-4 text-foreground" />
                 <h3 className="font-display text-sm font-bold text-foreground uppercase">INDICADORES DE GESTÃO</h3>
               </div>
               <div className="p-4 space-y-4">
@@ -467,7 +471,7 @@ const Dashboard: React.FC = () => {
 
           {/* ═══════════════════ 5) BLOCO AGENDA ESTRATÉGICA ═══════════════════ */}
           <div className="stat-card !p-0 overflow-hidden">
-            <div className="px-4 py-2.5 border-b border-border flex items-center justify-between bg-primary/5 dark:bg-primary/10">
+            <div className="px-4 py-2.5 border-b border-border flex items-center justify-between border-t-[3px] border-t-[#1E4E8C] rounded-t-xl">
               <button onClick={() => setCalendarMonth(prev => subMonths(prev, 1))} className="p-1 rounded hover:bg-muted transition-colors">
                 <ChevronLeft className="w-4 h-4 text-muted-foreground" />
               </button>
@@ -526,9 +530,9 @@ const Dashboard: React.FC = () => {
 
           {/* Compromissos do dia */}
           <div className="stat-card !p-0 overflow-hidden">
-            <div className="px-5 py-3 border-b border-border flex items-center justify-between bg-accent/5 dark:bg-accent/10">
+            <div className="px-5 py-3 border-b border-border flex items-center justify-between border-t-[3px] border-t-[#1E7D5C] rounded-t-xl">
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-accent" />
+                <Calendar className="w-4 h-4 text-foreground" />
                 <h3 className="font-display text-sm font-bold text-foreground uppercase">
                   {isSameDay(selectedDate, new Date()) ? 'COMPROMISSOS DE HOJE' : `AGENDA – ${format(selectedDate, "dd/MM")}`}
                 </h3>
@@ -571,8 +575,8 @@ const Dashboard: React.FC = () => {
 
           {/* ═══════════════════ 7) BLOCO ALERTAS ESTRATÉGICOS ═══════════════════ */}
           <div className="stat-card !p-0 overflow-hidden">
-            <div className="px-5 py-3 border-b border-border flex items-center gap-2 bg-destructive/5 dark:bg-destructive/10">
-              <Bell className="w-4 h-4 text-destructive" />
+            <div className="px-5 py-3 border-b border-border flex items-center gap-2 border-t-[3px] border-t-[#B3261E] rounded-t-xl">
+              <Bell className="w-4 h-4 text-foreground" />
               <h3 className="font-display text-sm font-bold text-foreground uppercase">ALERTAS ESTRATÉGICOS</h3>
             </div>
             <div className="divide-y divide-border">

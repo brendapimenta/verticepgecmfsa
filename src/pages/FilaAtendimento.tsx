@@ -28,16 +28,16 @@ import { ptBR } from 'date-fns/locale';
 const prioridadeOrder: Record<Prioridade, number> = { Alta: 0, Média: 1, Baixa: 2 };
 
 const prioridadeBadge: Record<Prioridade, string> = {
-  Alta: 'bg-red-500/15 text-red-400 border-red-500/30',
-  Média: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30',
-  Baixa: 'bg-green-500/15 text-green-400 border-green-500/30',
+  Alta: 'priority-high',
+  Média: 'priority-medium',
+  Baixa: 'priority-low',
 };
 
 const statusBadge: Record<StatusAtendimento, string> = {
-  Aguardando: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30',
-  'Em Atendimento': 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-  Concluído: 'bg-green-500/15 text-green-400 border-green-500/30',
-  Adiado: 'bg-gray-500/15 text-gray-400 border-gray-500/30',
+  Aguardando: 'badge-status-waiting',
+  'Em Atendimento': 'badge-status-in-progress',
+  Concluído: 'badge-status-completed',
+  Adiado: 'badge-status-postponed',
 };
 
 const getTempoEspera = (hora: string) => {
@@ -140,7 +140,7 @@ const FilaAtendimento: React.FC = () => {
 
   const renderAtendimentoCard = (a: typeof atendimentos[0], index: number, isAgendado: boolean) => {
     const tempo = getTempoEspera(a.hora_chegada);
-    const prioridadeBorda = a.prioridade === 'Alta' ? 'border-l-[#EF4444]' : a.prioridade === 'Média' ? 'border-l-[#EAB308]' : a.prioridade === 'Baixa' ? 'border-l-[#22C55E]' : 'border-l-muted-foreground/30';
+    const prioridadeBorda = a.prioridade === 'Alta' ? 'border-l-[#B3261E]' : a.prioridade === 'Média' ? 'border-l-[#EAB308]' : a.prioridade === 'Baixa' ? 'border-l-[#22C55E]' : 'border-l-border';
     const isFirst = index === 0 && a.status === 'Aguardando';
     const isAlta = a.prioridade === 'Alta';
     const canCheckin = isAgendado && !a.checkin_realizado && (isSalaPrincipal || isSalaEspera);
@@ -157,12 +157,11 @@ const FilaAtendimento: React.FC = () => {
       <div
         key={a.id}
         className={cn(
-          "bg-card rounded-lg border p-4 border-l-4 transition-all",
+          "bg-card rounded-lg border border-border shadow-sm p-4 border-l-4 transition-all",
           prioridadeBorda,
-          isFirst && "ring-1 ring-primary/30",
-          isAlta && !isFirst && "ring-1 ring-red-500/20"
+          isFirst && "ring-1 ring-accent/30",
+          isAlta && !isFirst && "ring-1 ring-destructive/20"
         )}
-        style={isFirst ? { background: 'hsl(var(--primary) / 0.08)' } : isAlta ? { background: 'hsl(var(--destructive) / 0.04)' } : undefined}
       >
         <div className="flex flex-col md:flex-row md:items-center gap-3">
           <div className="flex-shrink-0 flex flex-col items-center gap-1 md:w-12">
@@ -175,22 +174,22 @@ const FilaAtendimento: React.FC = () => {
               <PersonAvatar nome={a.nome_cidadao} fotoUrl={a.foto_url} size="sm" />
               <button onClick={() => navigate(`/atendimento/${a.id}`)} className="font-semibold text-foreground hover:text-accent underline-offset-2 hover:underline">{a.nome_cidadao}</button>
               {isFirst && (
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-primary/20 text-foreground border border-primary/30">
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-accent/10 text-accent border border-accent/20">
                   Próximo
                 </span>
               )}
               {isAgendado && (
-                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-primary/15 text-primary border border-primary/25 flex items-center gap-1">
+                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-accent/10 text-accent border border-accent/20 flex items-center gap-1">
                   <CalendarClock className="w-3 h-3" /> Agendado
                 </span>
               )}
               {a.checkin_realizado && (
-                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-green-500/15 text-green-500 border border-green-500/25 flex items-center gap-1">
+                <span className="px-2 py-0.5 rounded text-[10px] font-medium badge-status-completed flex items-center gap-1 border">
                   <CheckCircle className="w-3 h-3" /> Presente {a.checkin_hora && `às ${a.checkin_hora}`}
                 </span>
               )}
               {aguardandoComparecimento && (
-                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 flex items-center gap-1">
+                <span className="px-2 py-0.5 rounded text-[10px] font-medium badge-status-waiting flex items-center gap-1 border">
                   <Clock className="w-3 h-3" /> Aguardando Comparecimento
                 </span>
               )}
@@ -203,7 +202,7 @@ const FilaAtendimento: React.FC = () => {
               </span>
               <Badge variant="outline" className="text-xs">{a.tipo}</Badge>
               {(a.tipo === 'Vereador' || a.tipo === 'Autoridade') && (
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-primary/20 text-primary border border-primary/30">
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-accent/10 text-accent border border-accent/20">
                   Institucional
                 </span>
               )}
@@ -289,7 +288,7 @@ const FilaAtendimento: React.FC = () => {
               <Button
                 size="sm"
                 variant="outline"
-                className="h-8 text-xs gap-1 border-green-500/30 text-green-400 hover:bg-green-500/15 hover:text-green-300"
+                className="h-8 text-xs gap-1 badge-status-completed border hover:opacity-80"
                 onClick={() => setConcluirId(a.id)}
               >
                 <CheckCircle className="w-3.5 h-3.5" />
@@ -323,8 +322,8 @@ const FilaAtendimento: React.FC = () => {
               </div>
               <div className="space-y-2">
                 {agendadosHoje.map(e => (
-                  <div key={e.id} className="stat-card !py-3 !px-4 flex items-center gap-3 border-l-4 border-l-primary/50">
-                    <span className="text-sm font-bold text-primary min-w-[45px]">{e.hora_inicio}</span>
+                  <div key={e.id} className="stat-card !py-3 !px-4 flex items-center gap-3 border-l-4 border-l-accent/50">
+                    <span className="text-sm font-bold text-accent min-w-[45px]">{e.hora_inicio}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{e.titulo}</p>
                       {e.local && (
@@ -415,7 +414,7 @@ const FilaAtendimento: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge className={d.status === 'Pendente' ? 'bg-yellow-500/15 text-yellow-300' : d.status === 'Em andamento' ? 'bg-blue-500/15 text-blue-400' : 'bg-green-500/15 text-green-400'}>{d.status}</Badge>
+                        <Badge className={cn("border", d.status === 'Pendente' ? 'badge-status-waiting' : d.status === 'Em andamento' ? 'badge-status-in-progress' : 'badge-status-completed')}>{d.status}</Badge>
                         {d.status !== 'Concluída' && (
                           <Select value={d.status} onValueChange={v => updateDemandaStatus(d.id, v as StatusDemanda)}>
                             <SelectTrigger className="w-32 h-8 text-xs"><SelectValue /></SelectTrigger>

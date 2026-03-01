@@ -15,15 +15,15 @@ import {
 import { cn } from '@/lib/utils';
 
 const prioridadeBadge: Record<Prioridade, string> = {
-  Alta: 'bg-red-500/15 text-red-400 border-red-500/30',
-  Média: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30',
-  Baixa: 'bg-green-500/15 text-green-400 border-green-500/30',
+  Alta: 'priority-high',
+  Média: 'priority-medium',
+  Baixa: 'priority-low',
 };
 
-const statusConfig: Record<StatusDemanda, { icon: React.ElementType; color: string; bg: string }> = {
-  Pendente: { icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
-  'Em andamento': { icon: Loader2, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
-  Concluída: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
+const statusConfig: Record<StatusDemanda, { icon: React.ElementType; label: string; badgeCls: string; headerCls: string }> = {
+  Pendente: { icon: Clock, label: 'Pendente', badgeCls: 'badge-status-waiting', headerCls: 'border-t-[#EAB308]' },
+  'Em andamento': { icon: Loader2, label: 'Em andamento', badgeCls: 'badge-status-in-progress', headerCls: 'border-t-[#1E4E8C]' },
+  Concluída: { icon: CheckCircle, label: 'Concluída', badgeCls: 'badge-status-completed', headerCls: 'border-t-[#22C55E]' },
 };
 
 const Demandas: React.FC = () => {
@@ -37,7 +37,6 @@ const Demandas: React.FC = () => {
   const [filterVinculo, setFilterVinculo] = useState<string>('todos');
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  // Form state
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [destinoPerfil, setDestinoPerfil] = useState<'Sala Principal' | 'Sala de Espera'>('Sala Principal');
@@ -47,7 +46,6 @@ const Demandas: React.FC = () => {
 
   const origemLabel = perfilUI === 'presidente' ? 'Presidente' : perfilUI === 'sala_principal' ? 'Sala Principal' : 'Sala de Espera';
 
-  // Presidente can't send to himself, only Sala Principal/Sala de Espera
   const destinoOptions = perfilUI === 'presidente'
     ? [{ value: 'Sala Principal', label: 'Sala Principal' }, { value: 'Sala de Espera', label: 'Sala de Espera' }]
     : perfilUI === 'sala_principal'
@@ -90,33 +88,47 @@ const Demandas: React.FC = () => {
     const atend = d.atendimento_id ? atendimentos.find(a => a.id === d.atendimento_id) : null;
     const cfg = statusConfig[d.status];
     return (
-      <div className="bg-card rounded-lg border p-4 space-y-3 transition-all hover:border-muted-foreground/30">
+      <div className={cn(
+        "bg-card rounded-lg border border-border shadow-sm p-4 space-y-3 transition-all hover:shadow-md",
+      )}>
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-sm text-foreground leading-tight">{d.titulo}</h3>
+          <div className="flex-1 min-w-0">
+            {/* Status badge */}
+            <Badge variant="outline" className={cn("text-[10px] font-bold uppercase mb-2 border", cfg.badgeCls)}>
+              {cfg.label}
+            </Badge>
+            {/* Title */}
+            <h3 className="font-semibold text-sm text-foreground leading-tight">{d.titulo}</h3>
+          </div>
           <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold border flex-shrink-0", prioridadeBadge[d.prioridade])}>
             {d.prioridade === 'Alta' && <AlertTriangle className="w-3 h-3 inline mr-1 -mt-0.5" />}
             {d.prioridade}
           </span>
         </div>
+
         <p className="text-xs text-muted-foreground line-clamp-2">{d.descricao}</p>
+
         <div className="flex items-center gap-2 flex-wrap text-[11px] text-muted-foreground">
-          <span>De: <strong className="text-foreground/80">{d.origem_perfil}</strong></span>
-          <span>→</span>
-          <span>Para: <strong className="text-foreground/80">{d.destino_perfil}</strong></span>
+          <span>De: <strong className="text-foreground">{d.origem_perfil}</strong></span>
+          <span className="text-border">→</span>
+          <span>Para: <strong className="text-foreground">{d.destino_perfil}</strong></span>
         </div>
+
         {atend && (
-          <div className="flex items-center gap-1 text-[11px] text-accent">
+          <div className="flex items-center gap-1 text-[11px] text-accent font-medium">
             <LinkIcon className="w-3 h-3" />
             <span>{atend.nome_cidadao}</span>
           </div>
         )}
+
         {d.prazo && (
-          <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <Calendar className="w-3 h-3" />
-            <span>{new Date(d.prazo).toLocaleDateString('pt-BR')}</span>
+            <span>Prazo: <strong className="text-foreground">{new Date(d.prazo).toLocaleDateString('pt-BR')}</strong></span>
           </div>
         )}
-        <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/50">
+
+        <div className="flex items-center justify-between gap-2 pt-2 border-t border-border">
           <span className="text-[10px] text-muted-foreground">
             {new Date(d.criado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
           </span>
@@ -255,22 +267,25 @@ const Demandas: React.FC = () => {
 
       {/* Kanban View */}
       {viewMode === 'kanban' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {kanbanColumns.map(status => {
             const cfg = statusConfig[status];
             const Icon = cfg.icon;
             const items = filtered.filter(d => d.status === status);
             return (
               <div key={status} className="space-y-3">
-                <div className={cn("flex items-center gap-2 px-3 py-2 rounded-lg border", cfg.bg)}>
-                  <Icon className={cn("w-4 h-4", cfg.color, status === 'Em andamento' && 'animate-spin')} />
-                  <h3 className={cn("text-sm font-semibold", cfg.color)}>{status}</h3>
-                  <Badge variant="outline" className="ml-auto text-[10px]">{items.length}</Badge>
+                <div className={cn(
+                  "flex items-center gap-2 px-4 py-2.5 rounded-lg bg-card border border-border shadow-sm border-t-[3px]",
+                  cfg.headerCls
+                )}>
+                  <Icon className={cn("w-4 h-4 text-foreground", status === 'Em andamento' && 'animate-spin')} />
+                  <h3 className="text-sm font-bold text-foreground">{status}</h3>
+                  <Badge variant="outline" className="ml-auto text-[10px] font-bold">{items.length}</Badge>
                 </div>
-                <div className="space-y-2 min-h-[100px]">
+                <div className="space-y-3 min-h-[100px]">
                   {items.map(d => <DemandaCard key={d.id} d={d} />)}
                   {items.length === 0 && (
-                    <div className="text-center py-8 text-muted-foreground/50 text-xs">Nenhuma demanda</div>
+                    <div className="text-center py-8 text-muted-foreground text-xs">Nenhuma demanda</div>
                   )}
                 </div>
               </div>
@@ -281,7 +296,7 @@ const Demandas: React.FC = () => {
 
       {/* List View */}
       {viewMode === 'lista' && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {filtered.length === 0 && (
             <div className="text-center py-12 text-muted-foreground">Nenhuma demanda encontrada</div>
           )}
