@@ -48,9 +48,15 @@ const FilaAtendimento: React.FC = () => {
   const canConcluir = isBrenda || perfilUI === 'presidente';
 
   const hoje = new Date().toISOString().split('T')[0];
+
+  // Sort: Aguardando first, then Em Atendimento, then by priority, then by arrival time
+  const statusOrder: Record<StatusAtendimento, number> = { Aguardando: 0, 'Em Atendimento': 1, Concluído: 2, Adiado: 3 };
+
   const filaHoje = atendimentos
     .filter(a => a.data_chegada === hoje && a.status !== 'Concluído')
     .sort((a, b) => {
+      const sDiff = statusOrder[a.status] - statusOrder[b.status];
+      if (sDiff !== 0) return sDiff;
       const pDiff = prioridadeOrder[a.prioridade] - prioridadeOrder[b.prioridade];
       if (pDiff !== 0) return pDiff;
       return a.hora_chegada.localeCompare(b.hora_chegada);
@@ -82,17 +88,37 @@ const FilaAtendimento: React.FC = () => {
       </div>
 
       <div className="space-y-3">
-        {filaHoje.map(a => {
+        {filaHoje.map((a, index) => {
           const tempo = getTempoEspera(a.hora_chegada);
           const tempoAlerta = tempo > 60 ? 'border-l-red-500' : tempo > 30 ? 'border-l-yellow-500' : 'border-l-transparent';
+          const isFirst = index === 0 && a.status === 'Aguardando';
 
           return (
-            <div key={a.id} className={cn("bg-card rounded-lg border p-4 border-l-4 transition-all", tempoAlerta)}>
+            <div
+              key={a.id}
+              className={cn(
+                "bg-card rounded-lg border p-4 border-l-4 transition-all",
+                tempoAlerta,
+                isFirst && "ring-1 ring-primary/30"
+              )}
+              style={isFirst ? { background: 'rgba(60,92,122,0.12)' } : undefined}
+            >
               <div className="flex flex-col md:flex-row md:items-center gap-3">
+                {/* Position number */}
+                <div className="flex-shrink-0 flex flex-col items-center gap-1 md:w-12">
+                  <span className="text-lg font-bold text-muted-foreground">#{index + 1}</span>
+                  <span className="text-[10px] text-muted-foreground">{a.hora_chegada}</span>
+                </div>
+
                 <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2 flex-wrap">
                       <PersonAvatar nome={a.nome_cidadao} fotoUrl={a.foto_url} size="sm" />
                       <button onClick={() => navigate(`/atendimento/${a.id}`)} className="font-semibold text-foreground hover:text-accent underline-offset-2 hover:underline">{a.nome_cidadao}</button>
+                    {isFirst && (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider" style={{ background: 'rgba(60,92,122,0.3)', color: '#E6EDF5', border: '1px solid rgba(60,92,122,0.4)' }}>
+                        Próximo
+                      </span>
+                    )}
                     <span className={cn("px-2 py-0.5 rounded text-xs font-bold border", prioridadeBadge[a.prioridade])}>
                       {a.prioridade}
                     </span>
