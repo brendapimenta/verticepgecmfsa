@@ -89,7 +89,7 @@ const Agenda: React.FC = () => {
   const eventosDiaSelecionado = diaSelecionado ? eventosNoDia(diaSelecionado) : [];
 
   // ---- CRUD ----
-  const perfilCriador = perfilUI === 'presidente' || perfilUI === 'administrador' ? 'Presidente' : 'Brenda';
+  const perfilCriador = perfilUI === 'presidente' || perfilUI === 'administrador' ? 'Presidente' : 'Sala Principal';
 
   const abrirNovo = (date?: string) => {
     setEditando(null);

@@ -39,7 +39,7 @@ const tipoAcaoLabels: Record<TipoAcaoAuditoria, string> = {
   criar_evento: 'Criar Evento',
   editar_evento: 'Editar Evento',
   excluir_evento: 'Excluir Evento',
-  chamar_brenda: 'Chamar Brenda',
+  chamar_sala_principal: 'Chamar Sala Principal',
   criar_pauta: 'Criar Pauta',
   decidir_pauta: 'Decidir Pauta',
   adiar_pauta: 'Adiar Pauta',

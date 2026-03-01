@@ -192,7 +192,7 @@ const Dashboard: React.FC = () => {
             {usuario?.nome || 'Usuário'}
           </p>
           <p className="text-[11px] text-muted-foreground capitalize">
-            {perfilUI === 'administrador' ? 'Administrador' : perfilUI === 'presidente' ? 'Presidente' : perfilUI === 'brenda' ? 'Brenda' : 'Sala de Espera'}
+            {perfilUI === 'administrador' ? 'Administrador' : perfilUI === 'presidente' ? 'Presidente' : perfilUI === 'sala_principal' ? 'Sala Principal' : 'Sala de Espera'}
           </p>
           <div className="flex items-center gap-1.5 mt-0.5 sm:justify-end">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -237,7 +237,7 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* Atendimento atual (Presidente + Brenda) */}
-            {(isPresidente || isBrenda) && atendimentoAtual ? (
+            {(isPresidente || isSalaPrincipal) && atendimentoAtual ? (
               <div className="p-5 space-y-3">
                 <div className="flex items-start justify-between">
                   <div>
@@ -296,7 +296,7 @@ const Dashboard: React.FC = () => {
                   </button>
                 </div>
               </div>
-            ) : (isPresidente || isBrenda) ? (
+            ) : (isPresidente || isSalaPrincipal) ? (
               <div className="p-8 text-center">
                 <Shield className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">Nenhum atendimento em andamento.</p>
@@ -304,8 +304,8 @@ const Dashboard: React.FC = () => {
             ) : null}
 
             {/* Próximo da fila (Brenda + Sala de Espera) */}
-            {(isBrenda || isSalaEspera) && proximoFila && (
-              <div className={cn("p-4 border-t border-border", (isPresidente || isBrenda) && atendimentoAtual ? '' : '')}>
+            {(isSalaPrincipal || isSalaEspera) && proximoFila && (
+              <div className={cn("p-4 border-t border-border", (isPresidente || isSalaPrincipal) && atendimentoAtual ? '' : '')}>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase mb-2">PRÓXIMO DA FILA</p>
                 <div className="flex items-center justify-between">
                   <div>

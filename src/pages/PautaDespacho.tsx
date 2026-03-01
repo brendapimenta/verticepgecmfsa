@@ -56,7 +56,7 @@ const PautaDespachoPage: React.FC = () => {
   const [form, setForm] = useState({
     titulo: '', categoria: 'Compras' as CategoriaPauta, tipo_registro: 'Decisão Presidencial' as TipoRegistroPauta,
     descricao_resumida: '', contexto_para_fala: '', perguntas_para_decisao: '',
-    prioridade: 'Média' as PrioridadePauta, responsavel: 'Brenda' as 'Brenda' | 'Presidente',
+    prioridade: 'Média' as PrioridadePauta, responsavel: 'Sala Principal' as 'Sala Principal' | 'Presidente',
     prazo: '', vinculado_a_tipo: '' as string, vinculado_a_id: '',
   });
   const [decisaoTexto, setDecisaoTexto] = useState('');
@@ -67,7 +67,7 @@ const PautaDespachoPage: React.FC = () => {
   });
 
   const isPresidente = perfilUI === 'presidente';
-  const isBrenda = perfilUI === 'brenda';
+  const isBrenda = perfilUI === 'sala_principal';
   const isAdmin = perfilUI === 'administrador';
 
   // Filter based on profile
@@ -121,11 +121,11 @@ const PautaDespachoPage: React.FC = () => {
 
   const handleCriar = () => {
     if (!form.titulo.trim()) return;
-    const perfilCriador: 'Brenda' | 'Presidente' = isPresidente ? 'Presidente' : 'Brenda';
+    const perfilCriador: 'Sala Principal' | 'Presidente' = isPresidente ? 'Presidente' : 'Sala Principal';
     const isTarefa = form.tipo_registro === 'Tarefa Operacional';
     const statusInicial: StatusPauta = isTarefa ? 'Em Execução' : 'Pendente';
     const responsavelFinal = isPresidente
-      ? (isTarefa ? 'Brenda' : 'Presidente')
+      ? (isTarefa ? 'Sala Principal' : 'Presidente')
       : form.responsavel;
     addPautaDespacho({
       ...form,
@@ -139,7 +139,7 @@ const PautaDespachoPage: React.FC = () => {
     registrar('criar_pauta', `Pauta criada por ${perfilCriador}: ${form.titulo}.`);
     toast.success('Pauta criada com sucesso.');
     setCriarOpen(false);
-    setForm({ titulo: '', categoria: 'Compras', tipo_registro: 'Decisão Presidencial', descricao_resumida: '', contexto_para_fala: '', perguntas_para_decisao: '', prioridade: 'Média', responsavel: 'Brenda', prazo: '', vinculado_a_tipo: '', vinculado_a_id: '' });
+    setForm({ titulo: '', categoria: 'Compras', tipo_registro: 'Decisão Presidencial', descricao_resumida: '', contexto_para_fala: '', perguntas_para_decisao: '', prioridade: 'Média', responsavel: 'Sala Principal', prazo: '', vinculado_a_tipo: '', vinculado_a_id: '' });
   };
 
   const handleDecidir = () => {
@@ -167,7 +167,7 @@ const PautaDespachoPage: React.FC = () => {
     const old = pautasDespacho.find(p => p.id === infoOpen);
     pedirInfoPauta(infoOpen, comentarioInfo);
     registrar('pedir_info_pauta', `Info solicitada: ${old?.titulo}.`, infoOpen);
-    toast.success('Solicitação de informações enviada para Brenda.');
+    toast.success('Solicitação de informações enviada para Sala Principal.');
     setInfoOpen(null);
     setComentarioInfo('');
   };
@@ -179,8 +179,8 @@ const PautaDespachoPage: React.FC = () => {
       titulo: formTarefa.titulo, categoria: pautaOrigem?.categoria || 'Outro',
       tipo_registro: 'Tarefa Operacional', descricao_resumida: formTarefa.descricao_resumida,
       contexto_para_fala: '', perguntas_para_decisao: '',
-      status: 'Em Execução', prioridade: formTarefa.prioridade, responsavel: 'Brenda',
-      prazo: formTarefa.prazo || undefined, criado_por_id: usuario.id, criado_por_perfil: 'Brenda',
+      status: 'Em Execução', prioridade: formTarefa.prioridade, responsavel: 'Sala Principal',
+      prazo: formTarefa.prazo || undefined, criado_por_id: usuario.id, criado_por_perfil: 'Sala Principal',
       vinculado_a_tipo: pautaOrigem?.vinculado_a_tipo, vinculado_a_id: pautaOrigem?.vinculado_a_id,
     });
     registrar('criar_tarefa_operacional', `Tarefa operacional criada: ${formTarefa.titulo} (vinculada a "${pautaOrigem?.titulo}").`, tarefaOpen);
@@ -448,7 +448,7 @@ const PautaDespachoPage: React.FC = () => {
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground uppercase">CONTEXTO PARA FALA</label>
-              <Textarea value={form.contexto_para_fala} onChange={e => setForm({ ...form, contexto_para_fala: e.target.value })} rows={2} placeholder="Texto que Brenda usa para explicar rapidamente a situação" />
+              <Textarea value={form.contexto_para_fala} onChange={e => setForm({ ...form, contexto_para_fala: e.target.value })} rows={2} placeholder="Texto que Sala Principal usa para explicar rapidamente a situação" />
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground uppercase">PERGUNTAS PARA DECISÃO</label>

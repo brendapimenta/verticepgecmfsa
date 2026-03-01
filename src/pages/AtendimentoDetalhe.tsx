@@ -59,7 +59,7 @@ const AtendimentoDetalhe: React.FC = () => {
 
   const handleSalvarAnotPresidente = () => {
     salvarAnotacoesPresidente(atendimento.id, anotPresidente, atendimento.nome_cidadao);
-    toast({ title: 'Anotações salvas', description: 'Brenda será notificada.' });
+    toast({ title: 'Anotações salvas', description: 'Sala Principal será notificada.' });
   };
 
   const handleSalvarAnotSalaPrincipal = () => {
