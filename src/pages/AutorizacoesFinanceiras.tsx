@@ -22,9 +22,9 @@ const AutorizacoesFinanceiras: React.FC = () => {
   const { usuario } = useAuth();
   const perfilUI = usePerfilVisual();
 
-  const canCreate = perfilUI === 'brenda' || perfilUI === 'administrador';
-  const canConcluir = perfilUI === 'brenda' || perfilUI === 'presidente' || perfilUI === 'administrador';
-  const canEdit = perfilUI === 'brenda' || perfilUI === 'administrador';
+  const canCreate = perfilUI === 'sala_principal' || perfilUI === 'administrador';
+  const canConcluir = perfilUI === 'sala_principal' || perfilUI === 'presidente' || perfilUI === 'administrador';
+  const canEdit = perfilUI === 'sala_principal' || perfilUI === 'administrador';
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -44,7 +44,7 @@ const AutorizacoesFinanceiras: React.FC = () => {
       valor: valor ? parseFloat(valor) : undefined,
       status: 'Pendente',
       criado_por_id: usuario.id,
-      criado_por_perfil: 'Brenda',
+      criado_por_perfil: 'Sala Principal',
     });
     resetForm();
   };
@@ -61,8 +61,8 @@ const AutorizacoesFinanceiras: React.FC = () => {
 
   const handleConcluir = () => {
     if (!concluirId || !usuario) return;
-    const perfil = perfilUI === 'presidente' ? 'Presidente' : 'Brenda';
-    concluirAutorizacao(concluirId, usuario.id, perfil as 'Presidente' | 'Brenda');
+    const perfil = perfilUI === 'presidente' ? 'Presidente' : 'Sala Principal';
+    concluirAutorizacao(concluirId, usuario.id, perfil as 'Presidente' | 'Sala Principal');
     setConcluirId(null);
   };
 

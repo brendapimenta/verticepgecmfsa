@@ -75,7 +75,7 @@ const NovoAtendimento: React.FC = () => {
       hora_chegada: agora.toTimeString().slice(0, 5),
       prioridade: prioridadeAuto as Prioridade,
       status: 'Aguardando',
-      responsavel: 'Brenda',
+      responsavel: 'Sala Principal',
       criado_por: usuario?.id || '',
     });
 

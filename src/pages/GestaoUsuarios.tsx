@@ -26,7 +26,7 @@ interface UsuarioItem {
 const perfilLabels: Record<string, string> = {
   administrador: 'ADMINISTRADOR',
   sala_espera: 'SALA DE ESPERA',
-  brenda: 'BRENDA',
+  sala_principal: 'SALA PRINCIPAL',
   presidente: 'PRESIDENTE',
 };
 
@@ -287,7 +287,7 @@ const GestaoUsuarios: React.FC = () => {
                 <SelectContent>
                   <SelectItem value="administrador">ADMINISTRADOR</SelectItem>
                   <SelectItem value="presidente">PRESIDENTE</SelectItem>
-                  <SelectItem value="brenda">BRENDA</SelectItem>
+                  <SelectItem value="sala_principal">SALA PRINCIPAL</SelectItem>
                   <SelectItem value="sala_espera">SALA DE ESPERA</SelectItem>
                 </SelectContent>
               </Select>

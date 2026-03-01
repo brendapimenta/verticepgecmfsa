@@ -62,10 +62,10 @@ const ExportarDados: React.FC = () => {
         if (dados.length === 0) continue;
 
         if (formato === 'csv') {
-          const csv = gerarCSV(dados, tabela.nome);
+          const csv = gerarCSV(dados as unknown as Record<string, unknown>[], tabela.nome);
           zip.file(`${tabela.nome}_${timestamp}.csv`, csv);
         } else {
-          const ws = XLSX.utils.json_to_sheet(dados);
+          const ws = XLSX.utils.json_to_sheet(dados as unknown as Record<string, unknown>[]);
           const wb = XLSX.utils.book_new();
           XLSX.utils.book_append_sheet(wb, ws, tabela.label.slice(0, 31));
           const xlsxBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });

@@ -40,21 +40,21 @@ const Demandas: React.FC = () => {
   // Form state
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
-  const [destinoPerfil, setDestinoPerfil] = useState<'Brenda' | 'Sala de Espera'>('Brenda');
+  const [destinoPerfil, setDestinoPerfil] = useState<'Sala Principal' | 'Sala de Espera'>('Sala Principal');
   const [prioridade, setPrioridade] = useState<Prioridade>('Média');
   const [prazo, setPrazo] = useState('');
   const [atendimentoId, setAtendimentoId] = useState('');
 
-  const origemLabel = perfilUI === 'presidente' ? 'Presidente' : perfilUI === 'brenda' ? 'Brenda' : 'Sala de Espera';
+  const origemLabel = perfilUI === 'presidente' ? 'Presidente' : perfilUI === 'sala_principal' ? 'Sala Principal' : 'Sala de Espera';
 
   // Presidente can't send to himself, only Brenda/Sala de Espera
   const destinoOptions = perfilUI === 'presidente'
-    ? [{ value: 'Brenda', label: 'Brenda' }, { value: 'Sala de Espera', label: 'Sala de Espera' }]
-    : perfilUI === 'brenda'
+    ? [{ value: 'Sala Principal', label: 'Sala Principal' }, { value: 'Sala de Espera', label: 'Sala de Espera' }]
+    : perfilUI === 'sala_principal'
     ? [{ value: 'Sala de Espera', label: 'Sala de Espera' }]
-    : [{ value: 'Brenda', label: 'Brenda' }];
+    : [{ value: 'Sala Principal', label: 'Sala Principal' }];
 
-  const canChangeStatus = perfilUI === 'brenda' || perfilUI === 'sala_espera' || perfilUI === 'administrador';
+  const canChangeStatus = perfilUI === 'sala_principal' || perfilUI === 'sala_espera' || perfilUI === 'administrador';
 
   const filtered = useMemo(() => {
     return demandas.filter(d => {
@@ -72,7 +72,7 @@ const Demandas: React.FC = () => {
       titulo: titulo.trim(),
       descricao: descricao.trim(),
       origem_perfil: origemLabel as Demanda['origem_perfil'],
-      destino_perfil: destinoPerfil,
+      destino_perfil: destinoPerfil as 'Sala Principal' | 'Sala de Espera',
       atendimento_id: atendimentoId || undefined,
       prioridade,
       status: 'Pendente',
@@ -80,7 +80,7 @@ const Demandas: React.FC = () => {
       criado_por_id: usuario.id,
     });
     setTitulo(''); setDescricao(''); setPrazo(''); setAtendimentoId('');
-    setPrioridade('Média'); setDestinoPerfil(destinoOptions[0].value as 'Brenda' | 'Sala de Espera');
+    setPrioridade('Média'); setDestinoPerfil(destinoOptions[0].value as 'Sala Principal' | 'Sala de Espera');
     setDialogOpen(false);
   };
 
@@ -177,7 +177,7 @@ const Demandas: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-medium text-muted-foreground mb-1 block">Destino</label>
-                    <Select value={destinoPerfil} onValueChange={v => setDestinoPerfil(v as 'Brenda' | 'Sala de Espera')}>
+                    <Select value={destinoPerfil} onValueChange={v => setDestinoPerfil(v as 'Sala Principal' | 'Sala de Espera')}>
                       <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {destinoOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
