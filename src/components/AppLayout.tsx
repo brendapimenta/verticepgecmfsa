@@ -151,7 +151,7 @@ export const AppLayout: React.FC = () => {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-border bg-card gap-3">
+        <header className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-border gap-3" style={{ background: 'rgba(7, 27, 52, 0.95)' }}>
           <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-lg hover:bg-muted">
             <Menu className="w-5 h-5" />
           </button>
@@ -186,14 +186,14 @@ export const AppLayout: React.FC = () => {
 
         {/* View As Banner */}
         {isViewingAs && (
-          <div className="flex items-center justify-between px-4 md:px-6 py-2 bg-amber-50 border-b border-amber-200 text-amber-800 text-sm">
-            <span className="flex items-center gap-2">
+          <div className="flex items-center justify-between px-4 md:px-6 py-2 border-b text-sm" style={{ background: 'rgba(60,92,122,0.2)', borderColor: 'hsl(215 35% 22%)' }}>
+            <span className="flex items-center gap-2 text-[#A9B7C9]">
               <Eye className="w-4 h-4" />
-              Você está visualizando como: <strong>{perfilLabels[perfilVisual]}</strong>
+              Você está visualizando como: <strong className="text-[#E6EDF5]">{perfilLabels[perfilVisual]}</strong>
             </span>
             <button
               onClick={() => setPerfilVisual('administrador')}
-              className="text-xs font-medium underline hover:no-underline"
+              className="text-xs font-medium underline hover:no-underline text-[#A9B7C9] hover:text-[#E6EDF5]"
             >
               Voltar para Administrador
             </button>

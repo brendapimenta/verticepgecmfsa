@@ -106,7 +106,7 @@ const NovoAtendimento: React.FC = () => {
         </div>
 
         {needsSchedule && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-lg bg-accent/10 border border-accent/20">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-lg bg-secondary border border-border">
             <div>
               <Label>Data Agendada *</Label>
               <Input type="date" className="mt-1.5" value={form.data_agendada} onChange={e => setForm(f => ({ ...f, data_agendada: e.target.value }))} required />
