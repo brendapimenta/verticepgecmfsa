@@ -142,112 +142,136 @@ const LoginPage: React.FC = () => {
         </svg>
       </div>
 
-      <div className="relative z-10 flex flex-col lg:flex-row items-center justify-center w-full max-w-5xl mx-auto px-4 gap-12 lg:gap-16">
-        {/* Left: Branding */}
+      <div
+        className="relative z-10 w-full mx-auto px-6 lg:px-10 min-h-screen"
+        style={{
+          maxWidth: '1240px',
+          display: 'grid',
+          gridTemplateColumns: '1fr',
+          alignItems: 'center',
+          justifyItems: 'center',
+        }}
+      >
         <div
-          className="flex-1 flex flex-col items-center justify-center text-center py-8 lg:py-0"
-          style={{ animation: 'login-brand-in 0.6s ease-out both' }}
+          className="w-full grid gap-12 lg:gap-20 items-center"
+          style={{ gridTemplateColumns: '1fr', }}
         >
-          <div className="relative flex flex-col items-center">
+          {/* Desktop: 2-column grid */}
+          <style>{`
+            @media (min-width: 1024px) {
+              .login-grid { grid-template-columns: 1fr 1fr !important; }
+            }
+          `}</style>
+          <div className="login-grid w-full grid gap-12 lg:gap-20 items-center" style={{ gridTemplateColumns: '1fr' }}>
+            {/* Left: Branding */}
             <div
-              className="absolute inset-0 -m-16 pointer-events-none"
-              style={{
-                background: 'radial-gradient(circle, rgba(60,92,122,0.25) 0%, rgba(60,92,122,0.1) 40%, transparent 70%)',
-              }}
-            />
-            <img
-              src={verticeLogoFull}
-              alt="VÉRTICE"
-              className="relative w-[220px] lg:w-[340px] object-contain"
-              style={{ filter: 'drop-shadow(0 0 40px rgba(60,92,122,0.15))' }}
-            />
-          </div>
-          <div className="h-[18px]" />
-          <p className="text-base lg:text-xl tracking-[0.12em] uppercase font-semibold" style={{ color: '#DCE6F2' }}>
-            GESTÃO ESTRATÉGICA DE ATENDIMENTOS
-          </p>
-          <div className="h-3" />
-          <p className="text-[10px] lg:text-sm tracking-[0.06em] uppercase whitespace-nowrap leading-relaxed font-medium" style={{ color: '#A9B7C9' }}>
-            CONTROLE, ESTRATÉGIA E PRECISÃO NO ATENDIMENTO PÚBLICO
-          </p>
-        </div>
-
-        {/* Right: Login Card */}
-        <div className="w-full max-w-md" style={{ animation: 'login-card-in 0.4s ease-out both 0.15s' }}>
-          <div
-            className="rounded-2xl p-8"
-            style={{
-              background: 'rgba(13, 30, 58, 0.85)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-              border: '1px solid #1F3455',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
-            }}
-          >
-            <h2 className="text-lg font-semibold tracking-wide uppercase mb-6" style={{ color: '#E6EDF5' }}>
-              Acesso ao sistema
-            </h2>
-
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label htmlFor="email" className="block text-xs font-medium mb-1.5 uppercase tracking-wider login-label" style={{ color: '#A9B7C9' }}>
-                  E-mail
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="seu@email.gov.br"
-                  required
-                  className={`${inputClasses}${erro ? ' login-input-error' : ''}`}
+              className="flex flex-col items-center justify-center text-center px-4 lg:px-8 py-8 lg:py-0"
+              style={{ animation: 'login-brand-in 0.6s ease-out both' }}
+            >
+              <div className="relative flex flex-col items-center">
+                <div
+                  className="absolute inset-0 -m-16 pointer-events-none"
+                  style={{
+                    background: 'radial-gradient(circle, rgba(60,92,122,0.25) 0%, rgba(60,92,122,0.1) 40%, transparent 70%)',
+                  }}
+                />
+                <img
+                  src={verticeLogoFull}
+                  alt="VÉRTICE"
+                  className="relative w-[220px] lg:w-[340px] object-contain"
+                  style={{ filter: 'drop-shadow(0 0 40px rgba(60,92,122,0.15))' }}
                 />
               </div>
+              <div className="h-[18px]" />
+              <p className="text-base lg:text-xl tracking-[0.12em] uppercase font-semibold" style={{ color: '#DCE6F2' }}>
+                GESTÃO ESTRATÉGICA DE ATENDIMENTOS
+              </p>
+              <div className="h-3" />
+              <p className="text-[10px] lg:text-sm tracking-[0.06em] uppercase whitespace-nowrap leading-relaxed font-medium" style={{ color: '#A9B7C9' }}>
+                CONTROLE, ESTRATÉGIA E PRECISÃO NO ATENDIMENTO PÚBLICO
+              </p>
+            </div>
 
-              <div>
-                <label htmlFor="senha" className="block text-xs font-medium mb-1.5 uppercase tracking-wider login-label" style={{ color: '#A9B7C9' }}>
-                  Senha
-                </label>
-                <input
-                  id="senha"
-                  type="password"
-                  value={senha}
-                  onChange={e => setSenha(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className={`${inputClasses}${erro ? ' login-input-error' : ''}`}
-                />
-              </div>
-
-              {erro && <p className="text-sm" style={{ color: '#E5737F' }}>{erro}</p>}
-
-              <button
-                type="submit"
-                className="login-btn w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium"
-              >
-                <LogIn className="w-4 h-4" />
-                Entrar
-              </button>
-            </form>
-          </div>
-
-          {/* Demo accounts */}
-          <div className="mt-5 rounded-xl p-4" style={{ background: 'rgba(13, 30, 58, 0.6)', border: '1px solid #1F3455' }}>
-            <p className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: '#6B7F99' }}>
-              Acesso Demonstração
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              {demoAccounts.map(acc => (
-                <button
-                  key={acc.email}
-                  onClick={() => { setEmail(acc.email); setSenha('demo'); }}
-                  className="text-left px-3 py-2 rounded-lg text-xs transition-colors duration-200 hover:bg-[#122544] hover:border-[#324A71] border border-transparent"
-                  style={{ color: '#A9B7C9' }}
+            {/* Right: Login Card */}
+            <div className="flex items-center justify-center px-4 lg:px-8" style={{ animation: 'login-card-in 0.4s ease-out both 0.15s' }}>
+              <div className="w-full max-w-md">
+                <div
+                  className="rounded-2xl p-8"
+                  style={{
+                    background: 'rgba(13, 30, 58, 0.85)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    border: '1px solid #1F3455',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+                  }}
                 >
-                  <span className="font-medium block" style={{ color: '#E6EDF5' }}>{acc.label}</span>
-                  <span style={{ color: '#6B7F99' }}>{acc.email}</span>
-                </button>
-              ))}
+                  <h2 className="text-lg font-semibold tracking-wide uppercase mb-6" style={{ color: '#E6EDF5' }}>
+                    Acesso ao sistema
+                  </h2>
+
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    <div>
+                      <label htmlFor="email" className="block text-xs font-medium mb-1.5 uppercase tracking-wider login-label" style={{ color: '#A9B7C9' }}>
+                        E-mail
+                      </label>
+                      <input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        placeholder="seu@email.gov.br"
+                        required
+                        className={`${inputClasses}${erro ? ' login-input-error' : ''}`}
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="senha" className="block text-xs font-medium mb-1.5 uppercase tracking-wider login-label" style={{ color: '#A9B7C9' }}>
+                        Senha
+                      </label>
+                      <input
+                        id="senha"
+                        type="password"
+                        value={senha}
+                        onChange={e => setSenha(e.target.value)}
+                        placeholder="••••••••"
+                        required
+                        className={`${inputClasses}${erro ? ' login-input-error' : ''}`}
+                      />
+                    </div>
+
+                    {erro && <p className="text-sm" style={{ color: '#E5737F' }}>{erro}</p>}
+
+                    <button
+                      type="submit"
+                      className="login-btn w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium"
+                    >
+                      <LogIn className="w-4 h-4" />
+                      Entrar
+                    </button>
+                  </form>
+                </div>
+
+                {/* Demo accounts */}
+                <div className="mt-5 rounded-xl p-4" style={{ background: 'rgba(13, 30, 58, 0.6)', border: '1px solid #1F3455' }}>
+                  <p className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: '#6B7F99' }}>
+                    Acesso Demonstração
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {demoAccounts.map(acc => (
+                      <button
+                        key={acc.email}
+                        onClick={() => { setEmail(acc.email); setSenha('demo'); }}
+                        className="text-left px-3 py-2 rounded-lg text-xs transition-colors duration-200 hover:bg-[#122544] hover:border-[#324A71] border border-transparent"
+                        style={{ color: '#A9B7C9' }}
+                      >
+                        <span className="font-medium block" style={{ color: '#E6EDF5' }}>{acc.label}</span>
+                        <span style={{ color: '#6B7F99' }}>{acc.email}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
