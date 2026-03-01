@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Atendimento, Comando, MensagemChat, Notificacao, Perfil, Solicitacao, DemandaAtendimento } from '@/types';
+import { Atendimento, Comando, Demanda, MensagemChat, Notificacao, Perfil, Solicitacao, DemandaAtendimento, StatusDemanda } from '@/types';
 import { mockAtendimentos, mockComandos, mockMensagens } from '@/data/mockData';
 
 interface DataContextType {
@@ -9,6 +9,7 @@ interface DataContextType {
   notificacoes: Notificacao[];
   solicitacoes: Solicitacao[];
   demandasAtendimento: DemandaAtendimento[];
+  demandas: Demanda[];
   addAtendimento: (a: Omit<Atendimento, 'id' | 'atualizado_em'>) => void;
   updateAtendimento: (id: string, updates: Partial<Atendimento>) => void;
   addComando: (c: Omit<Comando, 'id' | 'criado_em'>) => void;
@@ -19,6 +20,8 @@ interface DataContextType {
   updateSolicitacaoStatus: (id: string, status: Solicitacao['status']) => void;
   addDemandaAtendimento: (d: Omit<DemandaAtendimento, 'id' | 'criado_em'>, nomeCidadao: string) => void;
   updateDemandaStatus: (id: string, status: DemandaAtendimento['status']) => void;
+  addDemanda: (d: Omit<Demanda, 'id' | 'criado_em'>) => void;
+  updateDemandaGlobalStatus: (id: string, status: StatusDemanda) => void;
   salvarAnotacoesPresidente: (atendimentoId: string, texto: string, nomeCidadao: string) => void;
   salvarAnotacoesBrenda: (atendimentoId: string, texto: string) => void;
 }
@@ -38,6 +41,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>([]);
   const [demandasAtendimento, setDemandasAtendimento] = useState<DemandaAtendimento[]>([]);
+  const [demandas, setDemandas] = useState<Demanda[]>([]);
 
   const criarNotificacao = useCallback((perfil_destino: Perfil, tipo_notificacao: Notificacao['tipo_notificacao'], referencia_tipo: Notificacao['referencia_tipo'], referencia_id: string, mensagem_resumo: string) => {
     const n: Notificacao = {
@@ -138,6 +142,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setDemandasAtendimento(prev => prev.map(d => d.id === id ? { ...d, status } : d));
   }, []);
 
+  const addDemanda = useCallback((d: Omit<Demanda, 'id' | 'criado_em'>) => {
+    const id = String(Date.now()) + Math.random().toString(36).slice(2, 6);
+    setDemandas(prev => [...prev, { ...d, id, criado_em: new Date().toISOString() }]);
+    const destinoPerfil: Perfil = d.destino_perfil === 'Brenda' ? 'brenda' : 'sala_espera';
+    criarNotificacao(destinoPerfil, 'nova_solicitacao', 'solicitacao', id,
+      `Nova demanda: ${d.titulo} (prioridade ${d.prioridade}).`);
+  }, [criarNotificacao]);
+
+  const updateDemandaGlobalStatus = useCallback((id: string, status: StatusDemanda) => {
+    setDemandas(prev => prev.map(d => d.id === id ? { ...d, status } : d));
+  }, []);
+
   const salvarAnotacoesPresidente = useCallback((atendimentoId: string, texto: string, nomeCidadao: string) => {
     setAtendimentos(prev => prev.map(a => a.id === atendimentoId ? {
       ...a,
@@ -160,10 +176,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <DataContext.Provider value={{
-      atendimentos, comandos, mensagens, notificacoes, solicitacoes, demandasAtendimento,
+      atendimentos, comandos, mensagens, notificacoes, solicitacoes, demandasAtendimento, demandas,
       addAtendimento, updateAtendimento, addComando, updateComandoStatus, addMensagem,
       marcarNotificacaoLida, addSolicitacao, updateSolicitacaoStatus,
-      addDemandaAtendimento, updateDemandaStatus, salvarAnotacoesPresidente, salvarAnotacoesBrenda,
+      addDemandaAtendimento, updateDemandaStatus, addDemanda, updateDemandaGlobalStatus,
+      salvarAnotacoesPresidente, salvarAnotacoesBrenda,
     }}>
       {children}
     </DataContext.Provider>

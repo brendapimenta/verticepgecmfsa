@@ -4,7 +4,7 @@ import { useViewAs, usePerfilVisual } from '@/contexts/ViewAsContext';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard, Users, ListOrdered, PlusCircle, MessageSquare,
-  Zap, LogOut, Menu, X, Shield, Bell, Eye
+  Zap, LogOut, Menu, X, Shield, Bell, Eye, ClipboardList
 } from 'lucide-react';
 import logoVertice from '@/assets/logo-vertice.png';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -67,6 +67,7 @@ export const AppLayout: React.FC = () => {
     { to: '/fila', label: 'Fila de Atendimento', icon: ListOrdered, roles: ['administrador', 'brenda', 'sala_espera', 'presidente'] },
     { to: '/novo-atendimento', label: 'Novo Atendimento', icon: PlusCircle, roles: ['administrador', 'brenda', 'sala_espera'] },
     { to: '/comandos', label: 'Comandos Rápidos', icon: Zap, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
+    { to: '/demandas', label: 'Demandas', icon: ClipboardList, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
     { to: '/chat', label: 'Chat', icon: MessageSquare, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
     { to: '/notificacoes', label: 'Notificações', icon: Bell, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
   ].filter(item => {
