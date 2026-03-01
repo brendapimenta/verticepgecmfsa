@@ -7,19 +7,21 @@ export interface UsuarioAuth {
   id: string;
   nome: string;
   email: string;
+  username: string;
   perfil: Perfil;
   ativo: boolean;
   instituicao_id: string;
-  login_google_habilitado?: boolean;
+  primeiro_login_pendente?: boolean;
 }
 
 interface AuthContextType {
   usuario: UsuarioAuth | null;
-  login: (email: string, senha: string) => Promise<{ success: boolean; error?: string }>;
-  loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
+  login: (username: string, senha: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   isAuthenticated: boolean;
   loading: boolean;
+  trocarSenha: (novaSenha: string) => Promise<{ success: boolean; error?: string }>;
+  setPrimeiroLoginDone: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -34,7 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [usuario, setUsuario] = useState<UsuarioAuth | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Check session on mount and listen for auth changes
+  // Check session on mount
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
@@ -43,59 +45,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
-        if (session?.user) {
-          // For Google OAuth, validate via edge function
-          const provider = session.user.app_metadata?.provider;
-          if (provider === 'google' && !usuario) {
-            try {
-              const { data, error } = await supabase.functions.invoke('validate-google-login', {
-                headers: { Authorization: `Bearer ${session.access_token}` },
-              });
-              if (error || !data?.authorized) {
-                await supabase.auth.signOut();
-                setUsuario(null);
-                // Store error for login page to display
-                sessionStorage.setItem('google_login_error', data?.message || 'Erro na autenticação Google.');
-              } else {
-                setUsuario(data.usuario);
-              }
-            } catch {
-              await supabase.auth.signOut();
-              setUsuario(null);
-            }
-          } else if (!usuario) {
-            // For email/password, fetch profile
-            const { data: profile } = await supabase
-              .from('usuarios')
-              .select('id, nome, email, perfil, ativo, instituicao_id, login_google_habilitado')
-              .eq('auth_user_id', session.user.id)
-              .single();
-            
-            if (profile && profile.ativo) {
-              setUsuario(profile as UsuarioAuth);
-            }
-          }
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session?.user && !usuario) {
+        // Fetch profile by auth_user_id
+        const { data: profile } = await supabase
+          .from('usuarios')
+          .select('id, nome, email, username, perfil, ativo, instituicao_id, primeiro_login_pendente')
+          .eq('auth_user_id', session.user.id)
+          .single();
+
+        if (profile && profile.ativo) {
+          setUsuario(profile as unknown as UsuarioAuth);
         }
         setLoading(false);
       }
     });
 
-    // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         setLoading(false);
       }
-      // onAuthStateChange INITIAL_SESSION will handle the rest
     });
 
     return () => subscription.unsubscribe();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const login = useCallback(async (email: string, senha: string): Promise<{ success: boolean; error?: string }> => {
+  const login = useCallback(async (username: string, senha: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const { data, error } = await supabase.functions.invoke('login-senha', {
-        body: { email, senha },
+        body: { username, senha },
       });
 
       if (error) {
@@ -121,22 +98,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const loginWithGoogle = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
+  const trocarSenha = useCallback(async (novaSenha: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      const { lovable } = await import('@/integrations/lovable');
-      const result = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: window.location.origin,
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return { success: false, error: 'Sessão expirada.' };
+
+      const { data, error } = await supabase.functions.invoke('trocar-senha', {
+        body: { nova_senha: novaSenha },
       });
 
-      if (result.error) {
-        return { success: false, error: 'Erro ao iniciar autenticação Google.' };
-      }
+      if (error) return { success: false, error: 'Erro ao trocar senha.' };
+      if (data?.error) return { success: false, error: data.error };
 
-      // The redirect will happen, and onAuthStateChange will handle validation
       return { success: true };
     } catch {
-      return { success: false, error: 'Erro ao conectar com Google.' };
+      return { success: false, error: 'Erro de conexão.' };
     }
+  }, []);
+
+  const setPrimeiroLoginDone = useCallback(() => {
+    setUsuario(prev => prev ? { ...prev, primeiro_login_pendente: false } : prev);
   }, []);
 
   const logout = useCallback(async () => {
@@ -145,7 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <AuthContext.Provider value={{ usuario, login, loginWithGoogle, logout, isAuthenticated: !!usuario, loading }}>
+    <AuthContext.Provider value={{ usuario, login, logout, isAuthenticated: !!usuario, loading, trocarSenha, setPrimeiroLoginDone }}>
       {children}
     </AuthContext.Provider>
   );
