@@ -1,1 +1,10 @@
 project_id = "bjyzysgtbuyreplvltur"
+
+[functions.admin-users]
+verify_jwt = false
+
+[functions.validate-google-login]
+verify_jwt = false
+
+[functions.login-senha]
+verify_jwt = false
