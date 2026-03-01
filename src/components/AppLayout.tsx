@@ -7,7 +7,7 @@ import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, ListOrdered, PlusCircle, MessageSquare,
   Zap, LogOut, Menu, X, Shield, Bell, Eye, ClipboardList, DollarSign, AlertTriangle,
-  FileText, AlertCircle, CheckCheck, ArrowRightLeft, Calendar, Sun, Moon, Gavel
+  FileText, AlertCircle, CheckCheck, ArrowRightLeft, Calendar, Sun, Moon, Gavel, Building2
 } from 'lucide-react';
 import logoVertice from '@/assets/logo-vertice.png';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -168,6 +168,7 @@ export const AppLayout: React.FC = () => {
     { to: '/notificacoes', label: 'Notificações', icon: Bell, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
     { to: '/pauta-despacho', label: 'Pauta para Despacho', icon: Gavel, roles: ['administrador', 'brenda', 'presidente'] },
     { to: '/auditoria', label: 'Log de Auditoria', icon: Shield, roles: ['administrador'] },
+    { to: '/configuracao-instituicao', label: 'Configuração Instituição', icon: Building2, roles: ['administrador'] },
   ].filter(item => {
     if (isAdmin && isViewingAs) {
       return item.roles.includes(perfilUI) || item.roles.includes('administrador');
