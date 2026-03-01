@@ -1,7 +1,7 @@
 import React from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Bell, FileText, Zap, MessageSquare, AlertCircle, CheckCheck, ClipboardList, DollarSign, ArrowRightLeft, AlertTriangle } from 'lucide-react';
+import { Bell, FileText, Zap, MessageSquare, AlertCircle, CheckCheck, ClipboardList, DollarSign, ArrowRightLeft, AlertTriangle, Calendar } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { TipoNotificacao, ReferenciaTipo } from '@/types';
 import { cn } from '@/lib/utils';
@@ -24,6 +24,8 @@ const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
   alerta_urgente: <AlertTriangle className="w-3.5 h-3.5 text-red-500" />,
   chamar_brenda: <Bell className="w-3.5 h-3.5 text-blue-400" />,
   solicitar_encerramento: <CheckCheck className="w-3.5 h-3.5 text-red-400" />,
+  novo_evento_agenda: <Calendar className="w-3.5 h-3.5 text-cyan-400" />,
+  evento_agenda_editado: <Calendar className="w-3.5 h-3.5 text-cyan-400" />,
 };
 
 import { getRouteForRef } from '@/lib/notificationRoutes';

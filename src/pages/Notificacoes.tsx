@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { TipoNotificacao, ReferenciaTipo } from '@/types';
-import { Bell, Filter, CheckCheck, FileText, Zap, MessageSquare, AlertCircle, ClipboardList, DollarSign, ArrowRightLeft, AlertTriangle } from 'lucide-react';
+import { Bell, Filter, CheckCheck, FileText, Zap, MessageSquare, AlertCircle, ClipboardList, DollarSign, ArrowRightLeft, AlertTriangle, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -26,6 +26,8 @@ const tipoLabel: Record<TipoNotificacao, string> = {
   alerta_urgente: 'Alerta Urgente',
   chamar_brenda: 'Chamar Brenda',
   solicitar_encerramento: 'Solicitar Encerramento',
+  novo_evento_agenda: 'Novo Evento na Agenda',
+  evento_agenda_editado: 'Evento Editado',
 };
 
 const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
@@ -45,6 +47,8 @@ const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
   alerta_urgente: <AlertTriangle className="w-4 h-4 text-red-500" />,
   chamar_brenda: <Bell className="w-4 h-4 text-blue-400" />,
   solicitar_encerramento: <CheckCheck className="w-4 h-4 text-red-400" />,
+  novo_evento_agenda: <Calendar className="w-4 h-4 text-cyan-400" />,
+  evento_agenda_editado: <Calendar className="w-4 h-4 text-cyan-400" />,
 };
 
 const getRouteForRef = (tipo: ReferenciaTipo, id: string): string => {
@@ -56,6 +60,7 @@ const getRouteForRef = (tipo: ReferenciaTipo, id: string): string => {
     case 'demanda': return '/demandas';
     case 'demanda_atendimento': return '/fila';
     case 'autorizacao_financeira': return '/autorizacoes';
+    case 'evento_agenda': return '/agenda';
     default: return '/notificacoes';
   }
 };

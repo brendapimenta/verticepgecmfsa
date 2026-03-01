@@ -6,7 +6,7 @@ import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, ListOrdered, PlusCircle, MessageSquare,
   Zap, LogOut, Menu, X, Shield, Bell, Eye, ClipboardList, DollarSign, AlertTriangle,
-  FileText, AlertCircle, CheckCheck, ArrowRightLeft
+  FileText, AlertCircle, CheckCheck, ArrowRightLeft, Calendar
 } from 'lucide-react';
 import logoVertice from '@/assets/logo-vertice.png';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -66,6 +66,8 @@ export const AppLayout: React.FC = () => {
       alerta_urgente: <AlertTriangle className="w-4 h-4 text-red-500" />,
       chamar_brenda: <Bell className="w-4 h-4 text-blue-400" />,
       solicitar_encerramento: <CheckCheck className="w-4 h-4 text-red-400" />,
+      novo_evento_agenda: <Calendar className="w-4 h-4 text-cyan-400" />,
+      evento_agenda_editado: <Calendar className="w-4 h-4 text-cyan-400" />,
     };
     return iconMap[tipo] || <Bell className="w-4 h-4 text-muted-foreground" />;
   };
@@ -154,6 +156,7 @@ export const AppLayout: React.FC = () => {
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['administrador', 'brenda', 'presidente'] },
     { to: '/fila', label: 'Fila de Atendimento', icon: ListOrdered, roles: ['administrador', 'brenda', 'sala_espera', 'presidente'] },
     { to: '/novo-atendimento', label: 'Novo Atendimento', icon: PlusCircle, roles: ['administrador', 'brenda', 'sala_espera'] },
+    { to: '/agenda', label: 'Agenda', icon: Calendar, roles: ['administrador', 'brenda', 'presidente'] },
     { to: '/comandos', label: 'Comandos Rápidos', icon: Zap, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
     { to: '/demandas', label: 'Demandas', icon: ClipboardList, roles: ['administrador', 'brenda', 'presidente', 'sala_espera'] },
     { to: '/autorizacoes', label: 'Autorizações Financeiras', icon: DollarSign, roles: ['administrador', 'brenda', 'presidente'] },

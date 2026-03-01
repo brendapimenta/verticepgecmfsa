@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Atendimento, AutorizacaoFinanceira, Comando, Demanda, MensagemChat, Notificacao, Perfil, Solicitacao, DemandaAtendimento, StatusDemanda, StatusAutorizacao } from '@/types';
+import { Atendimento, AutorizacaoFinanceira, Comando, Demanda, MensagemChat, Notificacao, Perfil, Solicitacao, DemandaAtendimento, StatusDemanda, StatusAutorizacao, EventoAgenda } from '@/types';
 import { mockAtendimentos, mockComandos, mockMensagens } from '@/data/mockData';
 
 interface DataContextType {
@@ -11,6 +11,7 @@ interface DataContextType {
   demandasAtendimento: DemandaAtendimento[];
   demandas: Demanda[];
   autorizacoes: AutorizacaoFinanceira[];
+  eventosAgenda: EventoAgenda[];
   addAtendimento: (a: Omit<Atendimento, 'id' | 'atualizado_em'>) => void;
   updateAtendimento: (id: string, updates: Partial<Atendimento>) => void;
   addComando: (c: Omit<Comando, 'id' | 'criado_em'>) => void;
@@ -31,6 +32,9 @@ interface DataContextType {
   criarAlertaUrgente: (mensagem: string, criado_por_id: string) => void;
   chamarBrenda: (criado_por_id: string) => void;
   solicitarEncerramento: (atendimentoId: string, nomeCidadao: string, criado_por_id: string) => void;
+  addEventoAgenda: (e: Omit<EventoAgenda, 'id' | 'criado_em' | 'atualizado_em'>) => void;
+  updateEventoAgenda: (id: string, updates: Partial<EventoAgenda>) => void;
+  deleteEventoAgenda: (id: string) => void;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -50,6 +54,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [demandasAtendimento, setDemandasAtendimento] = useState<DemandaAtendimento[]>([]);
   const [demandas, setDemandas] = useState<Demanda[]>([]);
   const [autorizacoes, setAutorizacoes] = useState<AutorizacaoFinanceira[]>([]);
+  const [eventosAgenda, setEventosAgenda] = useState<EventoAgenda[]>([]);
 
   const criarNotificacao = useCallback((perfil_destino: Perfil, tipo_notificacao: Notificacao['tipo_notificacao'], referencia_tipo: Notificacao['referencia_tipo'], referencia_id: string, mensagem_resumo: string) => {
     const n: Notificacao = {
@@ -269,14 +274,42 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       `O Presidente solicitou o encerramento do atendimento de ${nomeCidadao}.`);
   }, [criarNotificacao]);
 
+  // ============ 7) AGENDA ============
+
+  const addEventoAgenda = useCallback((e: Omit<EventoAgenda, 'id' | 'criado_em' | 'atualizado_em'>) => {
+    const id = String(Date.now()) + Math.random().toString(36).slice(2, 6);
+    const now = new Date().toISOString();
+    setEventosAgenda(prev => [...prev, { ...e, id, criado_em: now, atualizado_em: now }]);
+    const destino: Perfil = e.criado_por_perfil === 'Presidente' ? 'brenda' : 'presidente';
+    criarNotificacao(destino, 'novo_evento_agenda', 'evento_agenda', id,
+      `Novo evento na agenda: ${e.titulo} em ${e.data_inicio}.`);
+  }, [criarNotificacao]);
+
+  const updateEventoAgenda = useCallback((id: string, updates: Partial<EventoAgenda>) => {
+    setEventosAgenda(prev => {
+      const old = prev.find(e => e.id === id);
+      if (old) {
+        const destino: Perfil = old.criado_por_perfil === 'Presidente' ? 'brenda' : 'presidente';
+        criarNotificacao(destino, 'evento_agenda_editado', 'evento_agenda', id,
+          `Evento editado: ${updates.titulo || old.titulo}.`);
+      }
+      return prev.map(e => e.id === id ? { ...e, ...updates, atualizado_em: new Date().toISOString() } : e);
+    });
+  }, [criarNotificacao]);
+
+  const deleteEventoAgenda = useCallback((id: string) => {
+    setEventosAgenda(prev => prev.filter(e => e.id !== id));
+  }, []);
+
   return (
     <DataContext.Provider value={{
-      atendimentos, comandos, mensagens, notificacoes, solicitacoes, demandasAtendimento, demandas, autorizacoes,
+      atendimentos, comandos, mensagens, notificacoes, solicitacoes, demandasAtendimento, demandas, autorizacoes, eventosAgenda,
       addAtendimento, updateAtendimento, addComando, updateComandoStatus, addMensagem,
       marcarNotificacaoLida, addSolicitacao, updateSolicitacaoStatus,
       addDemandaAtendimento, updateDemandaStatus, addDemanda, updateDemandaGlobalStatus,
       salvarAnotacoesPresidente, salvarAnotacoesBrenda, addAutorizacao, concluirAutorizacao, updateAutorizacao,
       criarAlertaUrgente, chamarBrenda, solicitarEncerramento,
+      addEventoAgenda, updateEventoAgenda, deleteEventoAgenda,
     }}>
       {children}
     </DataContext.Provider>
