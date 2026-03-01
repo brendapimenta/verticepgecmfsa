@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { TipoCidadao, TipoRegistro, Prioridade } from '@/types';
@@ -7,17 +7,22 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PlusCircle, CheckCircle } from 'lucide-react';
+import { PlusCircle, CheckCircle, Camera, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { PersonAvatar } from '@/components/PersonAvatar';
 
 const tiposCidadao: TipoCidadao[] = ['Autoridade', 'Vereador', 'Administração', 'Liderança', 'Assessor', 'Servidor', 'Efetivo', 'Família', 'Cidadão'];
 const tiposRegistro: TipoRegistro[] = ['Sem agendamento', 'Atendimento agendado', 'Reunião agendada'];
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 const NovoAtendimento: React.FC = () => {
   const { addAtendimento } = useData();
   const { usuario } = useAuth();
   const { toast } = useToast();
   const [sucesso, setSucesso] = useState(false);
+  const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     nome_cidadao: '', tipo: '' as TipoCidadao, tipo_registro: '' as TipoRegistro,
@@ -26,6 +31,31 @@ const NovoAtendimento: React.FC = () => {
   });
 
   const needsSchedule = form.tipo_registro === 'Atendimento agendado' || form.tipo_registro === 'Reunião agendada';
+
+  const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+      toast({ title: 'Formato inválido', description: 'Aceitos apenas JPG e PNG.', variant: 'destructive' });
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      toast({ title: 'Arquivo muito grande', description: 'O limite é 5MB.', variant: 'destructive' });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setFotoPreview(ev.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeFoto = () => {
+    setFotoPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +67,7 @@ const NovoAtendimento: React.FC = () => {
     const agora = new Date();
     addAtendimento({
       ...form,
+      foto_url: fotoPreview || undefined,
       data_chegada: agora.toISOString().split('T')[0],
       hora_chegada: agora.toTimeString().slice(0, 5),
       prioridade: 'Média',
@@ -49,6 +80,7 @@ const NovoAtendimento: React.FC = () => {
     setSucesso(true);
     setTimeout(() => {
       setSucesso(false);
+      setFotoPreview(null);
       setForm({ nome_cidadao: '', tipo: '' as TipoCidadao, tipo_registro: '' as TipoRegistro, data_agendada: '', hora_agendada: '', telefone_contato: '', indicado_por: '', demanda_principal: '', descricao: '', observacao_recepcao: '' });
     }, 2000);
   };
@@ -73,6 +105,62 @@ const NovoAtendimento: React.FC = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="bg-card rounded-xl border border-border p-6 space-y-5">
+        {/* Photo Upload */}
+        <div className="flex flex-col items-center gap-3">
+          <Label className="text-center">Foto da Pessoa</Label>
+          <div className="relative">
+            {fotoPreview ? (
+              <div className="relative">
+                <img
+                  src={fotoPreview}
+                  alt="Preview"
+                  className="w-24 h-24 rounded-full object-cover"
+                  style={{ border: '2px solid hsl(215 35% 22%)' }}
+                />
+                <button
+                  type="button"
+                  onClick={removeFoto}
+                  className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center transition-colors"
+                  style={{ background: '#3C5C7A', color: '#E6EDF5' }}
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-24 h-24 rounded-full flex flex-col items-center justify-center gap-1 transition-colors"
+                style={{
+                  background: '#122544',
+                  border: '2px dashed hsl(215 35% 22%)',
+                  color: '#A9B7C9',
+                }}
+              >
+                <Camera className="w-5 h-5" />
+                <span className="text-[10px]">Adicionar</span>
+              </button>
+            )}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png"
+            onChange={handleFotoChange}
+            className="hidden"
+          />
+          {fotoPreview && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Alterar foto
+            </button>
+          )}
+          <p className="text-[10px] text-muted-foreground">Opcional • JPG ou PNG • Máx. 5MB</p>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label>Nome do Cidadão *</Label>

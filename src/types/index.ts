@@ -55,6 +55,7 @@ export interface Atendimento {
   anotacoes_presidente_atualizado_em?: string;
   anotacoes_brenda?: string;
   anotacoes_brenda_atualizado_em?: string;
+  foto_url?: string;
 }
 
 export interface MensagemChat {
