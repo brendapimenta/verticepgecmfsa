@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { TipoNotificacao } from '@/types';
-import { Bell, Filter, CheckCheck, FileText, Zap, MessageSquare, AlertCircle, ClipboardList, DollarSign } from 'lucide-react';
+import { TipoNotificacao, ReferenciaTipo } from '@/types';
+import { Bell, Filter, CheckCheck, FileText, Zap, MessageSquare, AlertCircle, ClipboardList, DollarSign, ArrowRightLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -16,21 +16,50 @@ const tipoLabel: Record<TipoNotificacao, string> = {
   nova_mensagem_chat: 'Nova Mensagem',
   status_atualizado: 'Status Atualizado',
   nova_solicitacao: 'Nova Solicitação',
+  solicitacao_status_atualizada: 'Solicitação Atualizada',
   ficha_atualizada: 'Ficha Atualizada',
-  nova_demanda_atendimento: 'Nova Demanda',
+  nova_demanda: 'Nova Demanda',
+  nova_demanda_atendimento: 'Demanda de Atendimento',
+  demanda_status_atualizada: 'Demanda Atualizada',
   nova_autorizacao: 'Nova Autorização',
+  autorizacao_concluida: 'Autorização Concluída',
 };
 
 const tipoIcon: Record<TipoNotificacao, React.ReactNode> = {
-  novo_atendimento: <FileText className="w-4 h-4 text-blue-600" />,
-  prioridade_alterada: <AlertCircle className="w-4 h-4 text-red-600" />,
-  novo_comando: <Zap className="w-4 h-4 text-yellow-600" />,
-  nova_mensagem_chat: <MessageSquare className="w-4 h-4 text-green-600" />,
-  status_atualizado: <CheckCheck className="w-4 h-4 text-purple-600" />,
-  nova_solicitacao: <ClipboardList className="w-4 h-4 text-orange-600" />,
-  ficha_atualizada: <FileText className="w-4 h-4 text-amber-600" />,
-  nova_demanda_atendimento: <ClipboardList className="w-4 h-4 text-teal-600" />,
-  nova_autorizacao: <DollarSign className="w-4 h-4 text-emerald-600" />,
+  novo_atendimento: <FileText className="w-4 h-4 text-blue-400" />,
+  prioridade_alterada: <AlertCircle className="w-4 h-4 text-red-400" />,
+  novo_comando: <Zap className="w-4 h-4 text-yellow-400" />,
+  nova_mensagem_chat: <MessageSquare className="w-4 h-4 text-green-400" />,
+  status_atualizado: <CheckCheck className="w-4 h-4 text-purple-400" />,
+  nova_solicitacao: <ClipboardList className="w-4 h-4 text-orange-400" />,
+  solicitacao_status_atualizada: <ArrowRightLeft className="w-4 h-4 text-orange-400" />,
+  ficha_atualizada: <FileText className="w-4 h-4 text-amber-400" />,
+  nova_demanda: <ClipboardList className="w-4 h-4 text-teal-400" />,
+  nova_demanda_atendimento: <ClipboardList className="w-4 h-4 text-teal-400" />,
+  demanda_status_atualizada: <ArrowRightLeft className="w-4 h-4 text-teal-400" />,
+  nova_autorizacao: <DollarSign className="w-4 h-4 text-emerald-400" />,
+  autorizacao_concluida: <CheckCheck className="w-4 h-4 text-emerald-400" />,
+};
+
+const getRouteForRef = (tipo: ReferenciaTipo, id: string): string => {
+  switch (tipo) {
+    case 'atendimento': return `/atendimento/${id}`;
+    case 'comando': return '/comandos';
+    case 'chat': return '/chat';
+    case 'solicitacao': return '/comandos';
+    case 'demanda': return '/demandas';
+    case 'demanda_atendimento': return '/fila';
+    case 'autorizacao_financeira': return '/autorizacoes';
+    default: return '/notificacoes';
+  }
+};
+
+const tempoRelativo = (iso: string): string => {
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (diff < 60) return 'agora';
+  if (diff < 3600) return `há ${Math.floor(diff / 60)} min`;
+  if (diff < 86400) return `há ${Math.floor(diff / 3600)}h`;
+  return `há ${Math.floor(diff / 86400)}d`;
 };
 
 const Notificacoes: React.FC = () => {
@@ -50,11 +79,7 @@ const Notificacoes: React.FC = () => {
 
   const handleClick = (notif: typeof minhas[0]) => {
     marcarNotificacaoLida(notif.id);
-    if (notif.referencia_tipo === 'atendimento') navigate(`/atendimento/${notif.referencia_id}`);
-    else if (notif.referencia_tipo === 'comando') navigate('/comandos');
-    else if (notif.referencia_tipo === 'chat') navigate('/chat');
-    else if (notif.referencia_tipo === 'solicitacao') navigate('/comandos');
-    else if (notif.referencia_tipo === 'demanda_atendimento') navigate('/fila');
+    navigate(getRouteForRef(notif.referencia_tipo, notif.referencia_id));
   };
 
   return (
@@ -76,7 +101,7 @@ const Notificacoes: React.FC = () => {
           </SelectContent>
         </Select>
         <Select value={filtroTipo} onValueChange={setFiltroTipo}>
-          <SelectTrigger className="w-44 h-9 text-xs"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-48 h-9 text-xs"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="todos">Todos os tipos</SelectItem>
             <SelectItem value="novo_atendimento">Novo Atendimento</SelectItem>
@@ -84,8 +109,14 @@ const Notificacoes: React.FC = () => {
             <SelectItem value="novo_comando">Novo Comando</SelectItem>
             <SelectItem value="nova_mensagem_chat">Nova Mensagem</SelectItem>
             <SelectItem value="status_atualizado">Status Atualizado</SelectItem>
+            <SelectItem value="nova_solicitacao">Nova Solicitação</SelectItem>
+            <SelectItem value="solicitacao_status_atualizada">Solicitação Atualizada</SelectItem>
             <SelectItem value="ficha_atualizada">Ficha Atualizada</SelectItem>
-            <SelectItem value="nova_demanda_atendimento">Nova Demanda</SelectItem>
+            <SelectItem value="nova_demanda">Nova Demanda</SelectItem>
+            <SelectItem value="nova_demanda_atendimento">Demanda de Atendimento</SelectItem>
+            <SelectItem value="demanda_status_atualizada">Demanda Atualizada</SelectItem>
+            <SelectItem value="nova_autorizacao">Nova Autorização</SelectItem>
+            <SelectItem value="autorizacao_concluida">Autorização Concluída</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -109,7 +140,7 @@ const Notificacoes: React.FC = () => {
                 </div>
                 <p className="text-sm text-foreground">{n.mensagem_resumo}</p>
                 <p className="text-[11px] text-muted-foreground mt-1">
-                  {new Date(n.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                  {tempoRelativo(n.criado_em)}
                 </p>
               </div>
             </div>

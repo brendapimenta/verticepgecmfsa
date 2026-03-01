@@ -24,7 +24,7 @@ interface DataContextType {
   addDemanda: (d: Omit<Demanda, 'id' | 'criado_em'>) => void;
   updateDemandaGlobalStatus: (id: string, status: StatusDemanda) => void;
   salvarAnotacoesPresidente: (atendimentoId: string, texto: string, nomeCidadao: string) => void;
-  salvarAnotacoesBrenda: (atendimentoId: string, texto: string) => void;
+  salvarAnotacoesBrenda: (atendimentoId: string, texto: string, nomeCidadao: string) => void;
   addAutorizacao: (a: Omit<AutorizacaoFinanceira, 'id' | 'criado_em'>) => void;
   concluirAutorizacao: (id: string, concluido_por_id: string, concluido_por_perfil: 'Presidente' | 'Brenda') => void;
   updateAutorizacao: (id: string, updates: Partial<AutorizacaoFinanceira>) => void;
@@ -63,6 +63,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     window.dispatchEvent(new CustomEvent('nova-notificacao', { detail: n }));
   }, []);
 
+  // ============ 1) ATENDIMENTOS ============
+
   const addAtendimento = useCallback((a: Omit<Atendimento, 'id' | 'atualizado_em'>) => {
     const id = String(Date.now());
     setAtendimentos(prev => [...prev, { ...a, id, atualizado_em: new Date().toISOString() }]);
@@ -75,21 +77,49 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAtendimentos(prev => {
       const old = prev.find(a => a.id === id);
       if (!old) return prev;
-      if (updates.prioridade && updates.prioridade === 'Alta' && old.prioridade !== 'Alta') {
-        criarNotificacao('presidente', 'prioridade_alterada', 'atendimento', id,
-          `Atendimento com prioridade ALTA: ${old.nome_cidadao} – ${old.demanda_principal}.`);
-      }
-      if (updates.status) {
-        const from = old.status;
-        const to = updates.status;
-        if ((from === 'Aguardando' && to === 'Em Atendimento') || (from === 'Em Atendimento' && to === 'Concluído')) {
-          criarNotificacao('brenda', 'status_atualizado', 'atendimento', id,
-            `Status atualizado para ${to}: ${old.nome_cidadao} – ${old.demanda_principal}.`);
+
+      // Prioridade alterada
+      if (updates.prioridade && updates.prioridade !== old.prioridade) {
+        if (updates.prioridade === 'Alta') {
+          criarNotificacao('presidente', 'prioridade_alterada', 'atendimento', id,
+            `Atendimento com prioridade ALTA: ${old.nome_cidadao} – ${old.demanda_principal}.`);
+        } else {
+          criarNotificacao('brenda', 'prioridade_alterada', 'atendimento', id,
+            `Prioridade alterada para ${updates.prioridade}: ${old.nome_cidadao} – ${old.demanda_principal}.`);
         }
       }
+
+      // Mudança de status
+      if (updates.status && updates.status !== old.status) {
+        const to = updates.status;
+        criarNotificacao('brenda', 'status_atualizado', 'atendimento', id,
+          `Status atualizado para ${to}: ${old.nome_cidadao} – ${old.demanda_principal}.`);
+        if (to === 'Concluído') {
+          criarNotificacao('sala_espera', 'status_atualizado', 'atendimento', id,
+            `Atendimento concluído: ${old.nome_cidadao} – ${old.demanda_principal}.`);
+        }
+      }
+
       return prev.map(a => a.id === id ? { ...a, ...updates, atualizado_em: new Date().toISOString() } : a);
     });
   }, [criarNotificacao]);
+
+  // ============ 2) CHATS ============
+
+  const addMensagem = useCallback((m: Omit<MensagemChat, 'id' | 'criado_em'>, canal?: 'sala_brenda' | 'brenda_presidente') => {
+    const id = String(Date.now());
+    setMensagens(prev => [...prev, { ...m, id, criado_em: new Date().toISOString() }]);
+    const resumo = `Nova mensagem de ${m.remetente_nome} no chat.`;
+    if (canal === 'sala_brenda') {
+      const destino: Perfil = m.remetente_nome === 'Brenda' ? 'sala_espera' : 'brenda';
+      criarNotificacao(destino, 'nova_mensagem_chat', 'chat', id, resumo);
+    } else if (canal === 'brenda_presidente') {
+      const destino: Perfil = m.remetente_nome === 'Brenda' ? 'presidente' : 'brenda';
+      criarNotificacao(destino, 'nova_mensagem_chat', 'chat', id, resumo);
+    }
+  }, [criarNotificacao]);
+
+  // ============ 3) COMANDOS RÁPIDOS ============
 
   const addComando = useCallback((c: Omit<Comando, 'id' | 'criado_em'>) => {
     const id = String(Date.now());
@@ -106,22 +136,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setComandos(prev => prev.map(c => c.id === id ? { ...c, status } : c));
   }, []);
 
-  const addMensagem = useCallback((m: Omit<MensagemChat, 'id' | 'criado_em'>, canal?: 'sala_brenda' | 'brenda_presidente') => {
-    const id = String(Date.now());
-    setMensagens(prev => [...prev, { ...m, id, criado_em: new Date().toISOString() }]);
-    const resumo = `Nova mensagem de ${m.remetente_nome} no chat.`;
-    if (canal === 'sala_brenda') {
-      const destino: Perfil = m.remetente_nome === 'Brenda' ? 'sala_espera' : 'brenda';
-      criarNotificacao(destino, 'nova_mensagem_chat', 'chat', id, resumo);
-    } else if (canal === 'brenda_presidente') {
-      const destino: Perfil = m.remetente_nome === 'Brenda' ? 'presidente' : 'brenda';
-      criarNotificacao(destino, 'nova_mensagem_chat', 'chat', id, resumo);
-    }
-  }, [criarNotificacao]);
-
-  const marcarNotificacaoLida = useCallback((id: string) => {
-    setNotificacoes(prev => prev.map(n => n.id === id ? { ...n, lida: true } : n));
-  }, []);
+  // ============ 4) SOLICITAÇÕES ============
 
   const addSolicitacao = useCallback((s: Omit<Solicitacao, 'id' | 'criado_em'>) => {
     const id = String(Date.now());
@@ -133,8 +148,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [criarNotificacao]);
 
   const updateSolicitacaoStatus = useCallback((id: string, status: Solicitacao['status']) => {
-    setSolicitacoes(prev => prev.map(s => s.id === id ? { ...s, status } : s));
-  }, []);
+    setSolicitacoes(prev => {
+      const old = prev.find(s => s.id === id);
+      if (old && old.status !== status) {
+        const origemPerfil: Perfil = old.origem_perfil === 'Presidente' ? 'presidente' : 'brenda';
+        criarNotificacao(origemPerfil, 'solicitacao_status_atualizada', 'solicitacao', id,
+          `Solicitação atualizada para ${status}: ${old.descricao_solicitacao}.`);
+      }
+      return prev.map(s => s.id === id ? { ...s, status } : s);
+    });
+  }, [criarNotificacao]);
+
+  // ============ 5) DEMANDAS ============
 
   const addDemandaAtendimento = useCallback((d: Omit<DemandaAtendimento, 'id' | 'criado_em'>, nomeCidadao: string) => {
     const id = String(Date.now());
@@ -151,13 +176,24 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const id = String(Date.now()) + Math.random().toString(36).slice(2, 6);
     setDemandas(prev => [...prev, { ...d, id, criado_em: new Date().toISOString() }]);
     const destinoPerfil: Perfil = d.destino_perfil === 'Brenda' ? 'brenda' : 'sala_espera';
-    criarNotificacao(destinoPerfil, 'nova_solicitacao', 'solicitacao', id,
+    criarNotificacao(destinoPerfil, 'nova_demanda', 'demanda', id,
       `Nova demanda: ${d.titulo} (prioridade ${d.prioridade}).`);
   }, [criarNotificacao]);
 
   const updateDemandaGlobalStatus = useCallback((id: string, status: StatusDemanda) => {
-    setDemandas(prev => prev.map(d => d.id === id ? { ...d, status } : d));
-  }, []);
+    setDemandas(prev => {
+      const old = prev.find(d => d.id === id);
+      if (old && old.status !== status) {
+        // Notificar quem criou a demanda
+        const criadorPerfil: Perfil = old.origem_perfil === 'Presidente' ? 'presidente' : old.origem_perfil === 'Brenda' ? 'brenda' : 'sala_espera';
+        criarNotificacao(criadorPerfil, 'demanda_status_atualizada', 'demanda', id,
+          `Demanda "${old.titulo}" atualizada para ${status}.`);
+      }
+      return prev.map(d => d.id === id ? { ...d, status } : d);
+    });
+  }, [criarNotificacao]);
+
+  // ============ ANOTAÇÕES ============
 
   const salvarAnotacoesPresidente = useCallback((atendimentoId: string, texto: string, nomeCidadao: string) => {
     setAtendimentos(prev => prev.map(a => a.id === atendimentoId ? {
@@ -170,32 +206,49 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       `O Presidente atualizou as anotações do atendimento de ${nomeCidadao}.`);
   }, [criarNotificacao]);
 
-  const salvarAnotacoesBrenda = useCallback((atendimentoId: string, texto: string) => {
+  const salvarAnotacoesBrenda = useCallback((atendimentoId: string, texto: string, nomeCidadao: string) => {
     setAtendimentos(prev => prev.map(a => a.id === atendimentoId ? {
       ...a,
       anotacoes_brenda: texto,
       anotacoes_brenda_atualizado_em: new Date().toISOString(),
       atualizado_em: new Date().toISOString(),
     } : a));
-  }, []);
+    criarNotificacao('presidente', 'ficha_atualizada', 'atendimento', atendimentoId,
+      `Brenda atualizou as anotações do atendimento de ${nomeCidadao}.`);
+  }, [criarNotificacao]);
+
+  // ============ 6) AUTORIZAÇÕES FINANCEIRAS ============
 
   const addAutorizacao = useCallback((a: Omit<AutorizacaoFinanceira, 'id' | 'criado_em'>) => {
     const id = String(Date.now()) + Math.random().toString(36).slice(2, 6);
     setAutorizacoes(prev => [...prev, { ...a, id, criado_em: new Date().toISOString() }]);
-    criarNotificacao('presidente', 'nova_autorizacao' as any, 'autorizacao_financeira', id,
+    criarNotificacao('presidente', 'nova_autorizacao', 'autorizacao_financeira', id,
       `Nova autorização financeira: ${a.titulo}.`);
   }, [criarNotificacao]);
 
   const concluirAutorizacao = useCallback((id: string, concluido_por_id: string, concluido_por_perfil: 'Presidente' | 'Brenda') => {
-    setAutorizacoes(prev => prev.map(a => a.id === id ? {
-      ...a, status: 'Concluída' as StatusAutorizacao,
-      resolvido_em: new Date().toISOString(),
-      concluido_por_id, concluido_por_perfil,
-    } : a));
-  }, []);
+    setAutorizacoes(prev => {
+      const old = prev.find(a => a.id === id);
+      if (old) {
+        // Notificar o outro perfil
+        const destinoPerfil: Perfil = concluido_por_perfil === 'Presidente' ? 'brenda' : 'presidente';
+        criarNotificacao(destinoPerfil, 'autorizacao_concluida', 'autorizacao_financeira', id,
+          `Autorização financeira "${old.titulo}" concluída por ${concluido_por_perfil}.`);
+      }
+      return prev.map(a => a.id === id ? {
+        ...a, status: 'Concluída' as StatusAutorizacao,
+        resolvido_em: new Date().toISOString(),
+        concluido_por_id, concluido_por_perfil,
+      } : a);
+    });
+  }, [criarNotificacao]);
 
   const updateAutorizacao = useCallback((id: string, updates: Partial<AutorizacaoFinanceira>) => {
     setAutorizacoes(prev => prev.map(a => a.id === id ? { ...a, ...updates } : a));
+  }, []);
+
+  const marcarNotificacaoLida = useCallback((id: string) => {
+    setNotificacoes(prev => prev.map(n => n.id === id ? { ...n, lida: true } : n));
   }, []);
 
   return (
