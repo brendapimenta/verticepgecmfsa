@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Atendimento, Comando, Demanda, MensagemChat, Notificacao, Perfil, Solicitacao, DemandaAtendimento, StatusDemanda } from '@/types';
+import { Atendimento, AutorizacaoFinanceira, Comando, Demanda, MensagemChat, Notificacao, Perfil, Solicitacao, DemandaAtendimento, StatusDemanda, StatusAutorizacao } from '@/types';
 import { mockAtendimentos, mockComandos, mockMensagens } from '@/data/mockData';
 
 interface DataContextType {
@@ -10,6 +10,7 @@ interface DataContextType {
   solicitacoes: Solicitacao[];
   demandasAtendimento: DemandaAtendimento[];
   demandas: Demanda[];
+  autorizacoes: AutorizacaoFinanceira[];
   addAtendimento: (a: Omit<Atendimento, 'id' | 'atualizado_em'>) => void;
   updateAtendimento: (id: string, updates: Partial<Atendimento>) => void;
   addComando: (c: Omit<Comando, 'id' | 'criado_em'>) => void;
@@ -24,6 +25,9 @@ interface DataContextType {
   updateDemandaGlobalStatus: (id: string, status: StatusDemanda) => void;
   salvarAnotacoesPresidente: (atendimentoId: string, texto: string, nomeCidadao: string) => void;
   salvarAnotacoesBrenda: (atendimentoId: string, texto: string) => void;
+  addAutorizacao: (a: Omit<AutorizacaoFinanceira, 'id' | 'criado_em'>) => void;
+  concluirAutorizacao: (id: string, concluido_por_id: string, concluido_por_perfil: 'Presidente' | 'Brenda') => void;
+  updateAutorizacao: (id: string, updates: Partial<AutorizacaoFinanceira>) => void;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -42,6 +46,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>([]);
   const [demandasAtendimento, setDemandasAtendimento] = useState<DemandaAtendimento[]>([]);
   const [demandas, setDemandas] = useState<Demanda[]>([]);
+  const [autorizacoes, setAutorizacoes] = useState<AutorizacaoFinanceira[]>([]);
 
   const criarNotificacao = useCallback((perfil_destino: Perfil, tipo_notificacao: Notificacao['tipo_notificacao'], referencia_tipo: Notificacao['referencia_tipo'], referencia_id: string, mensagem_resumo: string) => {
     const n: Notificacao = {
@@ -174,13 +179,32 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } : a));
   }, []);
 
+  const addAutorizacao = useCallback((a: Omit<AutorizacaoFinanceira, 'id' | 'criado_em'>) => {
+    const id = String(Date.now()) + Math.random().toString(36).slice(2, 6);
+    setAutorizacoes(prev => [...prev, { ...a, id, criado_em: new Date().toISOString() }]);
+    criarNotificacao('presidente', 'nova_autorizacao' as any, 'autorizacao_financeira', id,
+      `Nova autorização financeira: ${a.titulo}.`);
+  }, [criarNotificacao]);
+
+  const concluirAutorizacao = useCallback((id: string, concluido_por_id: string, concluido_por_perfil: 'Presidente' | 'Brenda') => {
+    setAutorizacoes(prev => prev.map(a => a.id === id ? {
+      ...a, status: 'Concluída' as StatusAutorizacao,
+      resolvido_em: new Date().toISOString(),
+      concluido_por_id, concluido_por_perfil,
+    } : a));
+  }, []);
+
+  const updateAutorizacao = useCallback((id: string, updates: Partial<AutorizacaoFinanceira>) => {
+    setAutorizacoes(prev => prev.map(a => a.id === id ? { ...a, ...updates } : a));
+  }, []);
+
   return (
     <DataContext.Provider value={{
-      atendimentos, comandos, mensagens, notificacoes, solicitacoes, demandasAtendimento, demandas,
+      atendimentos, comandos, mensagens, notificacoes, solicitacoes, demandasAtendimento, demandas, autorizacoes,
       addAtendimento, updateAtendimento, addComando, updateComandoStatus, addMensagem,
       marcarNotificacaoLida, addSolicitacao, updateSolicitacaoStatus,
       addDemandaAtendimento, updateDemandaStatus, addDemanda, updateDemandaGlobalStatus,
-      salvarAnotacoesPresidente, salvarAnotacoesBrenda,
+      salvarAnotacoesPresidente, salvarAnotacoesBrenda, addAutorizacao, concluirAutorizacao, updateAutorizacao,
     }}>
       {children}
     </DataContext.Provider>
