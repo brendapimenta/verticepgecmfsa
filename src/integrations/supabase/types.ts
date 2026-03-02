@@ -1141,6 +1141,7 @@ export type Database = {
     }
     Functions: {
       get_my_instituicao_id: { Args: never; Returns: string }
+      get_my_perfil: { Args: never; Returns: string }
     }
     Enums: {
       perfil_usuario:
