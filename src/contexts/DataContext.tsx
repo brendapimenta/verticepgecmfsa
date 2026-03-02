@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Atendimento, AutorizacaoFinanceira, Comando, Demanda, MensagemChat, Notificacao, Perfil, Solicitacao, DemandaAtendimento, StatusDemanda, StatusAutorizacao, EventoAgenda, PautaDespacho, StatusPauta } from '@/types';
 import { getRouteForRef } from '@/lib/notificationRoutes';
+import { toast } from 'sonner';
 
 interface DataContextType {
   loading: boolean;
@@ -87,6 +88,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         supabase.from('eventos_agenda').select('*').order('criado_em', { ascending: false }),
         supabase.from('pautas_despacho').select('*').order('criado_em', { ascending: false }),
       ]);
+
+      // Log any query errors
+      const queryResults = [
+        { name: 'atendimentos', result: aR },
+        { name: 'comandos', result: cR },
+        { name: 'mensagens_chat', result: mR },
+        { name: 'notificacoes', result: nR },
+        { name: 'solicitacoes', result: sR },
+        { name: 'demandas_atendimento', result: daR },
+        { name: 'demandas', result: dR },
+        { name: 'autorizacoes_financeiras', result: afR },
+        { name: 'eventos_agenda', result: eaR },
+        { name: 'pautas_despacho', result: pdR },
+      ];
+
+      const errors = queryResults.filter(q => q.result.error);
+      if (errors.length > 0) {
+        errors.forEach(q => console.error(`Erro ao carregar ${q.name}:`, q.result.error));
+        toast.error(`Erro ao carregar dados: ${errors.map(e => e.name).join(', ')}`, {
+          description: errors[0].result.error?.message || 'Verifique a conexão.',
+          duration: 6000,
+        });
+      }
+
       if (aR.data) setAtendimentos(aR.data as unknown as Atendimento[]);
       if (cR.data) setComandos(cR.data as unknown as Comando[]);
       if (mR.data) setMensagens(mR.data as unknown as MensagemChat[]);
@@ -98,7 +123,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (eaR.data) setEventosAgenda(eaR.data as unknown as EventoAgenda[]);
       if (pdR.data) setPautasDespacho(pdR.data as unknown as PautaDespacho[]);
     } catch (err) {
-      console.error('Erro ao carregar dados:', err);
+      console.error('Erro crítico ao carregar dados:', err);
+      toast.error('Erro crítico ao carregar dados do sistema.');
     } finally {
       setLoading(false);
     }
@@ -195,7 +221,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       observacao_recepcao: a.observacao_recepcao || null, foto_url: a.foto_url || null,
       criado_por: a.criado_por || usuario.id, instituicao_id: usuario.instituicao_id,
     }).select().single();
-    if (error) { console.error(error); return; }
+    if (error) { console.error('Erro ao criar atendimento:', error); toast.error('Erro ao criar atendimento', { description: error.message }); return; }
     if (data) {
       const atend = data as unknown as Atendimento;
       setAtendimentos(prev => [atend, ...prev]);
@@ -250,7 +276,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addMensagem = useCallback(async (m: Omit<MensagemChat, 'id' | 'criado_em'>, canal?: 'espera_principal' | 'principal_presidente') => {
     if (!usuario) return;
-    const { data } = await supabase.from('mensagens_chat').insert({
+    const { data, error } = await supabase.from('mensagens_chat').insert({
       remetente_id: m.remetente_id || usuario.id,
       remetente_nome: m.remetente_nome,
       mensagem: m.mensagem,
@@ -258,6 +284,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       atendimento_id: m.atendimento_id || null,
       instituicao_id: usuario.instituicao_id,
     }).select().single();
+    if (error) { console.error('Erro ao enviar mensagem:', error); toast.error('Erro ao enviar mensagem', { description: error.message }); return; }
     if (data) {
       setMensagens(prev => [...prev, data as unknown as MensagemChat]);
       const resumo = `Nova mensagem de ${m.remetente_nome} no chat.`;
@@ -275,12 +302,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addComando = useCallback(async (c: Omit<Comando, 'id' | 'criado_em'>) => {
     if (!usuario) return;
-    const { data } = await supabase.from('comandos').insert({
+    const { data, error } = await supabase.from('comandos').insert({
       origem_perfil: c.origem_perfil, destino_perfil: c.destino_perfil,
       tipo_chamada: c.tipo_chamada, descricao_customizada: c.descricao_customizada || null,
       status: 'Pendente', criado_por_id: c.criado_por_id, criado_por_nome: c.criado_por_nome,
       instituicao_id: usuario.instituicao_id,
     }).select().single();
+    if (error) { console.error('Erro ao criar comando:', error); toast.error('Erro ao criar comando', { description: error.message }); return; }
     if (data) {
       setComandos(prev => [data as unknown as Comando, ...prev]);
       const desc = c.tipo_chamada === 'Outro' ? c.descricao_customizada : c.tipo_chamada;
@@ -301,12 +329,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addSolicitacao = useCallback(async (s: Omit<Solicitacao, 'id' | 'criado_em'>) => {
     if (!usuario) return;
-    const { data } = await supabase.from('solicitacoes').insert({
+    const { data, error } = await supabase.from('solicitacoes').insert({
       origem_perfil: s.origem_perfil, destino_perfil: s.destino_perfil,
       descricao_solicitacao: s.descricao_solicitacao, status: 'Pendente',
       criado_por_id: s.criado_por_id, instituicao_id: usuario.instituicao_id,
       atendimento_id: s.atendimento_id || null,
     }).select().single();
+    if (error) { console.error('Erro ao criar solicitação:', error); toast.error('Erro ao criar solicitação', { description: error.message }); return; }
     if (data) {
       setSolicitacoes(prev => [data as unknown as Solicitacao, ...prev]);
       const destinoPerfil: Perfil = s.destino_perfil === 'Sala Principal' ? 'sala_principal' : 'sala_espera';
@@ -332,11 +361,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addDemandaAtendimento = useCallback(async (d: Omit<DemandaAtendimento, 'id' | 'criado_em'>, nomeCidadao: string) => {
     if (!usuario) return;
-    const { data } = await supabase.from('demandas_atendimento').insert({
+    const { data, error } = await supabase.from('demandas_atendimento').insert({
       atendimento_id: d.atendimento_id, origem_perfil: d.origem_perfil,
       destino_perfil: d.destino_perfil, descricao_demanda: d.descricao_demanda,
       status: 'Pendente', criado_por_id: d.criado_por_id, instituicao_id: usuario.instituicao_id,
     }).select().single();
+    if (error) { console.error('Erro ao criar demanda:', error); toast.error('Erro ao criar demanda', { description: error.message }); return; }
     if (data) {
       setDemandasAtendimento(prev => [data as unknown as DemandaAtendimento, ...prev]);
       criarNotificacao('sala_espera', 'nova_demanda_atendimento', 'demanda_atendimento', data.id,
@@ -351,12 +381,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addDemanda = useCallback(async (d: Omit<Demanda, 'id' | 'criado_em'>) => {
     if (!usuario) return;
-    const { data } = await supabase.from('demandas').insert({
+    const { data, error } = await supabase.from('demandas').insert({
       titulo: d.titulo, descricao: d.descricao, origem_perfil: d.origem_perfil,
       destino_perfil: d.destino_perfil, atendimento_id: d.atendimento_id || null,
       prioridade: d.prioridade, status: 'Pendente', prazo: d.prazo || null,
       criado_por_id: d.criado_por_id, instituicao_id: usuario.instituicao_id,
     }).select().single();
+    if (error) { console.error('Erro ao criar demanda:', error); toast.error('Erro ao criar demanda', { description: error.message }); return; }
     if (data) {
       setDemandas(prev => [data as unknown as Demanda, ...prev]);
       const destinoPerfil: Perfil = d.destino_perfil === 'Sala Principal' ? 'sala_principal' : 'sala_espera';
@@ -397,11 +428,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addAutorizacao = useCallback(async (a: Omit<AutorizacaoFinanceira, 'id' | 'criado_em'>) => {
     if (!usuario) return;
-    const { data } = await supabase.from('autorizacoes_financeiras').insert({
+    const { data, error } = await supabase.from('autorizacoes_financeiras').insert({
       titulo: a.titulo, descricao: a.descricao, valor: a.valor ?? null,
       status: 'Pendente', criado_por_id: a.criado_por_id,
       criado_por_perfil: a.criado_por_perfil, instituicao_id: usuario.instituicao_id,
     }).select().single();
+    if (error) { console.error('Erro ao criar autorização:', error); toast.error('Erro ao criar autorização', { description: error.message }); return; }
     if (data) {
       setAutorizacoes(prev => [data as unknown as AutorizacaoFinanceira, ...prev]);
       criarNotificacao('presidente', 'nova_autorizacao', 'autorizacao_financeira', data.id, `Nova autorização financeira: ${a.titulo}.`);
@@ -458,7 +490,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       instituicao_id: usuario.instituicao_id,
       recorrencia_id: (e as any).recorrencia_id || null,
     };
-    const { data } = await supabase.from('eventos_agenda').insert(insertData).select().single();
+    const { data, error } = await supabase.from('eventos_agenda').insert(insertData).select().single();
+    if (error) { console.error('Erro ao criar evento:', error); toast.error('Erro ao criar evento', { description: error.message }); return; }
     if (data) {
       setEventosAgenda(prev => [data as unknown as EventoAgenda, ...prev]);
       const destino: Perfil = e.criado_por_perfil === 'Presidente' ? 'sala_principal' : 'presidente';
@@ -522,7 +555,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addPautaDespacho = useCallback(async (p: Omit<PautaDespacho, 'id' | 'criado_em' | 'atualizado_em'>) => {
     if (!usuario) return;
-    const { data } = await supabase.from('pautas_despacho').insert({
+    const { data, error } = await supabase.from('pautas_despacho').insert({
       titulo: p.titulo, categoria: p.categoria, tipo_registro: p.tipo_registro,
       descricao_resumida: p.descricao_resumida, contexto_para_fala: p.contexto_para_fala,
       perguntas_para_decisao: p.perguntas_para_decisao, status: p.status,
@@ -531,6 +564,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       vinculado_a_tipo: p.vinculado_a_tipo || null, vinculado_a_id: p.vinculado_a_id || null,
       instituicao_id: usuario.instituicao_id,
     }).select().single();
+    if (error) { console.error('Erro ao criar pauta:', error); toast.error('Erro ao criar pauta', { description: error.message }); return; }
     if (data) {
       setPautasDespacho(prev => [data as unknown as PautaDespacho, ...prev]);
       const destino: Perfil = p.criado_por_perfil === 'Sala Principal' ? 'presidente' : 'sala_principal';
