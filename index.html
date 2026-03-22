@@ -68,11 +68,12 @@ body {
    FUNDO ESTRELADO
 ══════════════════════════════════════ */
 .starfield {
-  position: fixed;
+  position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+  background: #061020;
 }
 
 .starfield::before {
@@ -80,9 +81,8 @@ body {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 20% 30%, rgba(30,58,110,0.6) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 70%, rgba(15,32,64,0.8) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 100%, rgba(11,22,38,0.9) 0%, transparent 60%);
+    radial-gradient(ellipse at 25% 30%, rgba(10,40,100,0.7) 0%, transparent 55%),
+    radial-gradient(ellipse at 75% 70%, rgba(5,15,50,0.8) 0%, transparent 50%);
 }
 
 .star {
@@ -115,6 +115,8 @@ body {
   position: relative;
   z-index: 1;
   padding: 20px;
+  background: #061020;
+  overflow: hidden;
 }
 
 .login-layout {
@@ -307,6 +309,7 @@ textarea.form-input { resize: vertical; min-height: 80px; }
   background: #061020;
   position: relative;
   z-index: 1;
+  overflow: hidden;
 }
 
 /* ══════════════════════════════════════
@@ -1061,7 +1064,7 @@ tbody td { padding: 12px 16px; font-size: 13px; color: var(--text); }
 <div id="toast-container"></div>
 
 <!-- ══════════════ LOGIN ══════════════ -->
-<div id="login-screen">
+<div id="login-screen" style="background:#07111e!important">
   <div class="login-layout" style="position:relative;z-index:2">
     <div class="login-brand">
       <!-- Logo SVG Vértice -->
