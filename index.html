@@ -108,11 +108,13 @@ body {
    LOGIN
 ══════════════════════════════════════ */
 #login-screen {
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  position: fixed;
+  top: 0; left: 0;
   z-index: 1;
   padding: 20px;
   background: #061020;
@@ -302,12 +304,14 @@ textarea.form-input { resize: vertical; min-height: 80px; }
    TROCAR SENHA
 ══════════════════════════════════════ */
 #trocar-senha-screen {
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
   display: none;
   align-items: center;
   justify-content: center;
   background: #061020;
-  position: relative;
+  position: fixed;
+  top: 0; left: 0;
   z-index: 1;
   overflow: hidden;
 }
