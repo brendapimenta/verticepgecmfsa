@@ -2400,14 +2400,43 @@ async function salvarComando() {
 async function criarNotif(destPerfil,tipo,titulo,mensagem) {
   // Salvar no banco
   await db.from('notificacoes').insert({camara_id:CAMARA_ID,destinatario_perfil:destPerfil,tipo,titulo,mensagem});
-  // Enviar para Slack #presidencia
+  // Notificação nativa do browser/celular
+  enviarNotifNativa(titulo, mensagem);
+}
+
+function enviarNotifNativa(titulo, mensagem) {
   try {
-    fetch('https://pyoubbbkytuzbcnbndtx.supabase.co/functions/v1/send-push',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({dest:destPerfil,titulo,msg:mensagem})
-    }).then(r=>r.json()).then(t=>console.log('Notif Slack:',t)).catch(e=>console.log('Notif erro:',e));
-  } catch(e) { console.log('slack error:',e); }
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'granted') {
+      const n = new Notification(titulo, {
+        body: mensagem,
+        icon: '/icon-192.png',
+        badge: '/icon-192.png',
+        tag: 'vertice-' + Date.now(),
+        requireInteraction: false,
+        silent: false
+      });
+      n.onclick = () => { window.focus(); n.close(); };
+      setTimeout(() => n.close(), 8000);
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission().then(p => {
+        if (p === 'granted') enviarNotifNativa(titulo, mensagem);
+      });
+    }
+  } catch(e) { console.log('notif error:', e); }
+}
+
+async function pedirPermissaoNotificacao() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') {
+    const p = await Notification.requestPermission();
+    if (p === 'granted') {
+      new Notification('🟢 Vértice — Notificações ativas!', {
+        body: 'Você receberá alertas quando visitantes chegarem.',
+        icon: '/icon-192.png'
+      });
+    }
+  }
 }
 
 async function carregarNotificacoes() {
