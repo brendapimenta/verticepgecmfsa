@@ -2398,7 +2398,16 @@ async function salvarComando() {
 // NOTIFICAÇÕES
 // ══════════════════════════════════════
 async function criarNotif(destPerfil,tipo,titulo,mensagem) {
+  // Salvar no banco
   await db.from('notificacoes').insert({camara_id:CAMARA_ID,destinatario_perfil:destPerfil,tipo,titulo,mensagem});
+  // Enviar para Slack #presidencia
+  try {
+    fetch('https://pyoubbbkytuzbcnbndtx.supabase.co/functions/v1/send-push', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5b3ViYmJreXR1emJjbmJuZHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzODk4OTYsImV4cCI6MjA4Nzk2NTg5Nn0.IBz3VksAEN1d4iUnVqi_4-Sczz8grRnsw-4GxMHi7JQ'},
+      body:JSON.stringify({dest:destPerfil,titulo,msg:mensagem})
+    });
+  } catch(e) { console.log('slack error:',e); }
 }
 
 async function carregarNotificacoes() {
