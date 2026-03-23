@@ -1261,11 +1261,11 @@ tbody td { padding: 12px 16px; font-size: 13px; color: var(--text); }
       <div class="grid-2">
         <div class="form-group" style="grid-column:1/-1">
           <label class="form-label">Nome do visitante</label>
-          <input type="text" class="form-input" id="atend-nome" placeholder="Nome completo">
+          <input type="text" class="form-input-modal" id="atend-nome" placeholder="Nome completo">
         </div>
         <div class="form-group">
           <label class="form-label">Tipo</label>
-          <select class="form-input" id="atend-tipo">
+          <select class="form-input-modal" id="atend-tipo">
             <option value="Cidadão">Cidadão</option>
             <option value="Vereador">Vereador</option>
             <option value="Autoridade">Autoridade</option>
@@ -1273,7 +1273,7 @@ tbody td { padding: 12px 16px; font-size: 13px; color: var(--text); }
         </div>
         <div class="form-group">
           <label class="form-label">Prioridade</label>
-          <select class="form-input" id="atend-prioridade">
+          <select class="form-input-modal" id="atend-prioridade">
             <option value="Média">Normal</option>
             <option value="Alta">Urgente</option>
             <option value="Baixa">Pode aguardar</option>
@@ -1281,11 +1281,11 @@ tbody td { padding: 12px 16px; font-size: 13px; color: var(--text); }
         </div>
         <div class="form-group" style="grid-column:1/-1">
           <label class="form-label">Assunto</label>
-          <input type="text" class="form-input" id="atend-assunto" placeholder="Descreva o assunto">
+          <input type="text" class="form-input-modal" id="atend-assunto" placeholder="Descreva o assunto">
         </div>
         <div class="form-group" style="grid-column:1/-1">
           <label class="form-label">Observações</label>
-          <textarea class="form-input" id="atend-obs" placeholder="Informações adicionais (opcional)"></textarea>
+          <textarea class="form-input-modal" id="atend-obs" placeholder="Informações adicionais (opcional)"></textarea>
         </div>
       </div>
     </div>
@@ -1306,12 +1306,12 @@ tbody td { padding: 12px 16px; font-size: 13px; color: var(--text); }
       <input type="hidden" id="demanda-atend-id">
       <div class="form-group">
         <label class="form-label">Descrição</label>
-        <textarea class="form-input" id="demanda-desc" placeholder="Descreva a demanda detalhadamente"></textarea>
+        <textarea class="form-input-modal" id="demanda-desc" placeholder="Descreva a demanda detalhadamente"></textarea>
       </div>
       <div class="grid-2">
         <div class="form-group">
           <label class="form-label">Status</label>
-          <select class="form-input" id="demanda-status">
+          <select class="form-input-modal" id="demanda-status">
             <option value="Pendente">Pendente</option>
             <option value="Em andamento">Em andamento</option>
             <option value="Concluído">Concluído</option>
@@ -1319,7 +1319,7 @@ tbody td { padding: 12px 16px; font-size: 13px; color: var(--text); }
         </div>
         <div class="form-group">
           <label class="form-label">Prazo (opcional)</label>
-          <input type="date" class="form-input" id="demanda-prazo">
+          <input type="date" class="form-input-modal" id="demanda-prazo">
         </div>
       </div>
     </div>
@@ -1340,12 +1340,12 @@ tbody td { padding: 12px 16px; font-size: 13px; color: var(--text); }
       <input type="hidden" id="evento-id">
       <div class="form-group">
         <label class="form-label">Título</label>
-        <input type="text" class="form-input" id="evento-titulo" placeholder="Título do evento">
+        <input type="text" class="form-input-modal" id="evento-titulo" placeholder="Título do evento">
       </div>
       <div class="grid-2">
         <div class="form-group">
           <label class="form-label">Tipo</label>
-          <select class="form-input" id="evento-tipo">
+          <select class="form-input-modal" id="evento-tipo">
             <option>Atendimento</option><option>Reunião</option><option>Entrevista</option>
             <option>Evento</option><option>Congresso</option><option>Sessão Ordinária</option>
             <option>Sessão Solene</option><option>Sessão Especial</option>
@@ -1356,28 +1356,28 @@ tbody td { padding: 12px 16px; font-size: 13px; color: var(--text); }
         </div>
         <div class="form-group">
           <label class="form-label">Data</label>
-          <input type="date" class="form-input" id="evento-data">
+          <input type="date" class="form-input-modal" id="evento-data">
         </div>
         <div class="form-group">
           <label class="form-label">Hora início</label>
-          <input type="time" class="form-input" id="evento-hora-inicio">
+          <input type="time" class="form-input-modal" id="evento-hora-inicio">
         </div>
         <div class="form-group">
           <label class="form-label">Hora fim</label>
-          <input type="time" class="form-input" id="evento-hora-fim">
+          <input type="time" class="form-input-modal" id="evento-hora-fim">
         </div>
       </div>
       <div class="form-group">
         <label class="form-label">Local</label>
-        <input type="text" class="form-input" id="evento-local" placeholder="Local do evento">
+        <input type="text" class="form-input-modal" id="evento-local" placeholder="Local do evento">
       </div>
       <div class="form-group">
         <label class="form-label">Participantes</label>
-        <input type="text" class="form-input" id="evento-participantes" placeholder="Nomes dos participantes">
+        <input type="text" class="form-input-modal" id="evento-participantes" placeholder="Nomes dos participantes">
       </div>
       <div class="form-group">
         <label class="form-label">Observações</label>
-        <textarea class="form-input" id="evento-obs" placeholder="Observações adicionais"></textarea>
+        <textarea class="form-input-modal" id="evento-obs" placeholder="Observações adicionais"></textarea>
       </div>
     </div>
     <div class="modal-footer">
@@ -1396,18 +1396,18 @@ tbody td { padding: 12px 16px; font-size: 13px; color: var(--text); }
     <div class="modal-body">
       <div class="form-group">
         <label class="form-label">Descrição</label>
-        <textarea class="form-input" id="pauta-desc" placeholder="Descreva a pauta para despacho"></textarea>
+        <textarea class="form-input-modal" id="pauta-desc" placeholder="Descreva a pauta para despacho"></textarea>
       </div>
       <div class="form-group">
         <label class="form-label">Status</label>
-        <select class="form-input" id="pauta-status">
+        <select class="form-input-modal" id="pauta-status">
           <option value="Pendente">Pendente</option>
           <option value="Concluído">Concluído</option>
         </select>
       </div>
       <div class="form-group">
         <label class="form-label">Decisão</label>
-        <textarea class="form-input" id="pauta-decisao" placeholder="Registre a decisão tomada (opcional)"></textarea>
+        <textarea class="form-input-modal" id="pauta-decisao" placeholder="Registre a decisão tomada (opcional)"></textarea>
       </div>
     </div>
     <div class="modal-footer">
@@ -1426,7 +1426,7 @@ tbody td { padding: 12px 16px; font-size: 13px; color: var(--text); }
     <div class="modal-body">
       <div class="form-group">
         <label class="form-label">Para</label>
-        <select class="form-input" id="cmd-destinatario">
+        <select class="form-input-modal" id="cmd-destinatario">
           <option value="PRESIDENTE">Presidente</option>
           <option value="SALA_PRINCIPAL">Sala Principal</option>
           <option value="SALA_DE_ESPERA">Sala de Espera</option>
@@ -1435,7 +1435,7 @@ tbody td { padding: 12px 16px; font-size: 13px; color: var(--text); }
       </div>
       <div class="form-group">
         <label class="form-label">Tipo</label>
-        <select class="form-input" id="cmd-tipo">
+        <select class="form-input-modal" id="cmd-tipo">
           <option>Chamar pessoa</option>
           <option>Chamar Diretor</option>
           <option>Chamar Procurador</option>
@@ -1446,7 +1446,7 @@ tbody td { padding: 12px 16px; font-size: 13px; color: var(--text); }
       </div>
       <div class="form-group">
         <label class="form-label">Mensagem</label>
-        <textarea class="form-input" id="cmd-desc" placeholder="Descreva o comando"></textarea>
+        <textarea class="form-input-modal" id="cmd-desc" placeholder="Descreva o comando"></textarea>
       </div>
     </div>
     <div class="modal-footer">
