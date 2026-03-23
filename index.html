@@ -7,6 +7,18 @@
 <title>Vértice — Presidência CMFS</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "7d71b758-d515-4f88-9ea7-d2ecf62118f3",
+      safari_web_id: "web.onesignal.auto.7d71b758-d515-4f88-9ea7-d2ecf62118f3",
+      notifyButton: { enable: false },
+      allowLocalhostAsSecureOrigin: true,
+    });
+  });
+</script>
 <style>
 :root {
   /* Sidebar navy (escura) */
@@ -1605,6 +1617,25 @@ function logout() {
 // ══════════════════════════════════════
 // APP
 // ══════════════════════════════════════
+async function pedirPermissaoNotificacao() {
+  try {
+    if (typeof OneSignal !== "undefined" && window.OneSignalDeferred) {
+      window.OneSignalDeferred.push(async function(OneSignal) {
+        const permission = await OneSignal.Notifications.permission;
+        if (!permission) {
+          await OneSignal.Notifications.requestPermission();
+        }
+        // Setar o external ID do usuário para notificações direcionadas
+        if (usuarioAtual) {
+          await OneSignal.login(usuarioAtual.id);
+          await OneSignal.User.addTag("perfil", usuarioAtual.perfil_visualizacao);
+          await OneSignal.User.addTag("username", usuarioAtual.username);
+        }
+      });
+    }
+  } catch(e) { console.log("OneSignal:", e); }
+}
+
 function iniciarApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
