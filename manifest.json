@@ -1,0 +1,16 @@
+{
+  "name": "Vértice — Presidência CMFS",
+  "short_name": "Vértice",
+  "description": "Sistema de Gestão da Presidência da CMFS",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#061020",
+  "theme_color": "#0f2040",
+  "icons": [
+    {
+      "src": "https://onesignal.com/images/notification_logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
