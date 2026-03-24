@@ -1369,7 +1369,7 @@ select.form-input-modal { cursor: pointer; }
 <div class="modal-overlay" id="modal-evento">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">Novo Evento</div>
+      <div class="modal-title" id="modal-evento-titulo">NOVO EVENTO</div>
       <button class="btn btn-ghost btn-icon" onclick="fecharModal('modal-evento')">✕</button>
     </div>
     <div class="modal-body">
@@ -1418,6 +1418,7 @@ select.form-input-modal { cursor: pointer; }
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="fecharModal('modal-evento')">Cancelar</button>
+      <button id="btn-remover-evento" class="btn" onclick="removerEvento()" style="display:none;background:rgba(192,57,43,0.15);color:#e74c3c;border:1px solid rgba(192,57,43,0.3)">🗑 Remover</button>
       <button class="btn btn-primary" style="width:auto;padding:11px 24px" onclick="salvarEvento()">Salvar</button>
     </div>
   </div>
@@ -1521,6 +1522,7 @@ const PERFIL_MENUS = {
   SALA_DE_ESPERA: [
     { id:'fila', icon:'👥', label:'Fila de Atendimento' },
     { id:'novo-atendimento', icon:'➕', label:'Registrar Visitante' },
+    { id:'agenda', icon:'📅', label:'Agenda' },
     { id:'comandos', icon:'⚡', label:'Comandos' },
     { id:'chat', icon:'💬', label:'Chat' },
     { id:'notificacoes', icon:'🔔', label:'Notificações' },
@@ -2361,7 +2363,7 @@ function abrirModalEvento(data=null) {
   document.getElementById('evento-participantes').value='';
   document.getElementById('evento-obs').value='';
   // Atualizar título do modal
-  document.querySelector('#modal-evento .modal-title').textContent='NOVO EVENTO';
+  document.getElementById('modal-evento-titulo').textContent='NOVO EVENTO';
   // Esconder botão de remover
   const btnRemover = document.getElementById('btn-remover-evento');
   if (btnRemover) btnRemover.style.display='none';
@@ -2380,7 +2382,7 @@ async function verEvento(id) {
   document.getElementById('evento-local').value = e.local||'';
   document.getElementById('evento-participantes').value = e.participantes||'';
   document.getElementById('evento-obs').value = e.observacoes||'';
-  document.querySelector('#modal-evento .modal-title').textContent='EDITAR EVENTO';
+  document.getElementById('modal-evento-titulo').textContent='EDITAR EVENTO';
   // Mostrar botão de remover
   const btnRemover = document.getElementById('btn-remover-evento');
   if (btnRemover) btnRemover.style.display='inline-flex';
