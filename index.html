@@ -2242,8 +2242,8 @@ async function renderAgenda() {
             const evDia=(eventos||[]).filter(e=>e.data_inicio===ds);
             return `<div class="agenda-day ${isHoje?'today':''} ${isOutro?'other-month':''}" onclick="abrirModalEvento('${ds}')">
               <div class="agenda-day-num">${isHoje?`<span>${dia.getDate()}</span>`:dia.getDate()}</div>
-              ${evDia.slice(0,2).map(e=>`<div class="agenda-event-dot" onclick="event.stopPropagation();verEvento('${e.id}')" style="cursor:pointer">${e.hora_inicio?e.hora_inicio.substring(0,5)+' ':''}${e.titulo}</div>`).join('')}
-              ${evDia.length>2?`<div style="font-size:9px;color:var(--text-muted);cursor:pointer" onclick="event.stopPropagation();verEventosDia('${ds}')">${evDia.length-2} mais...</div>`:''}
+              ${evDia.slice(0,3).map(e=>`<div class="agenda-event-dot" onclick="event.stopPropagation();verEvento('${e.id}')" style="cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.hora_inicio?e.hora_inicio.substring(0,5)+' ':''}${e.titulo}</div>`).join('')}
+              ${evDia.length>3?`<div style="font-size:9px;color:var(--blue);cursor:pointer;font-weight:600;padding:1px 4px" onclick="event.stopPropagation();verEventosDia('${ds}')">+${evDia.length-3} mais</div>`:''}
             </div>`;
           }).join('')}
         </div>
@@ -2301,9 +2301,48 @@ async function removerEvento() {
   await renderAgenda();
 }
 
-function verEventosDia(data) {
-  // Abre modal de novo evento com a data — usuário pode navegar pelos eventos do dia
-  abrirModalEvento(data);
+async function verEventosDia(data) {
+  // Buscar todos os eventos deste dia
+  const {data:evs} = await db.from('agenda_eventos').select('*')
+    .eq('camara_id', CAMARA_ID).eq('data_inicio', data).order('hora_inicio');
+  if (!evs || evs.length === 0) return;
+
+  // Formatar data amigável
+  const dt = new Date(data + 'T12:00:00');
+  const dtStr = dt.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long'});
+
+  // Criar modal dinâmico de lista de eventos do dia
+  let html = `
+    <div class="modal-overlay active" id="modal-lista-dia" onclick="if(event.target===this)fecharModal('modal-lista-dia')">
+      <div class="modal" style="max-width:480px">
+        <div class="modal-header">
+          <span class="modal-title" style="text-transform:capitalize">📅 ${dtStr}</span>
+          <button class="btn btn-ghost btn-icon" onclick="fecharModal('modal-lista-dia')">✕</button>
+        </div>
+        <div class="modal-body" style="padding:16px">
+          ${evs.map(e => `
+            <div class="card" style="margin-bottom:10px;cursor:pointer" onclick="fecharModal('modal-lista-dia');verEvento('${e.id}')">
+              <div class="card-body" style="padding:12px 16px">
+                <div style="display:flex;justify-content:space-between;align-items:start;gap:8px">
+                  <div>
+                    <div style="font-family:var(--font-display);font-size:12px;letter-spacing:1px;color:var(--navy);margin-bottom:4px">${e.titulo}</div>
+                    <div style="font-size:11px;color:var(--text2)">${e.tipo}${e.hora_inicio?' · '+e.hora_inicio.substring(0,5)+(e.hora_fim?' – '+e.hora_fim.substring(0,5):''):''}${e.local?' · '+e.local:''}</div>
+                    ${e.participantes?`<div style="font-size:10px;color:var(--text-muted);margin-top:2px">👥 ${e.participantes}</div>`:''}
+                  </div>
+                  <span style="font-size:9px;background:var(--bg3);padding:2px 6px;border-radius:4px;white-space:nowrap;color:var(--text2)">${e.tipo}</span>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" onclick="fecharModal('modal-lista-dia')">Fechar</button>
+          <button class="btn btn-gold btn-sm" onclick="fecharModal('modal-lista-dia');abrirModalEvento('${data}')">+ Novo Evento</button>
+        </div>
+      </div>
+    </div>`;
+
+  document.body.insertAdjacentHTML('beforeend', html);
 }
 
 async function salvarEvento() {
