@@ -2207,52 +2207,148 @@ async function enviarMensagem() {
 // ══════════════════════════════════════
 // AGENDA
 // ══════════════════════════════════════
+// ── AGENDA: controle de modo ──
+let agendaMode = 'mes';
+let agendaDia  = new Date();
+
 async function renderAgenda() {
+  if (agendaMode==='semana') { await renderAgendaSemana(); return; }
+  if (agendaMode==='dia')    { await renderAgendaDia();    return; }
+  await renderAgendaMes();
+}
+
+function _agendaToolbar(titulo, podeEdit) {
+  return `
+    <div class="flex-between mb-16" style="flex-wrap:wrap;gap:8px">
+      <div class="flex-gap" style="gap:6px">
+        <button class="btn btn-ghost btn-icon" onclick="mudarPeriodo(-1)">‹</button>
+        <span style="font-family:var(--font-display);font-size:12px;letter-spacing:2px;color:var(--silver);text-transform:capitalize;min-width:160px;text-align:center">${titulo}</span>
+        <button class="btn btn-ghost btn-icon" onclick="mudarPeriodo(1)">›</button>
+        <button class="btn btn-ghost btn-sm" onclick="agendaMes=new Date();agendaDia=new Date();renderAgenda()">Hoje</button>
+      </div>
+      <div class="flex-gap" style="gap:4px">
+        <button class="btn btn-sm ${agendaMode==='dia'?'btn-primary':'btn-ghost'}" onclick="agendaMode='dia';renderAgenda()">Dia</button>
+        <button class="btn btn-sm ${agendaMode==='semana'?'btn-primary':'btn-ghost'}" onclick="agendaMode='semana';renderAgenda()">Semana</button>
+        <button class="btn btn-sm ${agendaMode==='mes'?'btn-primary':'btn-ghost'}" onclick="agendaMode='mes';renderAgenda()">Mês</button>
+        ${podeEdit?`<button class="btn btn-gold btn-sm" onclick="abrirModalEvento()">+ Novo</button>`:''}
+      </div>
+    </div>`;
+}
+
+function _evCompact(e) {
+  return `<div class="agenda-event-dot" onclick="event.stopPropagation();verEvento('${e.id}')" style="cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.titulo}">${e.hora_inicio?e.hora_inicio.substring(0,5)+' ':''}${e.titulo}</div>`;
+}
+
+function _evCard(e) {
+  const hi=e.hora_inicio?e.hora_inicio.substring(0,5):'', hf=e.hora_fim?'–'+e.hora_fim.substring(0,5):'';
+  return `<div onclick="verEvento('${e.id}')" style="cursor:pointer;background:var(--blue-bg);border-left:3px solid var(--blue);border-radius:6px;padding:8px 10px;margin-bottom:6px;transition:opacity .15s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
+    <div style="font-family:var(--font-display);font-size:11px;letter-spacing:1px;color:var(--navy)">${e.titulo}</div>
+    <div style="font-size:10px;color:var(--text2);margin-top:2px">${hi?'🕐 '+hi+hf:''}${e.tipo?' · '+e.tipo:''}${e.local?' · 📍'+e.local:''}</div>
+    ${e.participantes?`<div style="font-size:10px;color:var(--text-muted)">👥 ${e.participantes}</div>`:''}
+  </div>`;
+}
+
+// ── MENSAL ──
+async function renderAgendaMes() {
   const el=document.getElementById('page-agenda');
   const ano=agendaMes.getFullYear(), mes=agendaMes.getMonth();
   const prim=new Date(ano,mes,1), ult=new Date(ano,mes+1,0);
   const ini=new Date(prim); ini.setDate(ini.getDate()-ini.getDay());
   const fim=new Date(ult); fim.setDate(fim.getDate()+(6-fim.getDay()));
   const {data:eventos}=await db.from('agenda_eventos').select('*').eq('camara_id',CAMARA_ID)
-    .gte('data_inicio',ini.toISOString().split('T')[0]).lte('data_inicio',fim.toISOString().split('T')[0]);
+    .gte('data_inicio',ini.toISOString().split('T')[0]).lte('data_inicio',fim.toISOString().split('T')[0]).order('hora_inicio');
   const hoje=new Date().toISOString().split('T')[0];
   const mesNome=agendaMes.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
   let dias=[]; let d=new Date(ini);
-  while (d<=fim) { dias.push(new Date(d)); d.setDate(d.getDate()+1); }
+  while(d<=fim){dias.push(new Date(d));d.setDate(d.getDate()+1);}
   const podeEdit=['SALA_PRINCIPAL','ADMINISTRADOR','PRESIDENTE'].includes(usuarioAtual.perfil_visualizacao);
+  el.innerHTML=_agendaToolbar(mesNome,podeEdit)+`<div class="card"><div class="card-body" style="padding:12px"><div class="agenda-grid">
+    ${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d=>`<div class="agenda-day-header">${d}</div>`).join('')}
+    ${dias.map(dia=>{
+      const ds=dia.toISOString().split('T')[0];
+      const isHoje=ds===hoje,isOutro=dia.getMonth()!==mes;
+      const evDia=(eventos||[]).filter(e=>e.data_inicio===ds);
+      return `<div class="agenda-day ${isHoje?'today':''} ${isOutro?'other-month':''}" onclick="agendaDia=new Date('${ds}T12:00:00');agendaMode='dia';renderAgenda()">
+        <div class="agenda-day-num">${isHoje?`<span>${dia.getDate()}</span>`:dia.getDate()}</div>
+        ${evDia.slice(0,3).map(e=>_evCompact(e)).join('')}
+        ${evDia.length>3?`<div style="font-size:9px;color:var(--blue);cursor:pointer;font-weight:600" onclick="event.stopPropagation();agendaDia=new Date('${ds}T12:00:00');agendaMode='dia';renderAgenda()">+${evDia.length-3} mais</div>`:''}
+      </div>`;
+    }).join('')}
+  </div></div></div>`;
+}
 
-  el.innerHTML=`
-    <div class="flex-between mb-16">
-      <div class="flex-gap">
-        <button class="btn btn-ghost btn-icon" onclick="mudarMes(-1)">‹</button>
-        <span style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--silver);text-transform:capitalize">${mesNome}</span>
-        <button class="btn btn-ghost btn-icon" onclick="mudarMes(1)">›</button>
-        <button class="btn btn-ghost btn-sm" onclick="agendaMes=new Date();renderAgenda()">Hoje</button>
-      </div>
-      ${podeEdit?`<button class="btn btn-gold btn-sm" onclick="abrirModalEvento()">+ Novo Evento</button>`:''}
+// ── SEMANAL ──
+async function renderAgendaSemana() {
+  const el=document.getElementById('page-agenda');
+  const ini=new Date(agendaDia); ini.setDate(ini.getDate()-ini.getDay());
+  const fim=new Date(ini); fim.setDate(ini.getDate()+6);
+  const {data:eventos}=await db.from('agenda_eventos').select('*').eq('camara_id',CAMARA_ID)
+    .gte('data_inicio',ini.toISOString().split('T')[0]).lte('data_inicio',fim.toISOString().split('T')[0]).order('hora_inicio');
+  const hoje=new Date().toISOString().split('T')[0];
+  const podeEdit=['SALA_PRINCIPAL','ADMINISTRADOR','PRESIDENTE'].includes(usuarioAtual.perfil_visualizacao);
+  const titulo=ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})+' – '+fim.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
+  const diasNome=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const dias=[]; for(let i=0;i<7;i++){const d=new Date(ini);d.setDate(ini.getDate()+i);dias.push(d);}
+  el.innerHTML=_agendaToolbar(titulo,podeEdit)+`<div class="card"><div class="card-body" style="padding:12px">
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px">
+      ${dias.map(dia=>{
+        const ds=dia.toISOString().split('T')[0];
+        const isHoje=ds===hoje;
+        const evDia=(eventos||[]).filter(e=>e.data_inicio===ds);
+        return `<div style="min-height:140px">
+          <div onclick="agendaDia=new Date('${ds}T12:00:00');agendaMode='dia';renderAgenda()" style="cursor:pointer;text-align:center;padding:6px 4px;border-radius:8px;margin-bottom:8px;${isHoje?'background:var(--blue-bg);border:1px solid var(--blue)':'background:var(--bg3)'}">
+            <div style="font-size:9px;color:var(--text2);letter-spacing:1px">${diasNome[dia.getDay()]}</div>
+            <div style="font-family:var(--font-display);font-size:${isHoje?'18':'15'}px;color:${isHoje?'var(--blue)':'var(--text)'}${isHoje?';font-weight:700':''}">${dia.getDate()}</div>
+          </div>
+          ${evDia.map(e=>_evCard(e)).join('')}
+          ${evDia.length===0?`<div style="font-size:9px;color:var(--text-muted);text-align:center;padding:6px;opacity:.4">livre</div>`:''}
+        </div>`;
+      }).join('')}
     </div>
-    <div class="card">
-      <div class="card-body" style="padding:12px">
-        <div class="agenda-grid">
-          ${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d=>`<div class="agenda-day-header">${d}</div>`).join('')}
-          ${dias.map(dia=>{
-            const ds=dia.toISOString().split('T')[0];
-            const isHoje=ds===hoje;
-            const isOutro=dia.getMonth()!==mes;
-            const evDia=(eventos||[]).filter(e=>e.data_inicio===ds);
-            return `<div class="agenda-day ${isHoje?'today':''} ${isOutro?'other-month':''}" onclick="abrirModalEvento('${ds}')">
-              <div class="agenda-day-num">${isHoje?`<span>${dia.getDate()}</span>`:dia.getDate()}</div>
-              ${evDia.slice(0,3).map(e=>`<div class="agenda-event-dot" onclick="event.stopPropagation();verEvento('${e.id}')" style="cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.hora_inicio?e.hora_inicio.substring(0,5)+' ':''}${e.titulo}</div>`).join('')}
-              ${evDia.length>3?`<div style="font-size:9px;color:var(--blue);cursor:pointer;font-weight:600;padding:1px 4px" onclick="event.stopPropagation();verEventosDia('${ds}')">+${evDia.length-3} mais</div>`:''}
-            </div>`;
-          }).join('')}
-        </div>
-      </div>
-    </div>
-  `;
+  </div></div>`;
+}
+
+// ── DIÁRIA ──
+async function renderAgendaDia() {
+  const el=document.getElementById('page-agenda');
+  const ds=agendaDia.toISOString().split('T')[0];
+  const {data:eventos}=await db.from('agenda_eventos').select('*').eq('camara_id',CAMARA_ID)
+    .eq('data_inicio',ds).order('hora_inicio');
+  const podeEdit=['SALA_PRINCIPAL','ADMINISTRADOR','PRESIDENTE'].includes(usuarioAtual.perfil_visualizacao);
+  const titulo=agendaDia.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  el.innerHTML=_agendaToolbar(titulo,podeEdit)+`<div class="card"><div class="card-body" style="padding:0;max-width:680px;margin:0 auto">
+    ${eventos&&eventos.length>0
+      ? eventos.map(e=>`<div onclick="verEvento('${e.id}')" style="cursor:pointer;display:flex;gap:16px;padding:16px 20px;border-bottom:1px solid var(--border2)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+          <div style="min-width:70px;text-align:right;padding-top:2px">
+            <div style="font-size:14px;font-weight:700;color:var(--navy)">${e.hora_inicio?e.hora_inicio.substring(0,5):'──'}</div>
+            ${e.hora_fim?`<div style="font-size:10px;color:var(--text-muted)">${e.hora_fim.substring(0,5)}</div>`:''}
+          </div>
+          <div style="flex:1;border-left:3px solid var(--blue);padding-left:14px">
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:1px;color:var(--navy);margin-bottom:4px">${e.titulo}</div>
+            <div style="font-size:11px;color:var(--text2)">${e.tipo}${e.local?' · 📍'+e.local:''}</div>
+            ${e.participantes?`<div style="font-size:10px;color:var(--text-muted);margin-top:2px">👥 ${e.participantes}</div>`:''}
+            ${e.observacoes?`<div style="font-size:10px;color:var(--text-muted);margin-top:4px;font-style:italic">${e.observacoes}</div>`:''}
+          </div>
+          <div style="color:var(--text-muted);align-self:center">›</div>
+        </div>`).join('')
+      : `<div style="text-align:center;padding:56px 0;color:var(--text-muted)">
+          <div style="font-size:36px;margin-bottom:12px">📅</div>
+          <div style="font-family:var(--font-display);font-size:11px;letter-spacing:2px;margin-bottom:16px">NENHUM EVENTO</div>
+          ${podeEdit?`<button class="btn btn-gold btn-sm" onclick="abrirModalEvento('${ds}')">+ Adicionar evento</button>`:''}
+        </div>`
+    }
+  </div></div>`;
+}
+
+function mudarPeriodo(d) {
+  if(agendaMode==='mes'){agendaMes=new Date(agendaMes.getFullYear(),agendaMes.getMonth()+d,1);}
+  else if(agendaMode==='semana'){agendaDia=new Date(agendaDia);agendaDia.setDate(agendaDia.getDate()+(d*7));}
+  else{agendaDia=new Date(agendaDia);agendaDia.setDate(agendaDia.getDate()+d);}
+  renderAgenda();
 }
 
 function mudarMes(d) { agendaMes=new Date(agendaMes.getFullYear(),agendaMes.getMonth()+d,1); renderAgenda(); }
+
 
 function abrirModalEvento(data=null) {
   document.getElementById('evento-id').value='';
