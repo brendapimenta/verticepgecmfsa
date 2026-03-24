@@ -1541,6 +1541,7 @@ const PERFIL_MENUS = {
     { id:'comandos', icon:'⚡', label:'Comandos' },
     { id:'chat', icon:'💬', label:'Chat' },
     { id:'notificacoes', icon:'🔔', label:'Notificações' },
+    { id:'alterar-senha', icon:'🔑', label:'Alterar Senha' },
   ],
   SALA_PRINCIPAL: [
     { id:'dashboard', icon:'📊', label:'Dashboard' },
@@ -1552,6 +1553,7 @@ const PERFIL_MENUS = {
     { id:'comandos', icon:'⚡', label:'Comandos' },
     { id:'chat', icon:'💬', label:'Chat' },
     { id:'notificacoes', icon:'🔔', label:'Notificações' },
+    { id:'alterar-senha', icon:'🔑', label:'Alterar Senha' },
   ],
   PRESIDENTE: [
     { id:'dashboard', icon:'📊', label:'Dashboard' },
@@ -1562,6 +1564,7 @@ const PERFIL_MENUS = {
     { id:'autorizacoes', icon:'💰', label:'Autorizações' },
     { id:'chat', icon:'💬', label:'Chat' },
     { id:'notificacoes', icon:'🔔', label:'Notificações' },
+    { id:'alterar-senha', icon:'🔑', label:'Alterar Senha' },
   ],
   ADMINISTRADOR: [
     { id:'dashboard', icon:'📊', label:'Dashboard' },
@@ -1576,6 +1579,7 @@ const PERFIL_MENUS = {
     { id:'notificacoes', icon:'🔔', label:'Notificações' },
     { id:'usuarios', icon:'👤', label:'Usuários' },
     { id:'auditoria', icon:'🔍', label:'Auditoria' },
+    { id:'alterar-senha', icon:'🔑', label:'Alterar Senha' },
   ]
 };
 
@@ -1768,7 +1772,7 @@ function mostrarPagina(pagina) {
   const renders = { dashboard:renderDashboard, fila:renderFila, 'novo-atendimento':renderNovoAtendimento,
     demandas:renderDemandas, chat:renderChat, agenda:renderAgenda, pauta:renderPauta,
     comandos:renderComandos, notificacoes:renderNotificacoes, usuarios:renderUsuarios,
-    autorizacoes:renderAutorizacoes, auditoria:renderAuditoria };
+    autorizacoes:renderAutorizacoes, auditoria:renderAuditoria, 'alterar-senha':renderAlterarSenha };
   if (renders[pagina]) renders[pagina]();
 }
 
@@ -2502,6 +2506,71 @@ async function salvarEvento() {
     toast('Evento salvo!','success');
   }
   fecharModal('modal-evento'); await renderAgenda();
+}
+
+// ══════════════════════════════════════
+// ALTERAR SENHA
+// ══════════════════════════════════════
+async function renderAlterarSenha() {
+  const el = document.getElementById('page-alterar-senha');
+  if (!el) {
+    // Criar a página se não existir
+    const pageDiv = document.createElement('div');
+    pageDiv.id = 'page-alterar-senha';
+    pageDiv.className = 'page';
+    pageDiv.style.display = 'none';
+    document.getElementById('app-pages').appendChild(pageDiv);
+  }
+  const page = document.getElementById('page-alterar-senha');
+  page.innerHTML = `
+    <div style="max-width:480px;margin:0 auto">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🔑 Alterar Senha</div>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label" style="color:var(--text2)">Senha atual</label>
+            <input type="password" class="form-input-modal" id="senha-atual" placeholder="Digite sua senha atual">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="color:var(--text2)">Nova senha</label>
+            <input type="password" class="form-input-modal" id="senha-nova" placeholder="Mínimo 6 caracteres">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="color:var(--text2)">Confirmar nova senha</label>
+            <input type="password" class="form-input-modal" id="senha-confirmar" placeholder="Repita a nova senha">
+          </div>
+          <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="salvarNovaSenha()">
+            Salvar nova senha
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function salvarNovaSenha() {
+  const atual   = document.getElementById('senha-atual').value;
+  const nova    = document.getElementById('senha-nova').value;
+  const confirm = document.getElementById('senha-confirmar').value;
+  if (!atual || !nova || !confirm) { toast('Preencha todos os campos.','error'); return; }
+  if (nova.length < 6) { toast('A nova senha deve ter pelo menos 6 caracteres.','error'); return; }
+  if (nova !== confirm) { toast('As senhas não coincidem.','error'); return; }
+  // Verificar senha atual
+  const hashAtual = await sha256(atual);
+  if (hashAtual !== usuarioAtual.senha_hash) { toast('Senha atual incorreta.','error'); return; }
+  const hashNova = await sha256(nova);
+  const {error} = await db.from('usuarios').update({
+    senha_hash: hashNova,
+    primeiro_login_pendente: false
+  }).eq('id', usuarioAtual.id);
+  if (error) { toast('Erro ao salvar senha.','error'); return; }
+  usuarioAtual.senha_hash = hashNova;
+  localStorage.setItem('vertice_user', JSON.stringify(usuarioAtual));
+  document.getElementById('senha-atual').value = '';
+  document.getElementById('senha-nova').value = '';
+  document.getElementById('senha-confirmar').value = '';
+  toast('Senha alterada com sucesso! ✅','success');
 }
 
 // ══════════════════════════════════════
