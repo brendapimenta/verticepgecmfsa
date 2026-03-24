@@ -2237,16 +2237,38 @@ function _agendaToolbar(titulo, podeEdit) {
     </div>`;
 }
 
+function _tipoClasse(tipo) {
+  const map = {
+    'Atendimento': 'ev-atendimento',
+    'Reunião': 'ev-reuniao',
+    'Entrevista': 'ev-entrevista',
+    'Evento': 'ev-evento',
+    'Congresso': 'ev-congresso',
+    'Sessão Ordinária': 'ev-sessao',
+    'Sessão Solene': 'ev-sessao',
+    'Sessão Especial': 'ev-sessao',
+    'Audiência Pública': 'ev-audiencia',
+    'Agenda – Presidência': 'ev-presidencia',
+    'Agenda – Gabinete': 'ev-gabinete',
+    'Eventos – Prefeitura': 'ev-prefeitura',
+    'Agenda – Pessoal': 'ev-pessoal',
+    'Aniversários': 'ev-aniversario',
+  };
+  return map[tipo] || 'ev-default';
+}
+
 function _evCompact(e) {
-  return `<div class="agenda-event-dot" onclick="event.stopPropagation();verEvento('${e.id}')" style="cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.titulo}">${e.hora_inicio?e.hora_inicio.substring(0,5)+' ':''}${e.titulo}</div>`;
+  const cls = _tipoClasse(e.tipo);
+  return `<div class="agenda-event-dot ${cls}" onclick="event.stopPropagation();verEvento('${e.id}')" style="cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-left:2px solid;border-radius:3px;padding:1px 4px" title="${e.titulo}">${e.hora_inicio?e.hora_inicio.substring(0,5)+' ':''}${e.titulo}</div>`;
 }
 
 function _evCard(e) {
   const hi=e.hora_inicio?e.hora_inicio.substring(0,5):'', hf=e.hora_fim?'–'+e.hora_fim.substring(0,5):'';
-  return `<div onclick="verEvento('${e.id}')" style="cursor:pointer;background:var(--blue-bg);border-left:3px solid var(--blue);border-radius:6px;padding:8px 10px;margin-bottom:6px;transition:opacity .15s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
-    <div style="font-family:var(--font-display);font-size:11px;letter-spacing:1px;color:var(--navy)">${e.titulo}</div>
-    <div style="font-size:10px;color:var(--text2);margin-top:2px">${hi?'🕐 '+hi+hf:''}${e.tipo?' · '+e.tipo:''}${e.local?' · 📍'+e.local:''}</div>
-    ${e.participantes?`<div style="font-size:10px;color:var(--text-muted)">👥 ${e.participantes}</div>`:''}
+  const cls=_tipoClasse(e.tipo);
+  return `<div class="${cls}" onclick="verEvento('${e.id}')" style="cursor:pointer;border-left:3px solid;border-radius:6px;padding:8px 10px;margin-bottom:6px;transition:opacity .15s" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
+    <div style="font-family:var(--font-display);font-size:11px;letter-spacing:1px">${e.titulo}</div>
+    <div style="font-size:10px;opacity:.75;margin-top:2px">${hi?'🕐 '+hi+hf:''}${e.tipo?' · '+e.tipo:''}${e.local?' · 📍'+e.local:''}</div>
+    ${e.participantes?`<div style="font-size:10px;opacity:.6">👥 ${e.participantes}</div>`:''}
   </div>`;
 }
 
@@ -2325,11 +2347,11 @@ async function renderAgendaDia() {
             <div style="font-size:14px;font-weight:700;color:var(--navy)">${e.hora_inicio?e.hora_inicio.substring(0,5):'──'}</div>
             ${e.hora_fim?`<div style="font-size:10px;color:var(--text-muted)">${e.hora_fim.substring(0,5)}</div>`:''}
           </div>
-          <div style="flex:1;border-left:3px solid var(--blue);padding-left:14px">
-            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:1px;color:var(--navy);margin-bottom:4px">${e.titulo}</div>
-            <div style="font-size:11px;color:var(--text2)">${e.tipo}${e.local?' · 📍'+e.local:''}</div>
-            ${e.participantes?`<div style="font-size:10px;color:var(--text-muted);margin-top:2px">👥 ${e.participantes}</div>`:''}
-            ${e.observacoes?`<div style="font-size:10px;color:var(--text-muted);margin-top:4px;font-style:italic">${e.observacoes}</div>`:''}
+          <div class="${_tipoClasse(e.tipo)}" style="flex:1;border-left:3px solid;border-radius:6px;padding:10px 14px">
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:1px;margin-bottom:4px">${e.titulo}</div>
+            <div style="font-size:11px;opacity:.75">${e.tipo}${e.local?' · 📍'+e.local:''}</div>
+            ${e.participantes?`<div style="font-size:10px;opacity:.6;margin-top:2px">👥 ${e.participantes}</div>`:''}
+            ${e.observacoes?`<div style="font-size:10px;opacity:.55;margin-top:4px;font-style:italic">${e.observacoes}</div>`:''}
           </div>
           <div style="color:var(--text-muted);align-self:center">›</div>
         </div>`).join('')
