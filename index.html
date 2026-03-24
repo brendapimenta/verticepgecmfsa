@@ -2242,8 +2242,8 @@ async function renderAgenda() {
             const evDia=(eventos||[]).filter(e=>e.data_inicio===ds);
             return `<div class="agenda-day ${isHoje?'today':''} ${isOutro?'other-month':''}" onclick="abrirModalEvento('${ds}')">
               <div class="agenda-day-num">${isHoje?`<span>${dia.getDate()}</span>`:dia.getDate()}</div>
-              ${evDia.slice(0,2).map(e=>`<div class="agenda-event-dot">${e.hora_inicio?e.hora_inicio.substring(0,5)+' ':''}${e.titulo}</div>`).join('')}
-              ${evDia.length>2?`<div style="font-size:9px;color:var(--text-muted)">+${evDia.length-2}</div>`:''}
+              ${evDia.slice(0,2).map(e=>`<div class="agenda-event-dot" onclick="event.stopPropagation();verEvento('${e.id}')" style="cursor:pointer">${e.hora_inicio?e.hora_inicio.substring(0,5)+' ':''}${e.titulo}</div>`).join('')}
+              ${evDia.length>2?`<div style="font-size:9px;color:var(--text-muted);cursor:pointer" onclick="event.stopPropagation();verEventosDia('${ds}')">${evDia.length-2} mais...</div>`:''}
             </div>`;
           }).join('')}
         </div>
@@ -2264,24 +2264,70 @@ function abrirModalEvento(data=null) {
   document.getElementById('evento-local').value='';
   document.getElementById('evento-participantes').value='';
   document.getElementById('evento-obs').value='';
+  // Atualizar título do modal
+  document.querySelector('#modal-evento .modal-title').textContent='NOVO EVENTO';
+  // Esconder botão de remover
+  const btnRemover = document.getElementById('btn-remover-evento');
+  if (btnRemover) btnRemover.style.display='none';
   abrirModal('modal-evento');
+}
+
+async function verEvento(id) {
+  const {data:e} = await db.from('agenda_eventos').select('*').eq('id',id).single();
+  if (!e) return;
+  document.getElementById('evento-id').value = e.id;
+  document.getElementById('evento-titulo').value = e.titulo;
+  document.getElementById('evento-tipo').value = e.tipo;
+  document.getElementById('evento-data').value = e.data_inicio;
+  document.getElementById('evento-hora-inicio').value = e.hora_inicio||'';
+  document.getElementById('evento-hora-fim').value = e.hora_fim||'';
+  document.getElementById('evento-local').value = e.local||'';
+  document.getElementById('evento-participantes').value = e.participantes||'';
+  document.getElementById('evento-obs').value = e.observacoes||'';
+  document.querySelector('#modal-evento .modal-title').textContent='EDITAR EVENTO';
+  // Mostrar botão de remover
+  const btnRemover = document.getElementById('btn-remover-evento');
+  if (btnRemover) btnRemover.style.display='inline-flex';
+  abrirModal('modal-evento');
+}
+
+async function removerEvento() {
+  const id = document.getElementById('evento-id').value;
+  if (!id) return;
+  if (!confirm('Remover este evento da agenda?')) return;
+  await db.from('agenda_eventos').delete().eq('id', id);
+  fecharModal('modal-evento');
+  toast('Evento removido!','success');
+  await renderAgenda();
+}
+
+function verEventosDia(data) {
+  // Abre modal de novo evento com a data — usuário pode navegar pelos eventos do dia
+  abrirModalEvento(data);
 }
 
 async function salvarEvento() {
   const titulo=document.getElementById('evento-titulo').value.trim();
   const data=document.getElementById('evento-data').value;
   if (!titulo||!data) { toast('Preencha título e data.','error'); return; }
-  await db.from('agenda_eventos').insert({
-    camara_id:CAMARA_ID, titulo, tipo:document.getElementById('evento-tipo').value,
+  const id=document.getElementById('evento-id').value;
+  const payload={
+    titulo, tipo:document.getElementById('evento-tipo').value,
     data_inicio:data,
     hora_inicio:document.getElementById('evento-hora-inicio').value||null,
     hora_fim:document.getElementById('evento-hora-fim').value||null,
     local:document.getElementById('evento-local').value||null,
     participantes:document.getElementById('evento-participantes').value||null,
     observacoes:document.getElementById('evento-obs').value||null,
-    criado_por:usuarioAtual.id
-  });
-  fecharModal('modal-evento'); toast('Evento salvo!','success'); await renderAgenda();
+  };
+  if (id) {
+    await db.from('agenda_eventos').update(payload).eq('id',id);
+    toast('Evento atualizado!','success');
+  } else {
+    await db.from('agenda_eventos').insert({...payload, camara_id:CAMARA_ID, criado_por:usuarioAtual.id});
+    toast('Evento salvo!','success');
+  }
+  fecharModal('modal-evento'); await renderAgenda();
 }
 
 // ══════════════════════════════════════
