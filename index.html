@@ -1541,6 +1541,7 @@ const PERFIL_MENUS = {
     { id:'comandos', icon:'⚡', label:'Comandos' },
     { id:'chat', icon:'💬', label:'Chat' },
     { id:'notificacoes', icon:'🔔', label:'Notificações' },
+    { id:'relatorios', icon:'📊', label:'Relatórios' },
     { id:'alterar-senha', icon:'🔑', label:'Alterar Senha' },
   ],
   SALA_PRINCIPAL: [
@@ -1553,6 +1554,7 @@ const PERFIL_MENUS = {
     { id:'comandos', icon:'⚡', label:'Comandos' },
     { id:'chat', icon:'💬', label:'Chat' },
     { id:'notificacoes', icon:'🔔', label:'Notificações' },
+    { id:'relatorios', icon:'📊', label:'Relatórios' },
     { id:'alterar-senha', icon:'🔑', label:'Alterar Senha' },
   ],
   PRESIDENTE: [
@@ -1580,6 +1582,7 @@ const PERFIL_MENUS = {
     { id:'notificacoes', icon:'🔔', label:'Notificações' },
     { id:'usuarios', icon:'👤', label:'Usuários' },
     { id:'auditoria', icon:'🔍', label:'Auditoria' },
+    { id:'relatorios', icon:'📊', label:'Relatórios' },
     { id:'alterar-senha', icon:'🔑', label:'Alterar Senha' },
   ]
 };
@@ -1773,7 +1776,7 @@ function mostrarPagina(pagina) {
   const renders = { dashboard:renderDashboard, fila:renderFila, 'novo-atendimento':renderNovoAtendimento,
     demandas:renderDemandas, chat:renderChat, agenda:renderAgenda, pauta:renderPauta,
     comandos:renderComandos, notificacoes:renderNotificacoes, usuarios:renderUsuarios,
-    autorizacoes:renderAutorizacoes, auditoria:renderAuditoria, 'alterar-senha':renderAlterarSenha };
+    autorizacoes:renderAutorizacoes, auditoria:renderAuditoria, 'alterar-senha':renderAlterarSenha, relatorios:renderRelatorios };
   if (renders[pagina]) renders[pagina]();
 }
 
@@ -2516,6 +2519,140 @@ async function salvarEvento() {
     toast('Evento salvo!','success');
   }
   fecharModal('modal-evento'); await renderAgenda();
+}
+
+// ══════════════════════════════════════
+// RELATÓRIOS
+// ══════════════════════════════════════
+async function renderRelatorios() {
+  const el = document.getElementById('page-relatorios');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  // Buscar dados de todas as views
+  const [rHoje, rDiario, rMensal, rDemandas, rAgenda] = await Promise.all([
+    db.from('relatorio_hoje').select('*').single(),
+    db.from('relatorio_atendimentos_diario').select('*').limit(30),
+    db.from('relatorio_atendimentos_mensal').select('*').limit(12),
+    db.from('relatorio_demandas_mensal').select('*').limit(12),
+    db.from('relatorio_agenda_mensal').select('*').limit(12),
+  ]);
+
+  const hoje = rHoje.data || {};
+  const diario = rDiario.data || [];
+  const mensal = rMensal.data || [];
+  const demandas = rDemandas.data || [];
+  const agenda = rAgenda.data || [];
+
+  const statCard = (titulo, valor, sub, cor='var(--navy)') =>
+    `<div class="stat-card"><div class="stat-label">${titulo}</div>
+     <div class="stat-value" style="color:${cor}">${valor}</div>
+     <div class="stat-sub">${sub}</div></div>`;
+
+  const tabela = (colunas, linhas) => `
+    <div class="table-wrap">
+      <table>
+        <thead><tr>${colunas.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+        <tbody>${linhas}</tbody>
+      </table>
+    </div>`;
+
+  el.innerHTML = `
+    <!-- HOJE -->
+    <div class="card mb-16">
+      <div class="card-header"><div class="card-title">📋 Resumo de Hoje — ${new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}</div></div>
+      <div class="card-body">
+        <div class="stats-grid">
+          ${statCard('Atendimentos', hoje.atendimentos_hoje||0, 'total hoje')}
+          ${statCard('Concluídos', hoje.concluidos_hoje||0, 'finalizados', 'var(--green)')}
+          ${statCard('Urgentes', hoje.urgentes_hoje||0, 'prioridade alta', 'var(--red)')}
+          ${statCard('Eventos', hoje.eventos_hoje||0, 'na agenda')}
+          ${statCard('Demandas Pendentes', hoje.demandas_pendentes||0, 'em aberto', hoje.demandas_pendentes>0?'var(--gold)':'var(--navy)')}
+          ${statCard('Pautas Pendentes', hoje.pautas_pendentes||0, 'aguardando despacho', hoje.pautas_pendentes>0?'var(--gold)':'var(--navy)')}
+        </div>
+      </div>
+    </div>
+
+    <!-- DIÁRIO -->
+    <div class="card mb-16">
+      <div class="card-header"><div class="card-title">📅 Atendimentos por Dia — Últimos 30 dias</div></div>
+      <div class="card-body" style="padding:0">
+        ${tabela(
+          ['Data','Total','Concluídos','Urgentes','Adiados','Cidadão','Vereador','Autoridade','Servidor','Assessor','Espera Média'],
+          diario.map(d=>`<tr>
+            <td style="font-weight:600">${new Date(d.data+'T12:00:00').toLocaleDateString('pt-BR')}</td>
+            <td>${d.total_atendimentos}</td>
+            <td style="color:var(--green)">${d.concluidos}</td>
+            <td style="color:var(--red)">${d.urgentes}</td>
+            <td>${d.adiados}</td>
+            <td>${d.cidadaos}</td>
+            <td>${d.vereadores}</td>
+            <td>${d.autoridades}</td>
+            <td>${d.servidores}</td>
+            <td>${d.assessores}</td>
+            <td>${d.tempo_medio_espera_min||'—'} min</td>
+          </tr>`).join('') || '<tr><td colspan="11" style="text-align:center;color:var(--text-muted)">Nenhum dado</td></tr>'
+        )}
+      </div>
+    </div>
+
+    <!-- MENSAL ATENDIMENTOS -->
+    <div class="card mb-16">
+      <div class="card-header"><div class="card-title">📆 Atendimentos por Mês</div></div>
+      <div class="card-body" style="padding:0">
+        ${tabela(
+          ['Mês','Total','Concluídos','Urgentes','Adiados','Dias com Atendimento','Espera Média'],
+          mensal.map(m=>`<tr>
+            <td style="font-weight:600">${m.mes}</td>
+            <td>${m.total_atendimentos}</td>
+            <td style="color:var(--green)">${m.concluidos}</td>
+            <td style="color:var(--red)">${m.urgentes}</td>
+            <td>${m.adiados}</td>
+            <td>${m.dias_com_atendimento}</td>
+            <td>${m.tempo_medio_espera_min||'—'} min</td>
+          </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">Nenhum dado</td></tr>'
+        )}
+      </div>
+    </div>
+
+    <!-- DEMANDAS -->
+    <div class="card mb-16">
+      <div class="card-header"><div class="card-title">📋 Demandas por Mês</div></div>
+      <div class="card-body" style="padding:0">
+        ${tabela(
+          ['Mês','Total','Pendentes','Em Andamento','Concluídas','Atrasadas'],
+          demandas.map(d=>`<tr>
+            <td style="font-weight:600">${d.mes}</td>
+            <td>${d.total}</td>
+            <td style="color:var(--gold)">${d.pendentes}</td>
+            <td style="color:var(--blue)">${d.em_andamento}</td>
+            <td style="color:var(--green)">${d.concluidas}</td>
+            <td style="color:var(--red)">${d.atrasadas}</td>
+          </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-muted)">Nenhum dado</td></tr>'
+        )}
+      </div>
+    </div>
+
+    <!-- AGENDA -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">📅 Eventos da Agenda por Mês</div></div>
+      <div class="card-body" style="padding:0">
+        ${tabela(
+          ['Mês','Total','Reuniões','Sessões Ord.','Sessões Sol.','Audiências','Presidência','Eventos','Aniversários'],
+          agenda.map(a=>`<tr>
+            <td style="font-weight:600">${a.mes}</td>
+            <td>${a.total_eventos}</td>
+            <td>${a.reunioes}</td>
+            <td>${a.sessoes_ordinarias}</td>
+            <td>${a.sessoes_solenes}</td>
+            <td>${a.audiencias}</td>
+            <td>${a.agenda_presidencia}</td>
+            <td>${a.eventos}</td>
+            <td>${a.aniversarios}</td>
+          </tr>`).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--text-muted)">Nenhum dado</td></tr>'
+        )}
+      </div>
+    </div>
+  `;
 }
 
 // ══════════════════════════════════════
