@@ -1295,6 +1295,8 @@ select.form-input-modal { cursor: pointer; }
     <div id="page-usuarios"           class="page" style="display:none"></div>
     <div id="page-autorizacoes"       class="page" style="display:none"></div>
     <div id="page-auditoria"          class="page" style="display:none"></div>
+    <div id="page-relatorios"          class="page" style="display:none"></div>
+    <div id="page-alterar-senha"       class="page" style="display:none"></div>
   </div>
 </div>
 
@@ -2526,6 +2528,7 @@ async function salvarEvento() {
 // ══════════════════════════════════════
 async function renderRelatorios() {
   const el = document.getElementById('page-relatorios');
+  if (!el) { console.error('page-relatorios não encontrado'); return; }
   el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
 
   // Buscar dados de todas as views
