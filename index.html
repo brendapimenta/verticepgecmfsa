@@ -1940,6 +1940,7 @@ function renderFilaItems(fila) {
           ${!emAtend&&podeGer?`<button class="btn btn-gold btn-sm" onclick="chamarVisitante('${a.id}')">Chamar</button>`:''}
           ${emAtend&&podeGer?`<button class="btn btn-success btn-sm" onclick="concluirAtend('${a.id}')">Concluir</button>`:''}
           ${podeGer?`<button class="btn btn-ghost btn-sm" onclick="adiarAtend('${a.id}')">Adiar</button>`:''}
+          ${podeGer?`<button class="btn btn-ghost btn-sm" onclick="excluirAtend('${a.id}','${a.nome}')" style="color:#e74c3c;border-color:rgba(231,76,60,0.3)">✕</button>`:''}
         </div>
       </div>`;
     if (!emAtend) num++;
@@ -1977,6 +1978,14 @@ async function concluirAtend(id) {
   toast('Atendimento concluído!','success');
   await carregarFila();
 }
+
+async function excluirAtend(id, nome) {
+  if (!confirm(`Excluir o registro de "${nome}" da fila? Esta ação não pode ser desfeita.`)) return;
+  await db.from('atendimentos').delete().eq('id', id);
+  toast('Registro excluído.', 'success');
+  await renderFila();
+}
+
 
 async function adiarAtend(id) {
   await db.from('atendimentos').update({status:'Adiado'}).eq('id',id);
