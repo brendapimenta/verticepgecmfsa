@@ -2747,33 +2747,52 @@ async function carregarNotificacoes() {
 async function renderNotificacoes() {
   const el=document.getElementById('page-notificacoes');
   el.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const filtro=`destinatario_id.eq.${usuarioAtual.id},destinatario_perfil.eq.${usuarioAtual.perfil_visualizacao},destinatario_perfil.eq.todos`;
   const {data}=await db.from('notificacoes').select('*').eq('camara_id',CAMARA_ID)
-    .or(`destinatario_id.eq.${usuarioAtual.id},destinatario_perfil.eq.${usuarioAtual.perfil_visualizacao},destinatario_perfil.eq.todos`)
-    .order('criado_em',{ascending:false}).limit(50);
-  await db.from('notificacoes').update({lida:true}).eq('camara_id',CAMARA_ID)
-    .or(`destinatario_id.eq.${usuarioAtual.id},destinatario_perfil.eq.${usuarioAtual.perfil_visualizacao},destinatario_perfil.eq.todos`);
+    .or(filtro).order('criado_em',{ascending:false}).limit(100);
+  await db.from('notificacoes').update({lida:true}).eq('camara_id',CAMARA_ID).or(filtro);
   await carregarNotificacoes();
+  const total = (data||[]).length;
   el.innerHTML=`
     <div class="card">
-      <div class="card-header">
-        <div class="card-title">Todas as Notificações</div>
-        <button class="btn btn-ghost btn-sm" onclick="renderNotificacoes()">↻ Atualizar</button>
+      <div class="card-header" style="align-items:center">
+        <div class="card-title">Notificações ${total>0?`<span style="font-size:11px;color:var(--text-muted);font-family:var(--font-body);font-weight:400">(${total})</span>`:''}</div>
+        <div class="flex-gap">
+          <button class="btn btn-ghost btn-sm" onclick="renderNotificacoes()">↻ Atualizar</button>
+          ${total>0?`<button class="btn btn-ghost btn-sm" style="color:#e74c3c;border-color:rgba(231,76,60,0.3)" onclick="limparTodasNotificacoes()">🗑 Limpar tudo</button>`:''}
+        </div>
       </div>
       <div style="padding:0">
-        ${(data||[]).length===0?'<div class="empty-state"><div class="empty-icon">🔔</div><h3>Sem Notificações</h3></div>':
-          (data||[]).map(n=>`
-            <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;gap:12px;${!n.lida?'background:rgba(42,79,143,0.08)':''}">
-              <span style="font-size:18px">${n.titulo.split(' ')[0]}</span>
-              <div style="flex:1">
+        ${total===0
+          ? '<div class="empty-state"><div class="empty-icon">🔔</div><h3>Sem Notificações</h3><p>Você está em dia!</p></div>'
+          : (data||[]).map(n=>`
+            <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:flex-start;${!n.lida?'background:rgba(42,79,143,0.06)':''}">
+              <span style="font-size:18px;flex-shrink:0">${n.titulo.split(' ')[0]}</span>
+              <div style="flex:1;min-width:0">
                 <div style="font-family:var(--font-display);font-size:10px;letter-spacing:1.5px;color:var(--silver)">${n.titulo}</div>
                 <div style="font-size:12px;color:var(--text-dim);margin-top:2px">${n.mensagem}</div>
                 <div style="font-size:10px;color:var(--text-muted);margin-top:3px">${new Date(n.criado_em).toLocaleString('pt-BR')}</div>
               </div>
+              <button onclick="removerNotificacao('${n.id}')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;flex-shrink:0;padding:2px 4px;opacity:0.5" title="Remover">✕</button>
             </div>
-          `).join('')}
+          `).join('')
+        }
       </div>
     </div>
   `;
+}
+
+async function removerNotificacao(id) {
+  await db.from('notificacoes').delete().eq('id', id);
+  await renderNotificacoes();
+}
+
+async function limparTodasNotificacoes() {
+  if (!confirm('Limpar todas as notificações?')) return;
+  const filtro=`destinatario_id.eq.${usuarioAtual.id},destinatario_perfil.eq.${usuarioAtual.perfil_visualizacao},destinatario_perfil.eq.todos`;
+  await db.from('notificacoes').delete().eq('camara_id',CAMARA_ID).or(filtro);
+  await renderNotificacoes();
+  toast('Notificações limpas!','success');
 }
 
 // ══════════════════════════════════════
