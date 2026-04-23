@@ -1907,7 +1907,7 @@ async function carregarFila() {
 
 function renderFilaItems(fila) {
   const perfil = usuarioAtual.perfil_visualizacao;
-  const podeGer = ['SALA_PRINCIPAL','ADMINISTRADOR','PRESIDENTE'].includes(perfil);
+  const podeGer = ['SALA_PRINCIPAL','ADMINISTRADOR','PRESIDENTE','SALA_DE_ESPERA'].includes(perfil);
   const el = document.getElementById('fila-content');
   if (!el) return;
   if (!fila||fila.length===0) {
