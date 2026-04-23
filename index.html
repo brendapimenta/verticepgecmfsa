@@ -2528,135 +2528,278 @@ async function salvarEvento() {
 // ══════════════════════════════════════
 async function renderRelatorios() {
   const el = document.getElementById('page-relatorios');
-  if (!el) { console.error('page-relatorios não encontrado'); return; }
+  if (!el) return;
   el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
 
-  // Buscar dados de todas as views
-  const [rHoje, rDiario, rMensal, rDemandas, rAgenda] = await Promise.all([
-    db.from('relatorio_hoje').select('*').single(),
-    db.from('relatorio_atendimentos_diario').select('*').limit(30),
-    db.from('relatorio_atendimentos_mensal').select('*').limit(12),
-    db.from('relatorio_demandas_mensal').select('*').limit(12),
-    db.from('relatorio_agenda_mensal').select('*').limit(12),
+  // Buscar dados com nomes completos
+  const hoje = new Date().toISOString().split('T')[0];
+  const inicioMes = hoje.substring(0,7) + '-01';
+  const inicioSemana = (() => {
+    const d = new Date(); d.setDate(d.getDate() - d.getDay()); return d.toISOString().split('T')[0];
+  })();
+
+  const [rHoje, rSemana, rMes, rTodos] = await Promise.all([
+    db.from('atendimentos').select('*').eq('camara_id', CAMARA_ID).eq('data_chegada', hoje).order('hora_chegada'),
+    db.from('atendimentos').select('*').eq('camara_id', CAMARA_ID).gte('data_chegada', inicioSemana).order('data_chegada').order('hora_chegada'),
+    db.from('atendimentos').select('*').eq('camara_id', CAMARA_ID).gte('data_chegada', inicioMes).order('data_chegada').order('hora_chegada'),
+    db.from('atendimentos').select('*').eq('camara_id', CAMARA_ID).order('data_chegada', {ascending: false}).order('hora_chegada').limit(500),
   ]);
 
-  const hoje = rHoje.data || {};
-  const diario = rDiario.data || [];
-  const mensal = rMensal.data || [];
-  const demandas = rDemandas.data || [];
-  const agenda = rAgenda.data || [];
+  const todos    = rTodos.data    || [];
+  const diaData  = rHoje.data     || [];
+  const semData  = rSemana.data   || [];
+  const mesData  = rMes.data      || [];
 
-  const statCard = (titulo, valor, sub, cor='var(--navy)') =>
-    `<div class="stat-card"><div class="stat-label">${titulo}</div>
-     <div class="stat-value" style="color:${cor}">${valor}</div>
-     <div class="stat-sub">${sub}</div></div>`;
+  // Estado do filtro ativo
+  window._relPeriodo = window._relPeriodo || 'dia';
 
-  const tabela = (colunas, linhas) => `
-    <div class="table-wrap">
-      <table>
-        <thead><tr>${colunas.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
-        <tbody>${linhas}</tbody>
-      </table>
+  function dadosPeriodo(p) {
+    if (p === 'dia')    return diaData;
+    if (p === 'semana') return semData;
+    if (p === 'mes')    return mesData;
+    return todos;
+  }
+
+  function estatLine(label, valor, cor) {
+    return `<div class="stat-card" style="text-align:center;padding:16px 12px">
+      <div style="font-size:10px;letter-spacing:1.5px;font-family:var(--font-display);color:var(--text2);margin-bottom:6px">${label}</div>
+      <div style="font-size:28px;font-weight:700;color:${cor||'var(--navy)'}">${valor}</div>
     </div>`;
+  }
+
+  function badgeStatus(s) {
+    const map = {
+      'Concluído':      'background:#d1fae5;color:#065f46',
+      'Em Atendimento': 'background:#dbeafe;color:#1e40af',
+      'Aguardando':     'background:#fef3c7;color:#92400e',
+      'Adiado':         'background:#fee2e2;color:#991b1b',
+    };
+    return `<span style="font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;${map[s]||''}">${s}</span>`;
+  }
+
+  function badgePrio(p) {
+    const map = { 'Alta':'background:#fee2e2;color:#991b1b', 'Média':'background:#f3f4f6;color:#374151', 'Baixa':'background:#d1fae5;color:#065f46' };
+    return `<span style="font-size:10px;padding:2px 8px;border-radius:10px;${map[p]||''}">${p}</span>`;
+  }
+
+  function tabelaAtendimentos(lista, titulo) {
+    if (!lista.length) return `<div style="text-align:center;padding:32px;color:var(--text-muted)">Nenhum atendimento no período</div>`;
+    const total    = lista.length;
+    const concl    = lista.filter(a => a.status === 'Concluído').length;
+    const urgentes = lista.filter(a => a.prioridade === 'Alta').length;
+    return `
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+        ${estatLine('TOTAL', total)}
+        ${estatLine('CONCLUÍDOS', concl, 'var(--green)')}
+        ${estatLine('URGENTES', urgentes, 'var(--red)')}
+      </div>
+      <div class="table-wrap">
+        <table id="tabela-relatorio">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nome</th>
+              <th>Tipo</th>
+              <th>Assunto</th>
+              <th>Prioridade</th>
+              <th>Status</th>
+              <th>Data</th>
+              <th>Chegada</th>
+              <th>Atendimento</th>
+              <th>Espera</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${lista.map((a, i) => {
+              const espera = (a.hora_atendimento && a.hora_chegada)
+                ? (() => {
+                    const [h1,m1] = a.hora_chegada.split(':').map(Number);
+                    const [h2,m2] = a.hora_atendimento.split(':').map(Number);
+                    const diff = (h2*60+m2) - (h1*60+m1);
+                    return diff > 0 ? diff + ' min' : '—';
+                  })()
+                : '—';
+              return `<tr>
+                <td style="color:var(--text-muted);font-size:11px">${i+1}</td>
+                <td style="font-weight:600;font-family:var(--font-display);font-size:11px;letter-spacing:.5px">${a.nome}</td>
+                <td style="font-size:11px">${a.tipo}</td>
+                <td style="font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.assunto}</td>
+                <td>${badgePrio(a.prioridade)}</td>
+                <td>${badgeStatus(a.status)}</td>
+                <td style="font-size:11px;white-space:nowrap">${new Date(a.data_chegada+'T12:00:00').toLocaleDateString('pt-BR')}</td>
+                <td style="font-size:11px">${a.hora_chegada?.substring(0,5)||'—'}</td>
+                <td style="font-size:11px">${a.hora_atendimento?.substring(0,5)||'—'}</td>
+                <td style="font-size:11px">${espera}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  const periodos = [
+    { id: 'dia',    label: `Hoje (${new Date().toLocaleDateString('pt-BR')})` },
+    { id: 'semana', label: 'Esta Semana' },
+    { id: 'mes',    label: new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'}) },
+    { id: 'todos',  label: 'Histórico Completo' },
+  ];
+
+  const p = window._relPeriodo;
+  const lista = dadosPeriodo(p);
 
   el.innerHTML = `
-    <!-- HOJE -->
-    <div class="card mb-16">
-      <div class="card-header"><div class="card-title">📋 Resumo de Hoje — ${new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}</div></div>
-      <div class="card-body">
-        <div class="stats-grid">
-          ${statCard('Atendimentos', hoje.atendimentos_hoje||0, 'total hoje')}
-          ${statCard('Concluídos', hoje.concluidos_hoje||0, 'finalizados', 'var(--green)')}
-          ${statCard('Urgentes', hoje.urgentes_hoje||0, 'prioridade alta', 'var(--red)')}
-          ${statCard('Eventos', hoje.eventos_hoje||0, 'na agenda')}
-          ${statCard('Demandas Pendentes', hoje.demandas_pendentes||0, 'em aberto', hoje.demandas_pendentes>0?'var(--gold)':'var(--navy)')}
-          ${statCard('Pautas Pendentes', hoje.pautas_pendentes||0, 'aguardando despacho', hoje.pautas_pendentes>0?'var(--gold)':'var(--navy)')}
+    <div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <div class="flex-gap" style="gap:4px;flex-wrap:wrap">
+        ${periodos.map(x => `
+          <button class="btn btn-sm ${p===x.id?'btn-primary':'btn-ghost'}"
+            onclick="window._relPeriodo='${x.id}';renderRelatorios()">
+            ${x.label}
+          </button>`).join('')}
+      </div>
+      <button class="btn btn-gold btn-sm" onclick="exportarRelatorioPDF()">
+        ⬇ Exportar PDF
+      </button>
+    </div>
+
+    <div class="card" id="relatorio-conteudo">
+      <div class="card-header" style="justify-content:space-between">
+        <div>
+          <div class="card-title">📋 Relatório de Atendimentos</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">
+            ${periodos.find(x=>x.id===p).label} · Câmara Municipal de Feira de Santana
+          </div>
         </div>
       </div>
-    </div>
-
-    <!-- DIÁRIO -->
-    <div class="card mb-16">
-      <div class="card-header"><div class="card-title">📅 Atendimentos por Dia — Últimos 30 dias</div></div>
-      <div class="card-body" style="padding:0">
-        ${tabela(
-          ['Data','Total','Concluídos','Urgentes','Adiados','Cidadão','Vereador','Autoridade','Servidor','Assessor','Espera Média'],
-          diario.map(d=>`<tr>
-            <td style="font-weight:600">${new Date(d.data+'T12:00:00').toLocaleDateString('pt-BR')}</td>
-            <td>${d.total_atendimentos}</td>
-            <td style="color:var(--green)">${d.concluidos}</td>
-            <td style="color:var(--red)">${d.urgentes}</td>
-            <td>${d.adiados}</td>
-            <td>${d.cidadaos}</td>
-            <td>${d.vereadores}</td>
-            <td>${d.autoridades}</td>
-            <td>${d.servidores}</td>
-            <td>${d.assessores}</td>
-            <td>${d.tempo_medio_espera_min||'—'} min</td>
-          </tr>`).join('') || '<tr><td colspan="11" style="text-align:center;color:var(--text-muted)">Nenhum dado</td></tr>'
-        )}
-      </div>
-    </div>
-
-    <!-- MENSAL ATENDIMENTOS -->
-    <div class="card mb-16">
-      <div class="card-header"><div class="card-title">📆 Atendimentos por Mês</div></div>
-      <div class="card-body" style="padding:0">
-        ${tabela(
-          ['Mês','Total','Concluídos','Urgentes','Adiados','Dias com Atendimento','Espera Média'],
-          mensal.map(m=>`<tr>
-            <td style="font-weight:600">${m.mes}</td>
-            <td>${m.total_atendimentos}</td>
-            <td style="color:var(--green)">${m.concluidos}</td>
-            <td style="color:var(--red)">${m.urgentes}</td>
-            <td>${m.adiados}</td>
-            <td>${m.dias_com_atendimento}</td>
-            <td>${m.tempo_medio_espera_min||'—'} min</td>
-          </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">Nenhum dado</td></tr>'
-        )}
-      </div>
-    </div>
-
-    <!-- DEMANDAS -->
-    <div class="card mb-16">
-      <div class="card-header"><div class="card-title">📋 Demandas por Mês</div></div>
-      <div class="card-body" style="padding:0">
-        ${tabela(
-          ['Mês','Total','Pendentes','Em Andamento','Concluídas','Atrasadas'],
-          demandas.map(d=>`<tr>
-            <td style="font-weight:600">${d.mes}</td>
-            <td>${d.total}</td>
-            <td style="color:var(--gold)">${d.pendentes}</td>
-            <td style="color:var(--blue)">${d.em_andamento}</td>
-            <td style="color:var(--green)">${d.concluidas}</td>
-            <td style="color:var(--red)">${d.atrasadas}</td>
-          </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-muted)">Nenhum dado</td></tr>'
-        )}
-      </div>
-    </div>
-
-    <!-- AGENDA -->
-    <div class="card">
-      <div class="card-header"><div class="card-title">📅 Eventos da Agenda por Mês</div></div>
-      <div class="card-body" style="padding:0">
-        ${tabela(
-          ['Mês','Total','Reuniões','Sessões Ord.','Sessões Sol.','Audiências','Presidência','Eventos','Aniversários'],
-          agenda.map(a=>`<tr>
-            <td style="font-weight:600">${a.mes}</td>
-            <td>${a.total_eventos}</td>
-            <td>${a.reunioes}</td>
-            <td>${a.sessoes_ordinarias}</td>
-            <td>${a.sessoes_solenes}</td>
-            <td>${a.audiencias}</td>
-            <td>${a.agenda_presidencia}</td>
-            <td>${a.eventos}</td>
-            <td>${a.aniversarios}</td>
-          </tr>`).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--text-muted)">Nenhum dado</td></tr>'
-        )}
+      <div class="card-body">
+        ${tabelaAtendimentos(lista)}
       </div>
     </div>
   `;
 }
+
+async function exportarRelatorioPDF() {
+  const p = window._relPeriodo || 'dia';
+  const periodos = { dia:'Hoje', semana:'Esta Semana', mes:'Este Mês', todos:'Histórico' };
+  const hoje = new Date().toLocaleDateString('pt-BR');
+
+  // Buscar dados do período atual
+  const el = document.getElementById('tabela-relatorio');
+  if (!el) { toast('Sem dados para exportar.','error'); return; }
+
+  // Criar HTML para o PDF
+  const rows = Array.from(el.querySelectorAll('tbody tr')).map(tr => {
+    const tds = Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim());
+    return tds;
+  });
+
+  const headers = Array.from(el.querySelectorAll('thead th')).map(th => th.textContent.trim());
+
+  const htmlPDF = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Arial', sans-serif; font-size:11px; color:#1a1a2e; padding:24px; }
+  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; padding-bottom:16px; border-bottom:2px solid #0f2040; }
+  .header-left h1 { font-size:18px; color:#0f2040; letter-spacing:1px; margin-bottom:4px; }
+  .header-left p { font-size:10px; color:#666; }
+  .header-right { text-align:right; }
+  .header-right .periodo { font-size:13px; font-weight:700; color:#0f2040; }
+  .header-right .data { font-size:10px; color:#666; margin-top:2px; }
+  .stats { display:flex; gap:12px; margin-bottom:20px; }
+  .stat { flex:1; background:#f0f4f8; border-radius:8px; padding:12px; text-align:center; border-left:3px solid #0f2040; }
+  .stat .val { font-size:22px; font-weight:700; color:#0f2040; }
+  .stat .lbl { font-size:9px; color:#666; letter-spacing:1px; text-transform:uppercase; margin-top:2px; }
+  table { width:100%; border-collapse:collapse; font-size:10px; }
+  thead tr { background:#0f2040; color:white; }
+  thead th { padding:8px 6px; text-align:left; font-size:9px; letter-spacing:.5px; text-transform:uppercase; }
+  tbody tr:nth-child(even) { background:#f8faff; }
+  tbody tr:hover { background:#e8f0fe; }
+  tbody td { padding:7px 6px; border-bottom:1px solid #e5e7eb; vertical-align:middle; }
+  .badge { display:inline-block; padding:2px 7px; border-radius:10px; font-size:9px; font-weight:600; }
+  .badge-concluido { background:#d1fae5; color:#065f46; }
+  .badge-em-atendimento { background:#dbeafe; color:#1e40af; }
+  .badge-aguardando { background:#fef3c7; color:#92400e; }
+  .badge-adiado { background:#fee2e2; color:#991b1b; }
+  .badge-alta { background:#fee2e2; color:#991b1b; }
+  .badge-media { background:#f3f4f6; color:#374151; }
+  .badge-baixa { background:#d1fae5; color:#065f46; }
+  .footer { margin-top:24px; padding-top:12px; border-top:1px solid #e5e7eb; text-align:center; font-size:9px; color:#999; }
+  .nome { font-weight:600; }
+  .assunto { max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <h1>CÂMARA MUNICIPAL DE FEIRA DE SANTANA</h1>
+      <p>Presidência · Sistema Vértice · Relatório de Atendimentos</p>
+    </div>
+    <div class="header-right">
+      <div class="periodo">${periodos[p]}</div>
+      <div class="data">Gerado em ${hoje}</div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="val">${rows.length}</div>
+      <div class="lbl">Total</div>
+    </div>
+    <div class="stat">
+      <div class="val">${rows.filter(r=>r[5]==='Concluído').length}</div>
+      <div class="lbl">Concluídos</div>
+    </div>
+    <div class="stat">
+      <div class="val">${rows.filter(r=>r[4]==='Alta').length}</div>
+      <div class="lbl">Urgentes</div>
+    </div>
+    <div class="stat">
+      <div class="val">${rows.filter(r=>r[5]==='Adiado').length}</div>
+      <div class="lbl">Adiados</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>Nome</th><th>Tipo</th><th>Assunto</th>
+        <th>Prioridade</th><th>Status</th><th>Data</th>
+        <th>Chegada</th><th>Atendimento</th><th>Espera</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows.map(r => {
+        const statusCls = r[5]==='Concluído'?'concluido':r[5]==='Em Atendimento'?'em-atendimento':r[5]==='Adiado'?'adiado':'aguardando';
+        const prioCls = r[4]==='Alta'?'alta':r[4]==='Baixa'?'baixa':'media';
+        return `<tr>
+          <td>${r[0]}</td>
+          <td class="nome">${r[1]}</td>
+          <td>${r[2]}</td>
+          <td class="assunto" title="${r[3]}">${r[3]}</td>
+          <td><span class="badge badge-${prioCls}">${r[4]}</span></td>
+          <td><span class="badge badge-${statusCls}">${r[5]}</span></td>
+          <td>${r[6]}</td><td>${r[7]}</td><td>${r[8]}</td><td>${r[9]}</td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table>
+
+  <div class="footer">
+    Câmara Municipal de Feira de Santana · Vértice — Sistema de Gestão da Presidência · ${hoje}
+  </div>
+</body>
+</html>`;
+
+  // Abrir nova janela e imprimir como PDF
+  const win = window.open('', '_blank');
+  win.document.write(htmlPDF);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); }, 500);
+}
+
 
 // ══════════════════════════════════════
 // ALTERAR SENHA
