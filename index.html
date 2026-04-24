@@ -1985,8 +1985,11 @@ async function concluirAtend(id) {
 }
 
 async function excluirAtend(id, nome) {
-  if (!confirm(`Excluir o registro de "${nome}" da fila? Esta ação não pode ser desfeita.`)) return;
-  await db.from('atendimentos').delete().eq('id', id);
+  if (!confirm(`Excluir o registro de "${nome}" da fila?`)) return;
+  await db.from('atendimentos').update({
+    excluido_em: new Date().toISOString(),
+    status: 'Excluído'
+  }).eq('id', id);
   toast('Registro excluído.', 'success');
   await renderFila();
 }
@@ -2544,6 +2547,7 @@ async function renderRelatorios() {
     db.from('atendimentos').select('*').eq('camara_id', CAMARA_ID).gte('data_chegada', inicioMes).order('data_chegada').order('hora_chegada'),
     db.from('atendimentos').select('*').eq('camara_id', CAMARA_ID).order('data_chegada', {ascending: false}).order('hora_chegada').limit(500),
   ]);
+  // Incluir status Excluído nas listas
 
   const todos    = rTodos.data    || [];
   const diaData  = rHoje.data     || [];
@@ -2573,6 +2577,7 @@ async function renderRelatorios() {
       'Em Atendimento': 'background:#dbeafe;color:#1e40af',
       'Aguardando':     'background:#fef3c7;color:#92400e',
       'Adiado':         'background:#fee2e2;color:#991b1b',
+      'Excluído':       'background:#f3f4f6;color:#6b7280;text-decoration:line-through',
     };
     return `<span style="font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;${map[s]||''}">${s}</span>`;
   }
@@ -2588,10 +2593,11 @@ async function renderRelatorios() {
     const concl    = lista.filter(a => a.status === 'Concluído').length;
     const urgentes = lista.filter(a => a.prioridade === 'Alta').length;
     return `
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
         ${estatLine('TOTAL', total)}
         ${estatLine('CONCLUÍDOS', concl, 'var(--green)')}
         ${estatLine('URGENTES', urgentes, 'var(--red)')}
+        ${estatLine('EXCLUÍDOS', lista.filter(a=>a.status==='Excluído').length, '#9ca3af')}
       </div>
       <div class="table-wrap">
         <table id="tabela-relatorio">
@@ -2619,7 +2625,8 @@ async function renderRelatorios() {
                     return diff > 0 ? diff + ' min' : '—';
                   })()
                 : '—';
-              return `<tr>
+              const excluido = a.status === 'Excluído';
+              return `<tr style="${excluido?'opacity:0.55;background:#f9fafb;':''}">
                 <td style="color:var(--text-muted);font-size:11px">${i+1}</td>
                 <td style="font-weight:600;font-family:var(--font-display);font-size:11px;letter-spacing:.5px">${a.nome}</td>
                 <td style="font-size:11px">${a.tipo}</td>
