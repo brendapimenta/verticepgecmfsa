@@ -1736,12 +1736,19 @@ function atualizarUserInfo() {
 
 function configurarRealtime() {
   realtimeChannel = db.channel('vertice-rt')
-    .on('postgres_changes', { event:'*', schema:'public', table:'atendimentos' }, () => {
+    .on('postgres_changes', { event:'*', schema:'public', table:'atendimentos' }, (payload) => {
+      // Atualiza fila e dashboard automaticamente
       if (paginaAtual === 'fila') carregarFila();
       if (paginaAtual === 'dashboard') renderDashboard();
+      if (paginaAtual === 'relatorios') renderRelatorios();
+      // Alerta visual discreto quando chega novo atendimento
+      if (payload.eventType === 'INSERT') {
+        toast(`🟢 Novo visitante: ${payload.new?.nome || ''}`, 'info', 4000);
+      }
     })
     .on('postgres_changes', { event:'*', schema:'public', table:'notificacoes' }, () => {
       carregarNotificacoes();
+      if (paginaAtual === 'notificacoes') renderNotificacoes();
     })
     .on('postgres_changes', { event:'*', schema:'public', table:'chat_mensagens' }, () => {
       if (paginaAtual === 'chat') carregarMensagens();
@@ -1749,7 +1756,18 @@ function configurarRealtime() {
     .on('postgres_changes', { event:'*', schema:'public', table:'comandos' }, () => {
       if (paginaAtual === 'comandos') renderComandos();
     })
-    .subscribe();
+    .on('postgres_changes', { event:'*', schema:'public', table:'agenda_eventos' }, () => {
+      if (paginaAtual === 'agenda') renderAgenda();
+    })
+    .on('postgres_changes', { event:'*', schema:'public', table:'demandas' }, () => {
+      if (paginaAtual === 'demandas') renderDemandas();
+    })
+    .on('postgres_changes', { event:'*', schema:'public', table:'pauta_despacho' }, () => {
+      if (paginaAtual === 'pauta') renderPauta();
+    })
+    .subscribe((status) => {
+      console.log('Realtime status:', status);
+    });
 }
 
 // ══════════════════════════════════════
